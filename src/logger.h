@@ -32,7 +32,7 @@ void loggerEnd_inner(const char * funcName);
 
 
 #if __STDC_VERSION__ >= 199901L
-	#define writeLogger(format, ...) writeLogger_inner(__func__, format, ##__VA_ARGS__)
+	#define writeLogger(...) writeLogger_inner(__func__, ##__VA_ARGS__)
 	#define loggerEnd() loggerEnd_inner(__func__)
 #else
 	#error "Compiler doesn't support __func__!"
@@ -41,7 +41,7 @@ void loggerEnd_inner(const char * funcName);
 #else
 
 #define initLogger()
-#define writeLogger(format, ...)
+#define writeLogger(...)
 #define loggerStart()
 #define loggerEnd()
 
