@@ -1,4 +1,5 @@
 #include "iniFile.h"
+#include "fileHelper.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -294,5 +295,184 @@ char * ini_unescapeStr(const char * restrict string, intptr_t length)
 	}
 
 	return estr;
+}
+
+
+IniE_t ini_checkData(const char * restrict string, intptr_t length)
+{
+	assert(string != NULL);
+
+	size_t realLen = (length == -1) ? strlen(string) : strnlen_s(string, (size_t)length);
+
+	for (const char * end = string + realLen; string != end;)
+	{
+		if ((*string == ' ') || (*string == '\t') || (*string == '\n') || (*string == '\r'))
+		{
+			++string;
+			continue;
+		}
+		else if (*string == ';')
+		{
+			// Skip till end of line
+			++string;
+			for (; string != end; ++string)
+			{
+				if ((*string == '\n') || (*string == '\r'))
+				{
+					++string;
+					break;
+				}
+			}
+		}
+		else if (*string == '[')
+		{
+			// Section
+			++string;
+			bool found = false;
+			for (; string != end; ++string)
+			{
+				if (*string == '\\')
+				{
+					++string;
+					if (string == end)
+					{
+						return IniE_ESCAPE;
+					}
+					continue;
+				}
+				else if (*string == ']')
+				{
+					++string;
+					found = true;
+					break;
+				}
+			}
+			if (!found)
+			{
+				return IniE_SECTION;
+			}
+			for (; string != end; ++string)
+			{
+				if ((*string == '\n') || (*string == '\r'))
+				{
+					++string;
+					break;
+				}
+			}
+		}
+		else
+		{
+			// Key-value pair
+			for (; string != end; ++string)
+			{
+				if (*string == '\\')
+				{
+					++string;
+					if (string == end)
+					{
+						return IniE_ESCAPE;
+					}
+					continue;
+				}
+				else if ((*string == ' ') || (*string == '\t') || (*string == '=') || (*string == ':'))
+				{
+					break;
+				}
+			}
+			bool found = false;
+			for (; string != end; ++string)
+			{
+				if ((*string == ' ') || (*string == '\t'))
+				{
+					continue;
+				}
+				else if ((*string == '=') || (*string == ':'))
+				{
+					++string;
+					found = true;
+					break;
+				}
+				else
+				{
+					return IniE_VALUE;
+				}
+			}
+			if (found == false)
+			{
+				return IniE_VALUE;
+			}
+			for (; string != end; ++string)
+			{
+				if ((*string == ' ') || (*string == '\t'))
+				{
+					continue;
+				}
+				else
+				{
+					break;
+				}
+			}
+			for (; string != end; ++string)
+			{
+				if ((*string == '\n') || (*string == '\r'))
+				{
+					++string;
+					break;
+				}
+			}
+		}
+	}
+	
+	return IniE_OK;
+}
+IniE_t ini_checkFile(const char * restrict fileName)
+{
+	assert(fileName != NULL);
+	
+	size_t sz;
+	char * str = fhelper_read(fileName, &sz);
+	
+	if (str == NULL)
+	{
+		return IniE_MEM;
+	}
+	IniE_t code = ini_checkData(str, (intptr_t)(sz - 1));
+	free(str);
+	return code;
+}
+
+IniE_t ini_parseData(const char * restrict string, intptr_t length, IniData_t * restrict pini)
+{
+	assert(string != NULL);
+	assert(pini != NULL);
+	
+	size_t realLen = (length == -1) ? strlen(string) : strnlen_s(string, (size_t)length);
+
+	// Check
+	IniE_t code = ini_checkData(string, (intptr_t)realLen);
+	if (code != IniE_OK)
+	{
+		return code;
+	}
+
+	// Parse
+
+	return IniE_OK;
+}
+IniE_t ini_parseFile(const char * restrict fileName, IniData_t * restrict pini)
+{
+	assert(fileName != NULL);
+	assert(pini != NULL);
+	
+	size_t sz;
+	char * str = fhelper_read(fileName, &sz);
+	
+	if (str == NULL)
+	{
+		return IniE_MEM;
+	}
+	IniE_t code = ini_parseData(str, (intptr_t)(sz - 1), pini);
+	free(str);
+	return code;
 }
 

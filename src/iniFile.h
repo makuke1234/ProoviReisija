@@ -46,7 +46,10 @@ typedef struct IniData
 typedef enum IniE
 {
 	IniE_OK,
-	IniE_MEM
+	IniE_MEM,
+	IniE_SECTION,
+	IniE_ESCAPE,
+	IniE_VALUE
 
 } IniE_t;
 
@@ -67,10 +70,10 @@ char * ini_unescapeStr(const char * restrict string, intptr_t length);
 
 
 IniE_t ini_checkData(const char * restrict string, intptr_t length);
-IniE_t ini_checkFile(const char * restrict fileName, intptr_t fnameLength);
+IniE_t ini_checkFile(const char * restrict fileName);
 
 IniE_t ini_parseData(const char * restrict string, intptr_t length, IniData_t * restrict pini);
-IniE_t ini_parseFile(const char * restrict fileName, intptr_t fnameLength, IniData_t * restrict pini);
+IniE_t ini_parseFile(const char * restrict fileName, IniData_t * restrict pini);
 
 
 
