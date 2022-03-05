@@ -28,7 +28,13 @@ char * fhelper_read(const char * restrict fileName, size_t * restrict resultLeng
 	}
 
 	fseek(file, 0, SEEK_END);
-	size_t length = ftell(file);
+	long ftell_res = ftell(file);
+	if (ftell_res == -1)
+	{
+		fclose(file);
+		return NULL;
+	}
+	size_t length = (size_t)ftell_res;
 	rewind(file);
 
 	char * content = malloc(length + 1);
@@ -37,11 +43,11 @@ char * fhelper_read(const char * restrict fileName, size_t * restrict resultLeng
 		fclose(file);
 		return NULL;
 	}
-	size_t readBytes = fread(content, length, 1, file);
+	size_t readBytes = fread(content, 1, length, file);
 	fclose(file);
 	if (readBytes < length)
 	{
-		char * newmem = realloc(content, readBytes);
+		char * newmem = realloc(content, readBytes + 1);
 		if (newmem != NULL)
 		{
 			content = newmem;
@@ -61,6 +67,7 @@ void * fhelper_readBin(const char * restrict fileName, size_t * restrict resultL
 	{
 		return NULL;
 	}
+	size_t sfileLen = (size_t)fileLen;
 
 	FILE * file = fopen(fileName, "rb");
 	if (file == NULL)
@@ -68,16 +75,16 @@ void * fhelper_readBin(const char * restrict fileName, size_t * restrict resultL
 		return NULL;
 	}
 
-	void * mem = malloc(fileLen);
+	void * mem = malloc(sfileLen);
 	if (mem == NULL)
 	{
 		fclose(file);
 		return NULL;
 	}
 
-	*resultLength = fread(mem, (size_t)fileLen, 1, file);
+	*resultLength = fread(mem, sfileLen, 1, file);
 	fclose(file);
-	if (*resultLength < fileLen)
+	if (*resultLength < sfileLen)
 	{
 		void * newmem = realloc(mem, *resultLength);
 		if (newmem != NULL)
