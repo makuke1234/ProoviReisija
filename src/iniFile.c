@@ -1,5 +1,6 @@
 #include "iniFile.h"
 
+#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 
@@ -43,23 +44,23 @@ static inline bool s_appendCP(char ** restrict pstr, size_t * restrict psize, si
 	}
 	else if (codePoint <= 0x07FF)
 	{
-		if (!s_appendCh(pstr, psize, pcap,   0xC0 | ((codePoint >> 6) & 0x1F)))
+		if (!s_appendCh(pstr, psize, pcap,   (char)(0xC0 | ((codePoint >> 6) & 0x1F))))
 		{
 			return false;
 		}
-		return s_appendCh(pstr, psize, pcap, 0x80 | (codePoint        & 0x3F));
+		return s_appendCh(pstr, psize, pcap, (char)(0x80 | (codePoint        & 0x3F)));
 	}
 	else /*if (codePoint <= 0xFFFF)*/
 	{
-		if (!s_appendCh(pstr, psize, pcap,   0xE0 | ((codePoint >> 12) & 0x0F)))
+		if (!s_appendCh(pstr, psize, pcap,   (char)(0xE0 | ((codePoint >> 12) & 0x0F))))
 		{
 			return false;
 		}
-		if (!s_appendCh(pstr, psize, pcap,   0x80 | ((codePoint >>  6) & 0x3F)))
+		if (!s_appendCh(pstr, psize, pcap,   (char)(0x80 | ((codePoint >>  6) & 0x3F))))
 		{
 			return false;
 		}
-		return s_appendCh(pstr, psize, pcap, 0x80 | (codePoint         & 0x3F));
+		return s_appendCh(pstr, psize, pcap, (char)(0x80 | (codePoint         & 0x3F)));
 	}
 }
 static inline uint16_t s_hexToNum(char ch)
@@ -138,6 +139,7 @@ char * ini_escapeStr(const char * restrict string, intptr_t length)
 						}
 						string += 4;
 					}
+					break;
 				default:
 					free(estr);
 					return NULL;
@@ -189,6 +191,13 @@ char * ini_escapeStr(const char * restrict string, intptr_t length)
 		}
 	}
 
+	// Lisab null-terminaatori sõne lõppu
+	if (!s_appendCh(&estr, &estrSize, &estrCap, '\0'))
+	{
+		free(estr);
+		return NULL;
+	}
+
 	if (estrSize < estrCap)
 	{
 		char * newstr = realloc(estr, sizeof(char) * estrSize);
@@ -204,4 +213,78 @@ char * ini_unescapeStr(const char * restrict string, intptr_t length)
 {
 	size_t realLen = (length == -1) ? strlen(string) : strnlen_s(string, (size_t)length);
 
+	size_t estrSize = 0, estrCap = realLen + 1;
+	char * estr = malloc(sizeof(char) * estrCap);
+	if (estr == NULL)
+	{
+		return NULL;
+	}
+
+	for (const char * end = string + realLen; string != end; ++string)
+	{
+		char appendable = 0;
+		switch (*string)
+		{
+		case '\\':
+		case '\'':
+		case '"':
+		case ';':
+		case '#':
+		case '=':
+		case ':':
+			appendable = *string;
+			break;
+		case '\a':
+			appendable = 'a';
+			break;
+		case '\b':
+			appendable = 'b';
+			break;
+		case '\t':
+			appendable = 't';
+			break;
+		case '\r':
+			appendable = 'r';
+			break;
+		case '\n':
+			appendable = 'n';
+			break;
+		}
+
+		if (appendable != 0)
+		{
+			if (!s_appendCh(&estr, &estrSize, &estrCap, '\\') ||
+				!s_appendCh(&estr, &estrSize, &estrCap, appendable))
+			{
+				free(estr);
+				return NULL;
+			}
+		}
+		else
+		{
+			if (!s_appendCh(&estr, &estrSize, &estrCap, *string))
+			{
+				free(estr);
+				return NULL;
+			}
+		}
+	}
+
+	// Lisab null-terminaatori sõne lõppu
+	if (!s_appendCh(&estr, &estrSize, &estrCap, '\0'))
+	{
+		free(estr);
+		return NULL;
+	}
+
+	if (estrSize < estrCap)
+	{
+		char * newstr = realloc(estr, sizeof(char) * estrSize);
+		if (newstr != NULL)
+		{
+			estr = newstr;
+		}
+	}
+
+	return estr;
 }
