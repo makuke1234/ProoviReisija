@@ -4,20 +4,15 @@
 #include "hashmap.h"
 
 #include <stdint.h>
+#include <stdbool.h>
 
 
 #define FORBIDDEN_CODEPOINT 0xFFFF
 
 
-typedef char * char_ptr_t;
-
 typedef struct IniString
 {
-	union
-	{
-		char_ptr_t;
-		char * str;
-	};
+	char * str;
 	size_t len;
 	
 } IniString_t;
@@ -57,6 +52,15 @@ typedef enum IniE
 
 
 /* ********************* Funktsioonid ********************* */
+
+bool ini_str_appendCh(char ** restrict pstr, size_t * restrict psize, size_t * restrict pcap, char ch);
+bool ini_str_appendCP(char ** restrict pstr, size_t * restrict psize, size_t * restrict pcap, uint16_t codePoint);
+
+uint8_t ini_str_hexToNum(char ch);
+uint16_t ini_str_codePointFromStr(const char * restrict str);
+
+
+
 
 char * ini_escapeStr(const char * restrict string, intptr_t length);
 char * ini_unescapeStr(const char * restrict string, intptr_t length);

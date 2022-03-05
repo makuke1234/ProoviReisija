@@ -2,18 +2,17 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <stdbool.h>
 
 
-static inline bool s_appendCh(char ** restrict pstr, size_t * restrict psize, size_t * restrict pcap, char ch)
+bool ini_str_appendCh(char ** restrict pstr, size_t * restrict psize, size_t * restrict pcap, char ch)
 {
 	assert(pstr  != NULL);
 	assert(psize != NULL);
 	assert(pcap  != NULL);
 	
-	if (*psize >= *pcap)
+	if ((*psize) >= (*pcap))
 	{
-		size_t newcap = (*psize + 1) * 2; 
+		size_t newcap = ((*psize) + 1) * 2; 
 		char * newmem = realloc(*pstr, sizeof(char) * newcap);
 		if (newmem == NULL)
 		{
@@ -28,11 +27,12 @@ static inline bool s_appendCh(char ** restrict pstr, size_t * restrict psize, si
 
 	return true;
 }
-static inline bool s_appendCP(char ** restrict pstr, size_t * restrict psize, size_t * restrict pcap, uint16_t codePoint)
+bool ini_str_appendCP(char ** restrict pstr, size_t * restrict psize, size_t * restrict pcap, uint16_t codePoint)
 {
 	assert(pstr  != NULL);
 	assert(psize != NULL);
 	assert(pcap  != NULL);
+
 	if (codePoint == FORBIDDEN_CODEPOINT)
 	{
 		return false;
@@ -40,42 +40,45 @@ static inline bool s_appendCP(char ** restrict pstr, size_t * restrict psize, si
 
 	if (codePoint <= 0x7F)
 	{
-		return s_appendCh(pstr, psize, pcap, (char)codePoint);
+		return ini_str_appendCh(pstr, psize, pcap, (char)codePoint);
 	}
 	else if (codePoint <= 0x07FF)
 	{
-		if (!s_appendCh(pstr, psize, pcap,   (char)(0xC0 | ((codePoint >> 6) & 0x1F))))
+		if (!ini_str_appendCh(pstr, psize, pcap, (char)(0xC0 | ((codePoint >> 6) & 0x1F))))
 		{
 			return false;
 		}
-		return s_appendCh(pstr, psize, pcap, (char)(0x80 | (codePoint        & 0x3F)));
+		return ini_str_appendCh(pstr, psize, pcap, (char)(0x80 | (codePoint & 0x3F)));
 	}
 	else /*if (codePoint <= 0xFFFF)*/
 	{
-		if (!s_appendCh(pstr, psize, pcap,   (char)(0xE0 | ((codePoint >> 12) & 0x0F))))
+		if (!ini_str_appendCh(pstr, psize, pcap, (char)(0xE0 | ((codePoint >> 12) & 0x0F))))
 		{
 			return false;
 		}
-		if (!s_appendCh(pstr, psize, pcap,   (char)(0x80 | ((codePoint >>  6) & 0x3F))))
+		if (!ini_str_appendCh(pstr, psize, pcap, (char)(0x80 | ((codePoint >> 6) & 0x3F))))
 		{
 			return false;
 		}
-		return s_appendCh(pstr, psize, pcap, (char)(0x80 | (codePoint         & 0x3F)));
+		return ini_str_appendCh(pstr, psize, pcap, (char)(0x80 | (codePoint & 0x3F)));
 	}
 }
-static inline uint16_t s_hexToNum(char ch)
+
+uint8_t ini_str_hexToNum(char ch)
 {
-	return ((ch >= '0') && (ch < '9')) ? (uint16_t)(ch - '0') : ((ch >= 'A') && (ch <= 'F')) ? (uint16_t)(ch - 'A' + 10) : 0x00FF;
+	return ((ch >= '0') && (ch <= '9')) ? (uint8_t)(ch - '0') : ((ch >= 'A') && (ch <= 'F')) ? (uint8_t)(ch - 'A' + 10) : 0xFF;
 }
-static inline uint16_t s_codePointFromStr(const char * restrict str)
+uint16_t ini_str_codePointFromStr(const char * restrict str)
 {
+	assert(str != NULL);
+
 	uint16_t cp = 0x0000;
 	for (size_t i = 0; i < 4; ++i)
 	{
 		cp <<= 4;
 		cp &= 0xFFF0;
-		uint16_t res = s_hexToNum(str[i]);
-		if (res > 0x000F)
+		uint16_t res = (uint16_t)ini_str_hexToNum(str[i]);
+		if (res > 0x0F)
 		{
 			return FORBIDDEN_CODEPOINT;
 		}
@@ -89,6 +92,8 @@ static inline uint16_t s_codePointFromStr(const char * restrict str)
 
 char * ini_escapeStr(const char * restrict string, intptr_t length)
 {
+	assert(string != NULL);
+
 	size_t realLen = (length == -1) ? strlen(string) : strnlen_s(string, (size_t)length);
 	
 	size_t estrSize = 0, estrCap = realLen + 1;
@@ -116,9 +121,8 @@ char * ini_escapeStr(const char * restrict string, intptr_t length)
 				case '#':
 				case '=':
 				case ':':
-					append = true;
 					appendable = *string;
-					break;
+					/* fall through */
 				case '0':
 				case 'a':
 				case 'b':
@@ -132,14 +136,15 @@ char * ini_escapeStr(const char * restrict string, intptr_t length)
 					++string;
 					if ((string != end) && ((end - string) >= 4))
 					{
-						if (!s_appendCP(&estr, &estrSize, &estrCap, s_codePointFromStr(string)))
+						if (!ini_str_appendCP(&estr, &estrSize, &estrCap, ini_str_codePointFromStr(string)))
 						{
 							free(estr);
 							return NULL;
 						}
 						string += 4;
+						break;
 					}
-					break;
+					/* fall through */
 				default:
 					free(estr);
 					return NULL;
@@ -171,7 +176,7 @@ char * ini_escapeStr(const char * restrict string, intptr_t length)
 							break;
 						}
 					}
-					if (!s_appendCh(&estr, &estrSize, &estrCap, appendable))
+					if (!ini_str_appendCh(&estr, &estrSize, &estrCap, appendable))
 					{
 						free(estr);
 						return NULL;
@@ -182,7 +187,7 @@ char * ini_escapeStr(const char * restrict string, intptr_t length)
 		}
 		else
 		{
-			if (!s_appendCh(&estr, &estrSize, &estrCap, *string))
+			if (!ini_str_appendCh(&estr, &estrSize, &estrCap, *string))
 			{
 				free(estr);
 				return NULL;
@@ -192,7 +197,7 @@ char * ini_escapeStr(const char * restrict string, intptr_t length)
 	}
 
 	// Lisab null-terminaatori sõne lõppu
-	if (!s_appendCh(&estr, &estrSize, &estrCap, '\0'))
+	if (!ini_str_appendCh(&estr, &estrSize, &estrCap, '\0'))
 	{
 		free(estr);
 		return NULL;
@@ -211,6 +216,8 @@ char * ini_escapeStr(const char * restrict string, intptr_t length)
 }
 char * ini_unescapeStr(const char * restrict string, intptr_t length)
 {
+	assert(string != NULL);
+
 	size_t realLen = (length == -1) ? strlen(string) : strnlen_s(string, (size_t)length);
 
 	size_t estrSize = 0, estrCap = realLen + 1;
@@ -253,8 +260,8 @@ char * ini_unescapeStr(const char * restrict string, intptr_t length)
 
 		if (appendable != 0)
 		{
-			if (!s_appendCh(&estr, &estrSize, &estrCap, '\\') ||
-				!s_appendCh(&estr, &estrSize, &estrCap, appendable))
+			if (!ini_str_appendCh(&estr, &estrSize, &estrCap, '\\') ||
+				!ini_str_appendCh(&estr, &estrSize, &estrCap, appendable))
 			{
 				free(estr);
 				return NULL;
@@ -262,7 +269,7 @@ char * ini_unescapeStr(const char * restrict string, intptr_t length)
 		}
 		else
 		{
-			if (!s_appendCh(&estr, &estrSize, &estrCap, *string))
+			if (!ini_str_appendCh(&estr, &estrSize, &estrCap, *string))
 			{
 				free(estr);
 				return NULL;
@@ -271,7 +278,7 @@ char * ini_unescapeStr(const char * restrict string, intptr_t length)
 	}
 
 	// Lisab null-terminaatori sõne lõppu
-	if (!s_appendCh(&estr, &estrSize, &estrCap, '\0'))
+	if (!ini_str_appendCh(&estr, &estrSize, &estrCap, '\0'))
 	{
 		free(estr);
 		return NULL;
@@ -288,3 +295,4 @@ char * ini_unescapeStr(const char * restrict string, intptr_t length)
 
 	return estr;
 }
+
