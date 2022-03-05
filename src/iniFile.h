@@ -3,7 +3,6 @@
 
 #include "hashmap.h"
 
-#include <stdio.h>
 #include <stdint.h>
 
 typedef char * char_ptr_t;
@@ -36,14 +35,14 @@ typedef struct IniSection
 
 } IniSection_t;
 
-typedef struct IniFile
+typedef struct IniData
 {
 	IniSection_t * sections;
 	size_t numSections, maxSections;
 
 	hashMap_t sectionMap;
 
-} IniFile_t;
+} IniData_t;
 
 typedef enum IniE
 {
@@ -59,11 +58,11 @@ char * ini_escapeStr(const char * restrict string, intptr_t length);
 char * ini_unescapeStr(const char * restrict string, intptr_t length);
 
 
-IniE_t ini_check(const char * restrict string, intptr_t length);
-IniE_t ini_checkFile(FILE * restrict iniFile);
+IniE_t ini_checkData(const char * restrict string, intptr_t length);
+IniE_t ini_checkFile(const char * restrict fileName, intptr_t fnameLength);
 
-IniE_t ini_parse(const char * restrict string, intptr_t length, IniFile_t * restrict pini);
-IniE_t ini_parseFile(FILE * restrict iniFile, IniFile_t * restrict pini);
+IniE_t ini_parseData(const char * restrict string, intptr_t length, IniData_t * restrict pini);
+IniE_t ini_parseFile(const char * restrict fileName, intptr_t fnameLength, IniData_t * restrict pini);
 
 
 
