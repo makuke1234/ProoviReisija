@@ -21,3 +21,14 @@ tekiks optimaalne teekond.
 ![Ajakava](./images/ajakava.png)
 
 
+# Projekti edenemine
+
+Projektile kulutatud aja logi on saadaval [siin](./ajakulu.txt)
+
+- [ ] Andmete lugemine failist
+- [ ] Punktide lisamine vahepunktidena lähimatele teedele
+- [ ] Dijkstra algoritmi implementatsioon
+- [ ] Optimaalse teekonna leidmine
+- [ ] Lihtne kasutajaliides
+- [ ] Koodi dokumenteerimine
+
