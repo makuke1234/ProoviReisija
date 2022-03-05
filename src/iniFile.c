@@ -311,7 +311,7 @@ IniE_t ini_checkData(const char * restrict string, intptr_t length)
 			++string;
 			continue;
 		}
-		else if (*string == ';')
+		else if ((*string == ';') || (*string == '#'))
 		{
 			// Skip till end of line
 			++string;
