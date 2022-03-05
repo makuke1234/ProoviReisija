@@ -32,3 +32,9 @@ Projektile kulutatud aja logi on saadaval [siin](./ajakulu.txt)
 - [ ] Lihtne kasutajaliides
 - [ ] Koodi dokumenteerimine
 
+
+# Materjalid
+
+- [INI file wiki](https://en.wikipedia.org/wiki/INI_file) -> INI faili formaat
+- [Unicode block wiki](https://en.wikipedia.org/wiki/Unicode_block)
+- [Specials (Unicode block) wiki](https://en.wikipedia.org/wiki/Specials_(Unicode_block)) -> Sealt pärineb koodis "keelatud" Unicode märgend hex väärtusega 0xFFFF
