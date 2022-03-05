@@ -37,5 +37,6 @@ Projektile ajalogi on saadaval [siin](./ajakulu.txt).
 
 - [INI file wiki](https://en.wikipedia.org/wiki/INI_file) -> INI faili formaat
 - [Unicode block wiki](https://en.wikipedia.org/wiki/Unicode_block)
-- [Specials (Unicode block) wiki](https://en.wikipedia.org/wiki/Specials_(Unicode_block)) -> Sealt pärineb koodis "keelatud" Unicode märgend hex väärtusega 0xFFFF
+- [Specials (Unicode block) wiki](https://en.wikipedia.org/wiki/Specials_(Unicode_block)) -> Sealt pärineb koodis kokkuleppeline "keelatud" Unicode märgend *hex* väärtusega 0xFFFF
 - [C reference](https://en.cppreference.com/w/c) -> Alati abiks C standardteegi mõistmisel
+- [UTF-8 wiki](https://en.wikipedia.org/wiki/UTF-8#Encoding) -> Abiks *Unicode Code pointide* UTF-8'ks konverteerimisel
