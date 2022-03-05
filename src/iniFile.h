@@ -5,6 +5,10 @@
 
 #include <stdint.h>
 
+
+#define FORBIDDEN_CODEPOINT 0xFFFF
+
+
 typedef char * char_ptr_t;
 
 typedef struct IniString
