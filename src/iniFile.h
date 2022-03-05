@@ -1,13 +1,18 @@
 #ifndef INI_FILE_H
 #define INI_FILE_H
 
+#include "hashmap.h"
+
+#include <stdio.h>
 #include <stdint.h>
+
+typedef char * char_ptr_t;
 
 typedef struct IniString
 {
 	union
 	{
-		char *;
+		char_ptr_t;
 		char * str;
 	};
 	size_t len;
@@ -43,6 +48,23 @@ typedef struct IniFile
 typedef enum IniE
 {
 	IniE_OK,
+	IniE_MEM
+
 } IniE_t;
+
+
+/* ********************* Funktsioonid ********************* */
+
+char * ini_escapeStr(const char * restrict string, intptr_t length);
+char * ini_unescapeStr(const char * restrict string, intptr_t length);
+
+
+IniE_t ini_check(const char * restrict string, intptr_t length);
+IniE_t ini_checkFile(FILE * restrict iniFile);
+
+IniE_t ini_parse(const char * restrict string, intptr_t length, IniFile_t * restrict pini);
+IniE_t ini_parseFile(FILE * restrict iniFile, IniFile_t * restrict pini);
+
+
 
 #endif
