@@ -23,7 +23,7 @@ tekiks optimaalne teekond.
 
 # Projekti edenemine
 
-Projekti ajalogi on saadaval [siin](./ajakulu.txt).
+Projekti ajalogi on saadaval [siin](./ajalogi.txt).
 
 - [ ] Andmete lugemine failist
 - [ ] Punktide lisamine vahepunktidena lähimatele teedele
