@@ -4,7 +4,7 @@
 
 [![Release version](https://img.shields.io/github/v/release/makuke1234/ProoviReisija?display_name=release&include_prereleases)](https://github.com/makuke1234/ProoviReisija/releases/latest)
 [![Total downloads](https://img.shields.io/github/downloads/makuke1234/ProoviReisija/total)](https://github.com/makuke1234/ProoviReisija/releases)
-![C version](https://img.shields.io/badge/version-C99-blue.svg)
+![C version](https://img.shields.io/badge/version-C11-blue.svg)
 ![Tests](https://img.shields.io/badge/build-none-red.svg)
 
 
