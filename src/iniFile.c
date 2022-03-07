@@ -89,131 +89,6 @@ uint16_t ini_str_codePointFromStr(const char * restrict str)
 	return cp;
 }
 
-
-
-
-bool IniString_init(IniString_t * restrict istr, const char * restrict str, intptr_t length)
-{
-	assert(istr != NULL);
-	if (str == NULL)
-	{
-		str = "";
-	}
-
-	uint8_t realLen = (length == -1) ? strlen(str) : strnlen_s(str, (size_t)length);
-
-	if ((istr->str = malloc(sizeof(char) * (realLen + 1))) == NULL)
-	{
-		return false;
-	}
-
-	memcpy(istr->str, str, sizeof(char) * realLen);
-	istr->str[realLen] = '\0';
-	istr->len = realLen;
-	return true;
-}
-IniString_t * IniString_make(const char * restrict str, intptr_t length)
-{
-	IniString_t * mem = malloc(sizeof(IniString_t));
-	if (mem == NULL)
-	{
-		return NULL;
-	}
-	else if (!IniString_init(mem, str, length))
-	{
-		free(mem);
-		return NULL;
-	}
-	return mem;
-}
-bool IniString_initEscape(IniString_t * restrict istr, const char * restrict str, intptr_t length)
-{
-	assert(istr != NULL);
-	if (str == NULL)
-	{
-		str = "";
-	}
-
-	if ((istr->str = ini_escapeStr_s(str, length, &istr->len)) == NULL)
-	{
-		return false;
-	}
-	--istr->len;
-
-	return true;
-}
-IniString_t * IniString_makeEscape(const char * restrict str, intptr_t length)
-{
-	IniString_t * mem = malloc(sizeof(IniString_t));
-	if (mem == NULL)
-	{
-		return NULL;
-	}
-	else if (!IniString_initEscape(mem, str, length))
-	{
-		free(mem);
-		return NULL;
-	}
-	return mem;
-}
-
-void IniString_destroy(IniString_t * restrict istr)
-{
-	assert(istr != NULL);
-	if (istr->str != NULL)
-	{
-		free(istr->str);
-		istr->str = NULL;
-	}
-}
-void IniString_free(IniString_t * restrict istr)
-{
-	assert(istr != NULL);
-	IniString_destroy(istr);
-	free(istr);
-}
-
-
-void IniValue_destroy(IniValue_t * restrict ival)
-{
-	assert(ival != NULL);
-	IniString_destroy(&ival->key);
-	IniString_destroy(&ival->value);
-}
-void IniValue_free(IniValue_t * restrict ival)
-{
-	assert(ival != NULL);
-	IniValue_destroy(ival);
-	free(ival);
-}
-
-
-void IniSection_destroy(IniSection_t * restrict isect)
-{
-	assert(isect != NULL);
-
-	IniString_destroy(&isect->section);
-	if (isect->values != NULL)
-	{
-		for (size_t i = 0; i < isect->numValues; ++i)
-		{
-			IniValue_destroy(&isect->values[i]);
-		}
-		free(isect->values);
-		isect->values = NULL;
-	}
-	hashMap_destroy(&isect->valueMap);
-}
-void IniSection_free(IniSection_t * restrict isect)
-{
-	assert(isect != NULL);
-	IniSection_destroy(isect);
-	free(isect);
-}
-
-
-
-
 char * ini_escapeStr_s(const char * restrict string, intptr_t length, size_t * restrict psize)
 {
 	assert(string != NULL);
@@ -432,6 +307,128 @@ char * ini_unescapeStr(const char * restrict string, intptr_t length)
 {
 	size_t sz;
 	return ini_unescapeStr_s(string, length, &sz);
+}
+
+
+
+
+bool IniString_init(IniString_t * restrict istr, const char * restrict str, intptr_t length)
+{
+	assert(istr != NULL);
+	if (str == NULL)
+	{
+		str = "";
+	}
+
+	uint8_t realLen = (length == -1) ? strlen(str) : strnlen_s(str, (size_t)length);
+
+	if ((istr->str = malloc(sizeof(char) * (realLen + 1))) == NULL)
+	{
+		return false;
+	}
+
+	memcpy(istr->str, str, sizeof(char) * realLen);
+	istr->str[realLen] = '\0';
+	istr->len = realLen;
+	return true;
+}
+IniString_t * IniString_make(const char * restrict str, intptr_t length)
+{
+	IniString_t * mem = malloc(sizeof(IniString_t));
+	if (mem == NULL)
+	{
+		return NULL;
+	}
+	else if (!IniString_init(mem, str, length))
+	{
+		free(mem);
+		return NULL;
+	}
+	return mem;
+}
+bool IniString_initEscape(IniString_t * restrict istr, const char * restrict str, intptr_t length)
+{
+	assert(istr != NULL);
+	if (str == NULL)
+	{
+		str = "";
+	}
+
+	if ((istr->str = ini_escapeStr_s(str, length, &istr->len)) == NULL)
+	{
+		return false;
+	}
+	--istr->len;
+
+	return true;
+}
+IniString_t * IniString_makeEscape(const char * restrict str, intptr_t length)
+{
+	IniString_t * mem = malloc(sizeof(IniString_t));
+	if (mem == NULL)
+	{
+		return NULL;
+	}
+	else if (!IniString_initEscape(mem, str, length))
+	{
+		free(mem);
+		return NULL;
+	}
+	return mem;
+}
+
+void IniString_destroy(IniString_t * restrict istr)
+{
+	assert(istr != NULL);
+	if (istr->str != NULL)
+	{
+		free(istr->str);
+		istr->str = NULL;
+	}
+}
+void IniString_free(IniString_t * restrict istr)
+{
+	assert(istr != NULL);
+	IniString_destroy(istr);
+	free(istr);
+}
+
+
+void IniValue_destroy(IniValue_t * restrict ival)
+{
+	assert(ival != NULL);
+	IniString_destroy(&ival->key);
+	IniString_destroy(&ival->value);
+}
+void IniValue_free(IniValue_t * restrict ival)
+{
+	assert(ival != NULL);
+	IniValue_destroy(ival);
+	free(ival);
+}
+
+
+void IniSection_destroy(IniSection_t * restrict isect)
+{
+	assert(isect != NULL);
+
+	IniString_destroy(&isect->section);
+	if (isect->values != NULL)
+	{
+		for (size_t i = 0; i < isect->numValues; ++i)
+		{
+			IniValue_destroy(&isect->values[i]);
+		}
+		free(isect->values);
+		isect->values = NULL;
+	}
+	hashMap_destroy(&isect->valueMap);
+}
+void IniSection_free(IniSection_t * restrict isect)
+{
+	assert(isect != NULL);
+	IniSection_destroy(isect);
+	free(isect);
 }
 
 

@@ -62,6 +62,11 @@ bool ini_str_appendCP(char ** restrict pstr, size_t * restrict psize, size_t * r
 uint8_t ini_str_hexToNum(char ch);
 uint16_t ini_str_codePointFromStr(const char * restrict str);
 
+char * ini_escapeStr_s(const char * restrict string, intptr_t length, size_t * restrict psize);
+char * ini_escapeStr(const char * restrict string, intptr_t length);
+char * ini_unescapeStr_s(const char * restrict string, intptr_t length, size_t * restrict psize);
+char * ini_unescapeStr(const char * restrict string, intptr_t length);
+
 
 
 
@@ -80,12 +85,6 @@ void IniValue_free(IniValue_t * restrict ival);
 
 void IniSection_destroy(IniSection_t * restrict isect);
 void IniSection_free(IniSection_t * restrict isect);
-
-
-char * ini_escapeStr_s(const char * restrict string, intptr_t length, size_t * restrict psize);
-char * ini_escapeStr(const char * restrict string, intptr_t length);
-char * ini_unescapeStr_s(const char * restrict string, intptr_t length, size_t * restrict psize);
-char * ini_unescapeStr(const char * restrict string, intptr_t length);
 
 
 IniE_t ini_checkData(const char * restrict string, intptr_t length);
