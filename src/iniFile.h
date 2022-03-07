@@ -65,7 +65,19 @@ uint16_t ini_str_codePointFromStr(const char * restrict str);
 
 
 
+bool IniString_init(IniString_t * restrict istr, const char * restrict str, intptr_t length);
+IniString_t * IniString_make(const char * restrict str, intptr_t length);
+bool IniString_initEscape(IniString_t * restrict istr, const char * restrict str, intptr_t length);
+IniString_t * IniString_makeEscape(const char * restrict str, intptr_t length);
+
+void IniString_destroy(IniString_t * restrict istr);
+void IniString_free(IniString_t * restrict istr);
+
+
+
+char * ini_escapeStr_s(const char * restrict string, intptr_t length, size_t * restrict psize);
 char * ini_escapeStr(const char * restrict string, intptr_t length);
+char * ini_unescapeStr_s(const char * restrict string, intptr_t length, size_t * restrict psize);
 char * ini_unescapeStr(const char * restrict string, intptr_t length);
 
 

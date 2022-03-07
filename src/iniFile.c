@@ -91,9 +91,94 @@ uint16_t ini_str_codePointFromStr(const char * restrict str)
 
 
 
-char * ini_escapeStr(const char * restrict string, intptr_t length)
+
+bool IniString_init(IniString_t * restrict istr, const char * restrict str, intptr_t length)
+{
+	assert(istr != NULL);
+	if (str == NULL)
+	{
+		str = "";
+	}
+
+	uint8_t realLen = (length == -1) ? strlen(str) : strnlen_s(str, (size_t)length);
+
+	if ((istr->str = malloc(sizeof(char) * (realLen + 1))) == NULL)
+	{
+		return false;
+	}
+
+	memcpy(istr->str, str, sizeof(char) * realLen);
+	istr->str[realLen] = '\0';
+	istr->len = realLen;
+	return true;
+}
+IniString_t * IniString_make(const char * restrict str, intptr_t length)
+{
+	IniString_t * mem = malloc(sizeof(IniString_t));
+	if (mem == NULL)
+	{
+		return NULL;
+	}
+	else if (!IniString_init(mem, str, length))
+	{
+		free(mem);
+		return NULL;
+	}
+	return mem;
+}
+bool IniString_initEscape(IniString_t * restrict istr, const char * restrict str, intptr_t length)
+{
+	assert(istr != NULL);
+	if (str == NULL)
+	{
+		str = "";
+	}
+
+	if ((istr->str = ini_escapeStr_s(str, length, &istr->len)) == NULL)
+	{
+		return false;
+	}
+	--istr->len;
+
+	return true;
+}
+IniString_t * IniString_makeEscape(const char * restrict str, intptr_t length)
+{
+	IniString_t * mem = malloc(sizeof(IniString_t));
+	if (mem == NULL)
+	{
+		return NULL;
+	}
+	else if (!IniString_initEscape(istr, str, length))
+	{
+		free(mem);
+		return NULL;
+	}
+	return mem;
+}
+
+void IniString_destroy(IniString_t * restrict istr)
+{
+	assert(istr != NULL);
+	if (istr->str != NULL)
+	{
+		free(istr->str);
+		istr->str = NULL;
+	}
+}
+void IniString_free(IniString_t * restrict istr)
+{
+	assert(istr != NULL);
+	IniString_destroy(istr);
+	free(istr);
+}
+
+
+
+char * ini_escapeStr_s(const char * restrict string, intptr_t length, size_t * restrict psize)
 {
 	assert(string != NULL);
+	assert(psize  != NULL);
 
 	size_t realLen = (length == -1) ? strlen(string) : strnlen_s(string, (size_t)length);
 	
@@ -213,11 +298,18 @@ char * ini_escapeStr(const char * restrict string, intptr_t length)
 		}
 	}
 
+	*psize = estrSize;
 	return estr;
 }
-char * ini_unescapeStr(const char * restrict string, intptr_t length)
+char * ini_escapeStr(const char * restrict string, intptr_t length)
+{
+	size_t sz;
+	return ini_escapeStr_s(string, length, &sz);
+}
+char * ini_unescapeStr_s(const char * restrict string, intptr_t length, size_t * restrict psize)
 {
 	assert(string != NULL);
+	assert(psize  != NULL);
 
 	size_t realLen = (length == -1) ? strlen(string) : strnlen_s(string, (size_t)length);
 
@@ -293,8 +385,14 @@ char * ini_unescapeStr(const char * restrict string, intptr_t length)
 			estr = newstr;
 		}
 	}
-
+	
+	*psize = estrSize;
 	return estr;
+}
+char * ini_unescapeStr(const char * restrict string, intptr_t length)
+{
+	size_t sz;
+	return ini_unescapeStr_s(string, length, &sz);
 }
 
 
@@ -456,6 +554,10 @@ IniE_t ini_parseData(const char * restrict string, intptr_t length, IniData_t * 
 	}
 
 	// Parse
+	for (const char * end = string + realLen; string != end;)
+	{
+
+	}
 
 	return IniE_OK;
 }
