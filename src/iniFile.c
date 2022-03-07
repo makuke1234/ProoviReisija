@@ -665,6 +665,37 @@ bool ini_addSection(ini_t * restrict idata, const char * restrict secstr, intptr
 
 	return true;
 }
+IniSection_t * ini_getSection(ini_t * restrict idata, const char * restrict secstr)
+{
+	assert(idata  != NULL);
+	assert(secstr != NULL);
+
+	hashNode_t * node = hashMap_get(&idata->sectionMap, secstr);
+	if (node == NULL)
+	{
+		return NULL;
+	}
+	return node->value;
+}
+bool ini_removeSection(ini_t * restrict idata, const char * restrict secstr)
+{
+	assert(idata  != NULL);
+	assert(secstr != NULL);
+
+	IniSection_t * val = ini_getSection(idata, secstr);
+	if (val == NULL)
+	{
+		return false;
+	}
+
+	idata->sections[val->idx] = NULL;
+	if (idata->numSections == (val->idx + 1))
+	{
+		--idata->numSections;
+	}
+	IniSection_free(val);
+	return true;
+}
 
 IniE_t ini_checkData(const char * restrict string, intptr_t length)
 {

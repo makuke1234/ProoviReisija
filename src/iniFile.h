@@ -116,6 +116,8 @@ bool ini_init(ini_t * restrict idata);
 ini_t * ini_make();
 
 bool ini_addSection(ini_t * restrict idata, const char * restrict secstr, intptr_t seclen);
+IniSection_t * ini_getSection(ini_t * restrict idata, const char * restrict secstr);
+bool ini_removeSection(ini_t * restrict idata, const char * restrict secstr);
 
 IniE_t ini_checkData(const char * restrict string, intptr_t length);
 IniE_t ini_checkFile(const char * restrict fileName);
