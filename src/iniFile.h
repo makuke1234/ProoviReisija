@@ -21,13 +21,15 @@ typedef struct IniValue
 {
 	IniString_t key, value;
 
+	size_t idx;
+
 } IniValue_t;
 
 typedef struct IniSection
 {
 	IniString_t section;
 
-	IniValue_t * values;
+	IniValue_t ** values;
 	size_t numValues, maxValues;
 
 	hashMap_t valueMap;
@@ -95,6 +97,14 @@ void IniValue_free(IniValue_t * restrict ival);
 
 bool IniSection_init(IniSection_t * restrict isect, const char * sectname, intptr_t sectnameLen);
 IniSection_t * IniSection_make(const char * sectname, intptr_t sectnameLen);
+
+bool IniSection_addValue(
+	IniSection_t * restrict isect,
+	const char * restrict keystr, intptr_t keylen,
+	const char * restrict valstr, intptr_t vallen
+);
+IniValue_t * IniSection_getValue(IniSection_t * restrict isect, const char * restrict keystr);
+bool IniSection_removeValue(IniSection_t * restrict isect, const char * restrict keystr);
 
 void IniSection_destroy(IniSection_t * restrict isect);
 void IniSection_free(IniSection_t * restrict isect);

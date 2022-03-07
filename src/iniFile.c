@@ -483,6 +483,79 @@ IniSection_t * IniSection_make(const char * sectname, intptr_t sectnameLen)
 	return mem;
 }
 
+bool IniSection_addValue(
+	IniSection_t * restrict isect,
+	const char * restrict keystr, intptr_t keylen,
+	const char * restrict valstr, intptr_t vallen
+)
+{
+	assert(isect != NULL);
+
+	if (isect->numValues >= isect->maxValues)
+	{
+		// Reallocate memory
+		size_t newcap = (isect->numValues + 1) * 2;
+		IniValue_t ** newmem = realloc(isect->values, sizeof(IniValue_t *) * isect->numValues);
+		if (newmem == NULL)
+		{
+			return false;
+		}
+
+		isect->values    = newmem;
+		isect->maxValues = newcap;
+	}
+
+	IniValue_t * val = IniValue_make(keystr, keylen, valstr, vallen);
+	if (val == NULL)
+	{
+		return false;
+	}
+
+	if (!hashMap_insert(&isect->valueMap, val->key.str, val))
+	{
+		IniValue_free(val);
+		return false;
+	}
+
+	isect->values[isect->numValues] = val;
+	val->idx = isect->numValues;
+
+	++isect->numValues;
+
+	return true;
+}
+IniValue_t * IniSection_getValue(IniSection_t * restrict isect, const char * restrict keystr)
+{
+	assert(isect  != NULL);
+	assert(keystr != NULL);
+
+	hashNode_t * node = hashMap_get(&isect->valueMap, keystr);
+	if (node == NULL)
+	{
+		return NULL;
+	}
+	return node->value;
+}
+bool IniSection_removeValue(IniSection_t * restrict isect, const char * restrict keystr)
+{
+	assert(isect  != NULL);
+	assert(keystr != NULL);
+
+	IniValue_t * val = hashMap_remove(&isect->valueMap, keystr);
+	if (val == NULL)
+	{
+		return false;
+	}
+	
+	isect->values[val->idx] = NULL;
+	if (isect->numValues == (val->idx + 1))
+	{
+		--isect->numValues;
+	}
+	IniValue_free(val);
+	return true;
+}
+
 void IniSection_destroy(IniSection_t * restrict isect)
 {
 	assert(isect != NULL);
@@ -492,7 +565,7 @@ void IniSection_destroy(IniSection_t * restrict isect)
 	{
 		for (size_t i = 0; i < isect->numValues; ++i)
 		{
-			IniValue_destroy(&isect->values[i]);
+			IniValue_free(isect->values[i]);
 		}
 		free(isect->values);
 		isect->values = NULL;
