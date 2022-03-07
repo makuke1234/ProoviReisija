@@ -149,7 +149,7 @@ IniString_t * IniString_makeEscape(const char * restrict str, intptr_t length)
 	{
 		return NULL;
 	}
-	else if (!IniString_initEscape(istr, str, length))
+	else if (!IniString_initEscape(mem, str, length))
 	{
 		free(mem);
 		return NULL;
@@ -172,6 +172,45 @@ void IniString_free(IniString_t * restrict istr)
 	IniString_destroy(istr);
 	free(istr);
 }
+
+
+void IniValue_destroy(IniValue_t * restrict ival)
+{
+	assert(ival != NULL);
+	IniString_destroy(&ival->key);
+	IniString_destroy(&ival->value);
+}
+void IniValue_free(IniValue_t * restrict ival)
+{
+	assert(ival != NULL);
+	IniValue_destroy(ival);
+	free(ival);
+}
+
+
+void IniSection_destroy(IniSection_t * restrict isect)
+{
+	assert(isect != NULL);
+
+	IniString_destroy(&isect->section);
+	if (isect->values != NULL)
+	{
+		for (size_t i = 0; i < isect->numValues; ++i)
+		{
+			IniValue_destroy(&isect->values[i]);
+		}
+		free(isect->values);
+		isect->values = NULL;
+	}
+	hashMap_destroy(&isect->valueMap);
+}
+void IniSection_free(IniSection_t * restrict isect)
+{
+	assert(isect != NULL);
+	IniSection_destroy(isect);
+	free(isect);
+}
+
 
 
 
@@ -576,5 +615,25 @@ IniE_t ini_parseFile(const char * restrict fileName, IniData_t * restrict pini)
 	IniE_t code = ini_parseData(str, (intptr_t)(sz - 1), pini);
 	free(str);
 	return code;
+}
+
+void ini_destroy(IniData_t * restrict pini)
+{
+	if (pini->sections != NULL)
+	{
+		for (size_t i = 0; i < pini->numSections; ++i)
+		{
+			IniSection_destroy(&pini->sections[i]);
+		}
+		free(pini->sections);
+		pini->sections = NULL;
+	}
+	hashMap_destroy(&pini->sectionMap);
+}
+void ini_free(IniData_t * restrict pini)
+{
+	assert(pini != NULL);
+	ini_destroy(pini);
+	free(pini);
 }
 

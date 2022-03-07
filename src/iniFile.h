@@ -74,6 +74,13 @@ void IniString_destroy(IniString_t * restrict istr);
 void IniString_free(IniString_t * restrict istr);
 
 
+void IniValue_destroy(IniValue_t * restrict ival);
+void IniValue_free(IniValue_t * restrict ival);
+
+
+void IniSection_destroy(IniSection_t * restrict isect);
+void IniSection_free(IniSection_t * restrict isect);
+
 
 char * ini_escapeStr_s(const char * restrict string, intptr_t length, size_t * restrict psize);
 char * ini_escapeStr(const char * restrict string, intptr_t length);
@@ -87,6 +94,8 @@ IniE_t ini_checkFile(const char * restrict fileName);
 IniE_t ini_parseData(const char * restrict string, intptr_t length, IniData_t * restrict pini);
 IniE_t ini_parseFile(const char * restrict fileName, IniData_t * restrict pini);
 
+void ini_destroy(IniData_t * restrict pini);
+void ini_free(IniData_t * restrict pini);
 
 
 #endif
