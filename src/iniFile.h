@@ -34,11 +34,13 @@ typedef struct IniSection
 
 	hashMap_t valueMap;
 
+	size_t idx;
+
 } IniSection_t;
 
 typedef struct ini
 {
-	IniSection_t * sections;
+	IniSection_t ** sections;
 	size_t numSections, maxSections;
 
 	hashMap_t sectionMap;
@@ -113,11 +115,13 @@ void IniSection_free(IniSection_t * restrict isect);
 bool ini_init(ini_t * idata);
 ini_t * ini_make();
 
+bool ini_addSection(ini_t * restrict idata, const char * restrict secstr, intptr_t seclen);
+
 IniE_t ini_checkData(const char * restrict string, intptr_t length);
 IniE_t ini_checkFile(const char * restrict fileName);
 
-IniE_t ini_parseData(const char * restrict string, intptr_t length, ini_t * restrict pini);
-IniE_t ini_parseFile(const char * restrict fileName, ini_t * restrict pini);
+IniE_t ini_initData(const char * restrict string, intptr_t length, ini_t * restrict pini);
+IniE_t ini_initFile(const char * restrict fileName, ini_t * restrict pini);
 
 void ini_destroy(ini_t * restrict pini);
 void ini_free(ini_t * restrict pini);
