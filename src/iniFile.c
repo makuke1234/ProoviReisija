@@ -546,7 +546,7 @@ bool IniSection_removeValue(IniSection_t * restrict isect, const char * restrict
 	{
 		return false;
 	}
-	
+
 	isect->values[val->idx] = NULL;
 	if (isect->numValues == (val->idx + 1))
 	{
@@ -565,7 +565,10 @@ void IniSection_destroy(IniSection_t * restrict isect)
 	{
 		for (size_t i = 0; i < isect->numValues; ++i)
 		{
-			IniValue_free(isect->values[i]);
+			if (isect->values[i] != NULL)
+			{
+				IniValue_free(isect->values[i]);
+			}
 		}
 		free(isect->values);
 		isect->values = NULL;
