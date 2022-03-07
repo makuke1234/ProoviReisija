@@ -93,6 +93,9 @@ void IniValue_destroy(IniValue_t * restrict ival);
 void IniValue_free(IniValue_t * restrict ival);
 
 
+bool IniSection_init(IniSection_t * restrict isect, const char * sectname, intptr_t sectnameLen);
+IniSection_t * IniSection_make(const char * sectname, intptr_t sectnameLen);
+
 void IniSection_destroy(IniSection_t * restrict isect);
 void IniSection_free(IniSection_t * restrict isect);
 

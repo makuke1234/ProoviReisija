@@ -446,6 +446,43 @@ void IniValue_free(IniValue_t * restrict ival)
 }
 
 
+bool IniSection_init(IniSection_t * restrict isect, const char * sectname, intptr_t sectnameLen)
+{
+	assert(isect != NULL);
+
+	if (!IniString_init(&isect->section, sectname, sectnameLen))
+	{
+		return false;
+	}
+
+	isect->values    = NULL;
+	isect->numValues = 0;
+	isect->maxValues = 0;
+
+	if (!hashMap_init(&isect->valueMap, 1))
+	{
+		IniString_destroy(&isect->section);
+		return false;
+	}
+
+	return true;
+}
+IniSection_t * IniSection_make(const char * sectname, intptr_t sectnameLen)
+{
+	IniSection_t * mem = malloc(sizeof(IniSection_t));
+	if (mem == NULL)
+	{
+		return NULL;
+	}
+	else if (!IniSection_init(mem, sectname, sectnameLen))
+	{
+		free(mem);
+		return NULL;
+	}
+
+	return mem;
+}
+
 void IniSection_destroy(IniSection_t * restrict isect)
 {
 	assert(isect != NULL);
