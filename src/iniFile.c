@@ -588,7 +588,7 @@ void IniSection_free(IniSection_t * restrict isect)
 }
 
 
-bool ini_init(ini_t * idata)
+bool ini_init(ini_t * restrict idata)
 {
 	assert(idata != NULL);
 
