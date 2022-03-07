@@ -36,14 +36,14 @@ typedef struct IniSection
 
 } IniSection_t;
 
-typedef struct IniData
+typedef struct ini
 {
 	IniSection_t * sections;
 	size_t numSections, maxSections;
 
 	hashMap_t sectionMap;
 
-} IniData_t;
+} ini_t;
 
 typedef enum IniE
 {
@@ -110,14 +110,17 @@ void IniSection_destroy(IniSection_t * restrict isect);
 void IniSection_free(IniSection_t * restrict isect);
 
 
+bool ini_init(ini_t * idata);
+ini_t * ini_make();
+
 IniE_t ini_checkData(const char * restrict string, intptr_t length);
 IniE_t ini_checkFile(const char * restrict fileName);
 
-IniE_t ini_parseData(const char * restrict string, intptr_t length, IniData_t * restrict pini);
-IniE_t ini_parseFile(const char * restrict fileName, IniData_t * restrict pini);
+IniE_t ini_parseData(const char * restrict string, intptr_t length, ini_t * restrict pini);
+IniE_t ini_parseFile(const char * restrict fileName, ini_t * restrict pini);
 
-void ini_destroy(IniData_t * restrict pini);
-void ini_free(IniData_t * restrict pini);
+void ini_destroy(ini_t * restrict pini);
+void ini_free(ini_t * restrict pini);
 
 
 #endif

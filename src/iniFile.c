@@ -726,7 +726,7 @@ IniE_t ini_checkFile(const char * restrict fileName)
 	return code;
 }
 
-IniE_t ini_parseData(const char * restrict string, intptr_t length, IniData_t * restrict pini)
+IniE_t ini_parseData(const char * restrict string, intptr_t length, ini_t * restrict pini)
 {
 	assert(string != NULL);
 	assert(pini != NULL);
@@ -748,7 +748,7 @@ IniE_t ini_parseData(const char * restrict string, intptr_t length, IniData_t * 
 
 	return IniE_OK;
 }
-IniE_t ini_parseFile(const char * restrict fileName, IniData_t * restrict pini)
+IniE_t ini_parseFile(const char * restrict fileName, ini_t * restrict pini)
 {
 	assert(fileName != NULL);
 	assert(pini != NULL);
@@ -765,7 +765,7 @@ IniE_t ini_parseFile(const char * restrict fileName, IniData_t * restrict pini)
 	return code;
 }
 
-void ini_destroy(IniData_t * restrict pini)
+void ini_destroy(ini_t * restrict pini)
 {
 	if (pini->sections != NULL)
 	{
@@ -778,7 +778,7 @@ void ini_destroy(IniData_t * restrict pini)
 	}
 	hashMap_destroy(&pini->sectionMap);
 }
-void ini_free(IniData_t * restrict pini)
+void ini_free(ini_t * restrict pini)
 {
 	assert(pini != NULL);
 	ini_destroy(pini);
