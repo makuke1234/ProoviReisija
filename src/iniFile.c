@@ -501,6 +501,11 @@ bool IniSection_addValue(
 			return false;
 		}
 
+		for (size_t i = isect->maxValues; i < newcap; ++i)
+		{
+			newmem[i] = NULL;
+		}
+
 		isect->values    = newmem;
 		isect->maxValues = newcap;
 	}
@@ -582,6 +587,84 @@ void IniSection_free(IniSection_t * restrict isect)
 	free(isect);
 }
 
+
+bool ini_init(ini_t * idata)
+{
+	assert(idata != NULL);
+
+	idata->sections    = NULL;
+	idata->numSections = 0;
+	idata->maxSections = 0;
+
+	if (!hashMap_init(&idata->sectionMap, 1))
+	{
+		return false;
+	}
+
+	if (!ini_addSection(idata, "", 0))
+	{
+		ini_destroy(idata);
+		return false;
+	}
+
+	return true;
+}
+ini_t * ini_make()
+{
+	ini_t * mem = malloc(sizeof(ini_t));
+	if (mem == NULL)
+	{
+		return NULL;
+	}
+	else if (!ini_init(mem))
+	{
+		free(mem);
+		return NULL;
+	}
+
+	return mem;
+}
+
+bool ini_addSection(ini_t * restrict idata, const char * restrict secstr, intptr_t seclen)
+{
+	assert(idata != NULL);
+
+	if (idata->numSections >= idata->maxSections)
+	{
+		size_t newcap = (idata->numSections + 1) * 2;
+		IniSection_t ** newmem = realloc(idata->sections, sizeof(IniSection_t *) * newcap);
+		if (newmem == NULL)
+		{
+			return false;
+		}
+
+		for (size_t i = idata->maxSections; i < newcap; ++i)
+		{
+			newmem[i] = NULL;
+		}
+
+		idata->sections    = newmem;
+		idata->maxSections = newcap;
+	}
+
+	IniSection_t * sec = IniSection_make(secstr, seclen);
+	if (sec == NULL)
+	{
+		return false;
+	}
+
+	if (!hashMap_insert(&idata->sectionMap, sec->section.str, sec))
+	{
+		IniSection_free(sec);
+		return false;
+	}
+
+	sec->idx = idata->numSections;
+	idata->sections[idata->numSections] = sec;
+	++idata->numSections;
+
+	return true;
+}
 
 IniE_t ini_checkData(const char * restrict string, intptr_t length)
 {
@@ -726,7 +809,7 @@ IniE_t ini_checkFile(const char * restrict fileName)
 	return code;
 }
 
-IniE_t ini_parseData(const char * restrict string, intptr_t length, ini_t * restrict pini)
+IniE_t ini_initData(const char * restrict string, intptr_t length, ini_t * restrict pini)
 {
 	assert(string != NULL);
 	assert(pini != NULL);
@@ -748,7 +831,7 @@ IniE_t ini_parseData(const char * restrict string, intptr_t length, ini_t * rest
 
 	return IniE_OK;
 }
-IniE_t ini_parseFile(const char * restrict fileName, ini_t * restrict pini)
+IniE_t ini_initFile(const char * restrict fileName, ini_t * restrict pini)
 {
 	assert(fileName != NULL);
 	assert(pini != NULL);
@@ -760,7 +843,7 @@ IniE_t ini_parseFile(const char * restrict fileName, ini_t * restrict pini)
 	{
 		return IniE_MEM;
 	}
-	IniE_t code = ini_parseData(str, (intptr_t)(sz - 1), pini);
+	IniE_t code = ini_initData(str, (intptr_t)(sz - 1), pini);
 	free(str);
 	return code;
 }
@@ -771,7 +854,10 @@ void ini_destroy(ini_t * restrict pini)
 	{
 		for (size_t i = 0; i < pini->numSections; ++i)
 		{
-			IniSection_destroy(&pini->sections[i]);
+			if (pini->sections[i] != NULL)
+			{
+				IniSection_free(pini->sections[i]);
+			}
 		}
 		free(pini->sections);
 		pini->sections = NULL;
