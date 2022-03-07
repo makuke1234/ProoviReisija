@@ -79,6 +79,16 @@ void IniString_destroy(IniString_t * restrict istr);
 void IniString_free(IniString_t * restrict istr);
 
 
+bool IniValue_init(
+	IniValue_t * restrict ival,
+	const char * restrict keystr, intptr_t keylen,
+	const char * restrict valstr, intptr_t vallen
+);
+IniValue_t * IniValue_make(
+	const char * restrict keystr, intptr_t keylen,
+	const char * restrict valstr, intptr_t vallen
+);
+
 void IniValue_destroy(IniValue_t * restrict ival);
 void IniValue_free(IniValue_t * restrict ival);
 

@@ -394,6 +394,44 @@ void IniString_free(IniString_t * restrict istr)
 }
 
 
+bool IniValue_init(
+	IniValue_t * restrict ival,
+	const char * restrict keystr, intptr_t keylen,
+	const char * restrict valstr, intptr_t vallen
+)
+{
+	assert(ival != NULL);
+	
+	if (!IniString_init(&ival->key, keystr, keylen))
+	{
+		return false;
+	}
+	else if (!IniString_init(&ival->value, valstr, vallen))
+	{
+		IniString_destroy(&ival->key);
+		return false;
+	}
+	return true;
+}
+IniValue_t * IniValue_make(
+	const char * restrict keystr, intptr_t keylen,
+	const char * restrict valstr, intptr_t vallen
+)
+{
+	IniValue_t * mem = malloc(sizeof(IniValue_t));
+	if (mem == NULL)
+	{
+		return NULL;
+	}
+	else if (!IniValue_init(mem, keystr, keylen, valstr, vallen))
+	{
+		free(mem);
+		return NULL;
+	}
+
+	return mem;
+}
+
 void IniValue_destroy(IniValue_t * restrict ival)
 {
 	assert(ival != NULL);
