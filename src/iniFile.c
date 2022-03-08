@@ -854,10 +854,128 @@ IniE_t ini_initData(const char * restrict string, intptr_t length, ini_t * restr
 		return code;
 	}
 
+	if (!ini_init(pini))
+	{
+		return IniE_MEM;
+	}
+
 	// Parse
 	for (const char * end = string + realLen; string != end;)
 	{
+		if ((*string == ' ') || (*string == '\t') || (*string == '\n') || (*string == '\r'))
+		{
+			++string;
+			continue;
+		}
+		else if ((*string == ';') || (*string == '#'))
+		{
+			// Skip till end of line
+			++string;
+			for (; string != end; ++string)
+			{
+				if ((*string == '\n') || (*string == '\r'))
+				{
+					++string;
+					break;
+				}
+			}
+		}
+		else if (*string == '[')
+		{
+			// Add section
+			++string;
+			for (const char * secend = string; secend != end; ++secend)
+			{
+				if (*secend == '\\')
+				{
+					++secend;
+					if (secend == end)
+					{
+						return IniE_ESCAPE;
+					}
+					continue;
+				}
+				else if (*secend == ']')
+				{
+					// Add section to list
+					if (!ini_addSection(pini, string, secend - string))
+					{
+						ini_destroy(pini);
+						return IniE_MEM;
+					}
 
+					// Go on
+					string = secend;
+					++string;
+					break;
+				}
+			}
+		}
+		else
+		{
+			const char * keystart = string, * keyend = string + 1;
+			// Add key-value pair to last (current) section
+			for (; string != end; ++string)
+			{
+				if (*string == '\\')
+				{
+					++string;
+					if (string == end)
+					{
+						return IniE_ESCAPE;
+					}
+					continue;
+				}
+				else if ((*string == ' ') || (*string == '\t') || (*string == '=') || (*string == ':'))
+				{
+					keyend = string;
+					break;
+				}
+			}
+			for (; string != end; ++string)
+			{
+				if ((*string == ' ') || (*string == '\t'))
+				{
+					continue;
+				}
+				else if ((*string == '=') || (*string == ':'))
+				{
+					++string;
+					break;
+				}
+			}
+			const char * valstart = string, * valend = string + 1;
+			for (; string != end; ++string)
+			{
+				if ((*string == ' ') || (*string == '\t'))
+				{
+					continue;
+				}
+				else
+				{
+					valstart = string;
+					valend   = string + 1;
+					break;
+				}
+			}
+			for (; string != end; ++string)
+			{
+				if ((*string == '\n') || (*string == '\r'))
+				{
+					valend = string;
+					++string;
+					break;
+				}
+			}
+
+			// Get current section
+			IniSection_t * cursect = pini->sections[pini->numSections - 1];
+			if (!IniSection_addValue(cursect, keystart, keyend - keystart, valstart, valend - valstart))
+			{
+				ini_destroy(pini);
+				return IniE_MEM;
+			}
+		}
 	}
 
 	return IniE_OK;
@@ -869,11 +987,11 @@ IniE_t ini_initFile(const char * restrict fileName, ini_t * restrict pini)
 	
 	size_t sz;
 	char * str = fhelper_read(fileName, &sz);
-	
 	if (str == NULL)
 	{
 		return IniE_MEM;
 	}
+
 	IniE_t code = ini_initData(str, (intptr_t)(sz - 1), pini);
 	free(str);
 	return code;
