@@ -53,7 +53,7 @@ void t5(ini_t * ptr)
 
 int main(void)
 {
-	setlib("ini_check");
+	setlib("iniFile");
 
 	testData("key=value", true, &t1);
 	testData("key value", false, NULL);
