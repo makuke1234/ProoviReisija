@@ -113,7 +113,7 @@ void IniSection_free(IniSection_t * restrict isect);
 
 
 bool ini_init(ini_t * restrict idata);
-ini_t * ini_make();
+ini_t * ini_make(void);
 
 bool ini_addSection(ini_t * restrict idata, const char * restrict secstr, intptr_t seclen);
 IniSection_t * ini_getSection(ini_t * restrict idata, const char * restrict secstr);

@@ -320,7 +320,7 @@ bool IniString_init(IniString_t * restrict istr, const char * restrict str, intp
 		str = "";
 	}
 
-	uint8_t realLen = (length == -1) ? strlen(str) : strnlen_s(str, (size_t)length);
+	size_t realLen = (length == -1) ? strlen(str) : strnlen_s(str, (size_t)length);
 
 	if ((istr->str = malloc(sizeof(char) * (realLen + 1))) == NULL)
 	{
@@ -609,7 +609,7 @@ bool ini_init(ini_t * restrict idata)
 
 	return true;
 }
-ini_t * ini_make()
+ini_t * ini_make(void)
 {
 	ini_t * mem = malloc(sizeof(ini_t));
 	if (mem == NULL)
