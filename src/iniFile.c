@@ -944,7 +944,7 @@ IniE_t ini_initData(const char * restrict string, intptr_t length, ini_t * restr
 					break;
 				}
 			}
-			const char * valstart = string, * valend = string + 1;
+			const char * valstart = string, * valend = end;
 			for (; string != end; ++string)
 			{
 				if ((*string == ' ') || (*string == '\t'))
@@ -954,7 +954,6 @@ IniE_t ini_initData(const char * restrict string, intptr_t length, ini_t * restr
 				else
 				{
 					valstart = string;
-					valend   = string + 1;
 					break;
 				}
 			}
