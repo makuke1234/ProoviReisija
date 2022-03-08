@@ -13,7 +13,7 @@ void testEsc(const char * str1, const char * str2, char * (*escapeFunc)(const ch
 
 int main(void)
 {
-	setlib("iniFile_escape");
+	setlib("ini_escape");
 
 	testEsc("asdasdffsgjfgjDSDDFDFaksdj\u2191", "asdasdffsgjfgjDSDDFDFaksdj\u2191", &ini_escapeStr);
 	testEsc("asdasd", "asdasd", &ini_unescapeStr);

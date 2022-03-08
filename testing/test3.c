@@ -9,7 +9,7 @@ void testData(const char * data, bool pass)
 
 int main(void)
 {
-	setlib("iniFile_check");
+	setlib("ini_check");
 
 	testData("key=value", true);
 	testData("key value", false);
