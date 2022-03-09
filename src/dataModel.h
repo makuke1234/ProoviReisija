@@ -22,9 +22,9 @@ void point_destroy(point_t * restrict p);
 
 typedef struct dataModel
 {
-	point_t beginning, end;
-	point_t middlePoints[MAX_POINTS];
-	size_t numMiddlePoints;
+	point_t beg, end;
+	point_t mid[MAX_POINTS];
+	size_t numMidPoints;
 
 
 } dataModel_t;
@@ -38,7 +38,8 @@ typedef enum dmErr
 } dmErr_t;
 
 
-dmErr_t dm_readData(dataModel_t * restrict dm, const char * restrict filename);
+dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filename);
+void dm_destroy(dataModel_t * restrict dm);
 
 
 #endif

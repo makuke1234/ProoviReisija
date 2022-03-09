@@ -24,10 +24,13 @@ void point_destroy(point_t * restrict p)
 }
 
 
-dmErr_t dm_readData(dataModel_t * restrict dm, const char * restrict filename)
+dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filename)
 {
+	assert(dm != NULL);
+	assert(filename != NULL);
+
 	ini_t inifile;
-	if (!ini_initFile(filename, &inifile))
+	if (ini_initFile(filename, &inifile) != inieOK)
 	{
 		return dmeMEM;
 	}
@@ -58,6 +61,9 @@ dmErr_t dm_readData(dataModel_t * restrict dm, const char * restrict filename)
 		return dmeSTOPS_LIMIT;
 	}
 
+
+	dm->numMidPoints = 0;
+
 	for (size_t i = 0, realStops = 0; i < peatused->numValues; ++i)
 	{
 		iniValue_t * val = peatused->values[i];
@@ -71,7 +77,7 @@ dmErr_t dm_readData(dataModel_t * restrict dm, const char * restrict filename)
 			}
 			else if (realStops == 0)
 			{
-				dm->beginning = p;
+				dm->beg = p;
 			}
 			else if ((realStops + 1) == numStops)
 			{
@@ -79,8 +85,8 @@ dmErr_t dm_readData(dataModel_t * restrict dm, const char * restrict filename)
 			}
 			else
 			{
-				dm->middlePoints[dm->numMiddlePoints] = p;
-				++dm->numMiddlePoints;
+				dm->mid[dm->numMidPoints] = p;
+				++dm->numMidPoints;
 			}
 
 			++realStops;
@@ -92,5 +98,15 @@ dmErr_t dm_readData(dataModel_t * restrict dm, const char * restrict filename)
 	ini_destroy(&inifile);
 
 	return dmeOK;
+}
+void dm_destroy(dataModel_t * restrict dm)
+{
+	point_destroy(&dm->beg);
+	point_destroy(&dm->end);
+
+	for (size_t i = 0; i < dm->numMidPoints; ++i)
+	{
+		point_destroy(&dm->mid[i]);
+	}
 }
 
