@@ -813,7 +813,16 @@ IniE_t ini_checkData(const char * restrict string, intptr_t length)
 			}
 			for (; string != end; ++string)
 			{
-				if ((*string == '\n') || (*string == '\r'))
+				if (*string == '\\')
+				{
+					++string;
+					if (string == end)
+					{
+						return IniE_ESCAPE;
+					}
+					continue;
+				}
+				else if ((*string == ' ') || (*string == '\t') || (*string == '\n') || (*string == '\r'))
 				{
 					++string;
 					break;
@@ -922,6 +931,7 @@ IniE_t ini_initData(const char * restrict string, intptr_t length, ini_t * restr
 					++string;
 					if (string == end)
 					{
+						ini_destroy(pini);
 						return IniE_ESCAPE;
 					}
 					continue;
@@ -959,7 +969,17 @@ IniE_t ini_initData(const char * restrict string, intptr_t length, ini_t * restr
 			}
 			for (; string != end; ++string)
 			{
-				if ((*string == '\n') || (*string == '\r'))
+				if (*string == '\\')
+				{
+					++string;
+					if (string == end)
+					{
+						ini_destroy(pini);
+						return IniE_ESCAPE;
+					}
+					continue;
+				}
+				else if ((*string == ' ') || (*string == '\t') || (*string == '\n') || (*string == '\r'))
 				{
 					valend = string;
 					++string;
