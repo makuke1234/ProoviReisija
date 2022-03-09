@@ -75,17 +75,17 @@ char * g_ini_unescapeStr(const char * restrict string, intptr_t length);
 
 
 
-bool iniString_init(iniString_t * restrict istr, const char * restrict str, intptr_t length);
+bool iniString_init(iniString_t * restrict pstr, const char * restrict str, intptr_t length);
 iniString_t * iniString_make(const char * restrict str, intptr_t length);
-bool iniString_initEscape(iniString_t * restrict istr, const char * restrict str, intptr_t length);
+bool iniString_initEscape(iniString_t * restrict pstr, const char * restrict str, intptr_t length);
 iniString_t * iniString_makeEscape(const char * restrict str, intptr_t length);
 
-void iniString_destroy(iniString_t * restrict istr);
-void iniString_free(iniString_t * restrict istr);
+void iniString_destroy(iniString_t * restrict pstr);
+void iniString_free(iniString_t * restrict pstr);
 
 
 bool iniValue_init(
-	iniValue_t * restrict ival,
+	iniValue_t * restrict pval,
 	const char * restrict keystr, intptr_t keylen,
 	const char * restrict valstr, intptr_t vallen
 );
@@ -94,31 +94,31 @@ iniValue_t * iniValue_make(
 	const char * restrict valstr, intptr_t vallen
 );
 
-void iniValue_destroy(iniValue_t * restrict ival);
-void iniValue_free(iniValue_t * restrict ival);
+void iniValue_destroy(iniValue_t * restrict pval);
+void iniValue_free(iniValue_t * restrict pval);
 
 
-bool iniSection_init(iniSection_t * restrict isect, const char * sectname, intptr_t sectnameLen);
+bool iniSection_init(iniSection_t * restrict psect, const char * sectname, intptr_t sectnameLen);
 iniSection_t * iniSection_make(const char * sectname, intptr_t sectnameLen);
 
 bool iniSection_addValue(
-	iniSection_t * restrict isect,
+	iniSection_t * restrict psect,
 	const char * restrict keystr, intptr_t keylen,
 	const char * restrict valstr, intptr_t vallen
 );
-iniValue_t * iniSection_getValue(iniSection_t * restrict isect, const char * restrict keystr);
-bool iniSection_removeValue(iniSection_t * restrict isect, const char * restrict keystr);
+iniValue_t * iniSection_getValue(iniSection_t * restrict psect, const char * restrict keystr);
+bool iniSection_removeValue(iniSection_t * restrict psect, const char * restrict keystr);
 
-void iniSection_destroy(iniSection_t * restrict isect);
-void iniSection_free(iniSection_t * restrict isect);
+void iniSection_destroy(iniSection_t * restrict psect);
+void iniSection_free(iniSection_t * restrict psect);
 
 
-bool ini_init(ini_t * restrict idata);
+bool ini_init(ini_t * restrict pini);
 ini_t * ini_make(void);
 
-bool ini_addSection(ini_t * restrict idata, const char * restrict secstr, intptr_t seclen);
-iniSection_t * ini_getSection(ini_t * restrict idata, const char * restrict secstr);
-bool ini_removeSection(ini_t * restrict idata, const char * restrict secstr);
+bool ini_addSection(ini_t * restrict pini, const char * restrict secstr, intptr_t seclen);
+iniSection_t * ini_getSection(ini_t * restrict pini, const char * restrict secstr);
+bool ini_removeSection(ini_t * restrict pini, const char * restrict secstr);
 
 iniErr_t ini_checkData(const char * restrict string, intptr_t length);
 iniErr_t ini_checkFile(const char * restrict fileName);
