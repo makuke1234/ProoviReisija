@@ -13,7 +13,7 @@ static inline void setlib(const char * newlib)
 	lib = newlib;
 }
 
-static inline void test(bool cond, const char * errmsg, ...)
+static inline void vtest(bool cond, const char * errmsg, va_list ap)
 {
 	static int testnum = 1;
 	
@@ -24,14 +24,25 @@ static inline void test(bool cond, const char * errmsg, ...)
 	else
 	{
 		fprintf(stderr, "[%s] Test #%d failed: ", lib, testnum);
-		va_list ap;
-		va_start(ap, errmsg);
 		vfprintf(stderr, errmsg, ap);
-		va_end(ap);
-		fprintf(stderr, "\n");
+		fputc('\n', stderr);
 		exit(1);
 	}
 	++testnum;
+}
+static inline void test(bool cond, const char * errmsg, ...)
+{
+	va_list ap;
+	va_start(ap, errmsg);
+
+	vtest(cond, errmsg, ap);
+
+	va_end(ap);	
+}
+
+static inline void teststr(const char * str1, const char * str2)
+{
+	test(strcmp(str1, str2) == 0, "\"%s\" != \"%s\"", str1, str2);
 }
 
 static inline void testn(const char * newlib, bool cond, const char * errmsg)
