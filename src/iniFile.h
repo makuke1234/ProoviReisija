@@ -53,7 +53,8 @@ typedef enum IniE
 	IniE_MEM,
 	IniE_SECTION,
 	IniE_ESCAPE,
-	IniE_VALUE
+	IniE_VALUE,
+	IniE_QUOTE
 
 } IniE_t;
 

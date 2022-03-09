@@ -802,30 +802,56 @@ IniE_t ini_checkData(const char * restrict string, intptr_t length)
 			}
 			for (; string != end; ++string)
 			{
-				if ((*string == ' ') || (*string == '\t'))
-				{
-					continue;
-				}
-				else
+				if ((*string != ' ') && (*string != '\t'))
 				{
 					break;
 				}
 			}
-			for (; string != end; ++string)
+			if (*string == '"')
 			{
-				if (*string == '\\')
+				++string;
+				found = false;
+				for (; string != end; ++string)
 				{
-					++string;
-					if (string == end)
+					if (*string == '\\')
 					{
-						return IniE_ESCAPE;
+						++string;
+						if (string == end)
+						{
+							return IniE_ESCAPE;
+						}
+						continue;
 					}
-					continue;
+					else if (*string == '"')
+					{
+						++string;
+						found = true;
+						break;
+					}
 				}
-				else if ((*string == ';') || (*string == '#') || (*string == '\n') || (*string == '\r'))
+				if (found == false)
 				{
-					string += (*string != ';') && (*string != '#');
-					break;
+					return IniE_QUOTE;
+				}
+			}
+			else
+			{
+				for (; string != end; ++string)
+				{
+					if (*string == '\\')
+					{
+						++string;
+						if (string == end)
+						{
+							return IniE_ESCAPE;
+						}
+						continue;
+					}
+					else if ((*string == ';') || (*string == '#') || (*string == '\n') || (*string == '\r'))
+					{
+						string += (*string != ';') && (*string != '#');
+						break;
+					}
 				}
 			}
 		}
@@ -957,11 +983,7 @@ IniE_t ini_initData(const char * restrict string, intptr_t length, ini_t * restr
 			const char * valstart = string, * valend = end;
 			for (; string != end; ++string)
 			{
-				if ((*string == ' ') || (*string == '\t'))
-				{
-					continue;
-				}
-				else
+				if ((*string != ' ') && (*string != '\t'))
 				{
 					valstart = string;
 					break;
@@ -970,7 +992,7 @@ IniE_t ini_initData(const char * restrict string, intptr_t length, ini_t * restr
 			if (*valstart == '"')
 			{
 				++valstart;
-				for (; string != end; ++string)
+				for (string = valstart; string != end; ++string)
 				{
 					if (*string == '\\')
 					{
@@ -1019,10 +1041,7 @@ IniE_t ini_initData(const char * restrict string, intptr_t length, ini_t * restr
 							}
 							++valend;
 						}
-						else if ((*string != ';') && (*string != '#'))
-						{
-							++string;
-						}
+						string += (*string != ';') & (*string != '#');
 						break;
 					}
 				}
