@@ -49,6 +49,8 @@ void testData(const char * lib_, const char * data, bool pass, void (*testfunc)(
 		// Free resources
 		ini_destroy(&ini);
 	}
+
+	endphase();
 }
 
 void t1(ini_t * ptr)
