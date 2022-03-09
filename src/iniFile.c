@@ -982,7 +982,7 @@ IniE_t ini_initData(const char * restrict string, intptr_t length, ini_t * restr
 				else if ((*string == ';') || (*string == '#') || (*string == '\n') || (*string == '\r'))
 				{
 					valend = string;
-					if (((*valend == ';') || (*valend == '#')) && ((*(valend - 1) == ' ') || (*(valend - 1) == '\t')))
+					if ((*(valend - 1) == ' ') || (*(valend - 1) == '\t'))
 					{
 						--valend;
 						for (; valend != valstart; --valend)
@@ -994,7 +994,7 @@ IniE_t ini_initData(const char * restrict string, intptr_t length, ini_t * restr
 						}
 						++valend;
 					}
-					else
+					else if ((*string != ';') && (*string != '#'))
 					{
 						++string;
 					}
