@@ -29,8 +29,16 @@ typedef struct dataModel
 
 } dataModel_t;
 
+typedef enum dmErr
+{
+	dmeOK,
+	dmeMEM,
+	dmeSECTIONS,
+	dmeSTOPS_LIMIT
+} dmErr_t;
 
-bool dm_readData(dataModel_t * restrict dm, const char * restrict filename);
+
+dmErr_t dm_readData(dataModel_t * restrict dm, const char * restrict filename);
 
 
 #endif
