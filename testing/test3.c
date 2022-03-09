@@ -16,9 +16,9 @@
 	"file = \"payroll.dat\""
 
 
-void testkv(IniSection_t * sect, const char * key, const char * value, bool outcome)
+void testkv(iniSection_t * sect, const char * key, const char * value, bool outcome)
 {
-	IniValue_t * v = IniSection_getValue(sect, key);
+	iniValue_t * v = iniSection_getValue(sect, key);
 	test(outcome ? (v != NULL) : (v == NULL), outcome ? "No key %s found!" : "Key %s found in wrong place!", key);
 	if (!outcome)
 	{
@@ -36,12 +36,12 @@ void testData(const char * lib_, const char * data, bool pass, void (*testfunc)(
 {
 	setlib(lib_);
 
-	IniE_t code = ini_checkData(data, -1);
-	test(pass ? (code == IniE_OK) : (code != IniE_OK), "Input: %s, return code: %d", data, code);
+	iniErr_t code = ini_checkData(data, -1);
+	test(pass ? (code == inieOK) : (code != inieOK), "Input: %s, return code: %d", data, code);
 	if (pass)
 	{
 		ini_t ini;
-		test(ini_initData(data, -1, &ini) == IniE_OK, "INI structure initialization failed!");
+		test(ini_initData(data, -1, &ini) == inieOK, "INI structure initialization failed!");
 
 		// More tests
 		testfunc(&ini);
@@ -55,14 +55,14 @@ void testData(const char * lib_, const char * data, bool pass, void (*testfunc)(
 
 void t1(ini_t * ptr)
 {
-	IniSection_t * sect = ini_getSection(ptr, "");
+	iniSection_t * sect = ini_getSection(ptr, "");
 	test(sect != NULL, "No global section found!");
 
 	testkv(sect, "key", "value", true);
 }
 void t2(ini_t * ptr)
 {
-	IniSection_t * sect = ini_getSection(ptr, "");
+	iniSection_t * sect = ini_getSection(ptr, "");
 	test(sect != NULL, "No global section found!");
 
 	sect = ini_getSection(ptr, "section");
@@ -73,7 +73,7 @@ void t2(ini_t * ptr)
 }
 void t3(ini_t * ptr)
 {
-	IniSection_t * sect = ini_getSection(ptr, "");
+	iniSection_t * sect = ini_getSection(ptr, "");
 	test(sect != NULL, "No global section found!");
 
 	sect = ini_getSection(ptr, "section");
@@ -90,7 +90,7 @@ void t3(ini_t * ptr)
 }
 void t4(ini_t * ptr)
 {
-	IniSection_t * sect = ini_getSection(ptr, "");
+	iniSection_t * sect = ini_getSection(ptr, "");
 	test(sect != NULL, "No global section found!");
 
 	testkv(sect, "var", "abc", true);
@@ -98,7 +98,7 @@ void t4(ini_t * ptr)
 }
 void t5(ini_t * ptr)
 {
-	IniSection_t * sect = ini_getSection(ptr, "");
+	iniSection_t * sect = ini_getSection(ptr, "");
 	test(sect != NULL, "No global section found!");
 
 	testkv(sect, "key", "domain", false);
@@ -110,7 +110,7 @@ void t5(ini_t * ptr)
 }
 void t6(ini_t * ptr)
 {
-	IniSection_t * sect = ini_getSection(ptr, "");
+	iniSection_t * sect = ini_getSection(ptr, "");
 	test(sect != NULL, "No global section found!");
 	
 	testkv(sect, "name", "John Doe", false);

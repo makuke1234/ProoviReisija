@@ -10,121 +10,121 @@
 #define FORBIDDEN_CODEPOINT 0xFFFF
 
 
-typedef struct IniString
+typedef struct iniString
 {
 	char * str;
 	size_t len;
 	
-} IniString_t;
+} iniString_t;
 
-typedef struct IniValue
+typedef struct iniValue_t
 {
-	IniString_t key, value;
+	iniString_t key, value;
 
 	size_t idx;
 
-} IniValue_t;
+} iniValue_t;
 
-typedef struct IniSection
+typedef struct iniSection
 {
-	IniString_t section;
+	iniString_t section;
 
-	IniValue_t ** values;
+	iniValue_t ** values;
 	size_t numValues, maxValues;
 
 	hashMap_t valueMap;
 
 	size_t idx;
 
-} IniSection_t;
+} iniSection_t;
 
 typedef struct ini
 {
-	IniSection_t ** sections;
+	iniSection_t ** sections;
 	size_t numSections, maxSections;
 
 	hashMap_t sectionMap;
 
 } ini_t;
 
-typedef enum IniE
+typedef enum iniErr
 {
-	IniE_OK,
-	IniE_MEM,
-	IniE_SECTION,
-	IniE_ESCAPE,
-	IniE_VALUE,
-	IniE_QUOTE
+	inieOK,
+	inieMEM,
+	inieSECTION,
+	inieESCAPE,
+	inieVALUE,
+	inieQUOTE
 
-} IniE_t;
+} iniErr_t;
 
 
 /* ********************* Funktsioonid ********************* */
 
-bool ini_str_appendCh(char ** restrict pstr, size_t * restrict psize, size_t * restrict pcap, char ch);
-bool ini_str_appendCP(char ** restrict pstr, size_t * restrict psize, size_t * restrict pcap, uint16_t codePoint);
+bool g_ini_strAppendCh(char ** restrict pstr, size_t * restrict psize, size_t * restrict pcap, char ch);
+bool g_ini_strAppendCP(char ** restrict pstr, size_t * restrict psize, size_t * restrict pcap, uint16_t codePoint);
 
-uint8_t ini_str_hexToNum(char ch);
-uint16_t ini_str_codePointFromStr(const char * restrict str);
+uint8_t g_ini_strHexToNum(char ch);
+uint16_t g_ini_strCPFromStr(const char * restrict str);
 
-char * ini_escapeStr_s(const char * restrict string, intptr_t length, size_t * restrict psize);
-char * ini_escapeStr(const char * restrict string, intptr_t length);
-char * ini_unescapeStr_s(const char * restrict string, intptr_t length, size_t * restrict psize);
-char * ini_unescapeStr(const char * restrict string, intptr_t length);
-
-
+char * g_ini_escapeStr_s(const char * restrict string, intptr_t length, size_t * restrict psize);
+char * g_ini_escapeStr(const char * restrict string, intptr_t length);
+char * g_ini_unescapeStr_s(const char * restrict string, intptr_t length, size_t * restrict psize);
+char * g_ini_unescapeStr(const char * restrict string, intptr_t length);
 
 
-bool IniString_init(IniString_t * restrict istr, const char * restrict str, intptr_t length);
-IniString_t * IniString_make(const char * restrict str, intptr_t length);
-bool IniString_initEscape(IniString_t * restrict istr, const char * restrict str, intptr_t length);
-IniString_t * IniString_makeEscape(const char * restrict str, intptr_t length);
-
-void IniString_destroy(IniString_t * restrict istr);
-void IniString_free(IniString_t * restrict istr);
 
 
-bool IniValue_init(
-	IniValue_t * restrict ival,
+bool iniString_init(iniString_t * restrict istr, const char * restrict str, intptr_t length);
+iniString_t * iniString_make(const char * restrict str, intptr_t length);
+bool iniString_initEscape(iniString_t * restrict istr, const char * restrict str, intptr_t length);
+iniString_t * iniString_makeEscape(const char * restrict str, intptr_t length);
+
+void iniString_destroy(iniString_t * restrict istr);
+void iniString_free(iniString_t * restrict istr);
+
+
+bool iniValue_init(
+	iniValue_t * restrict ival,
 	const char * restrict keystr, intptr_t keylen,
 	const char * restrict valstr, intptr_t vallen
 );
-IniValue_t * IniValue_make(
+iniValue_t * iniValue_make(
 	const char * restrict keystr, intptr_t keylen,
 	const char * restrict valstr, intptr_t vallen
 );
 
-void IniValue_destroy(IniValue_t * restrict ival);
-void IniValue_free(IniValue_t * restrict ival);
+void iniValue_destroy(iniValue_t * restrict ival);
+void iniValue_free(iniValue_t * restrict ival);
 
 
-bool IniSection_init(IniSection_t * restrict isect, const char * sectname, intptr_t sectnameLen);
-IniSection_t * IniSection_make(const char * sectname, intptr_t sectnameLen);
+bool iniSection_init(iniSection_t * restrict isect, const char * sectname, intptr_t sectnameLen);
+iniSection_t * iniSection_make(const char * sectname, intptr_t sectnameLen);
 
-bool IniSection_addValue(
-	IniSection_t * restrict isect,
+bool iniSection_addValue(
+	iniSection_t * restrict isect,
 	const char * restrict keystr, intptr_t keylen,
 	const char * restrict valstr, intptr_t vallen
 );
-IniValue_t * IniSection_getValue(IniSection_t * restrict isect, const char * restrict keystr);
-bool IniSection_removeValue(IniSection_t * restrict isect, const char * restrict keystr);
+iniValue_t * iniSection_getValue(iniSection_t * restrict isect, const char * restrict keystr);
+bool iniSection_removeValue(iniSection_t * restrict isect, const char * restrict keystr);
 
-void IniSection_destroy(IniSection_t * restrict isect);
-void IniSection_free(IniSection_t * restrict isect);
+void iniSection_destroy(iniSection_t * restrict isect);
+void iniSection_free(iniSection_t * restrict isect);
 
 
 bool ini_init(ini_t * restrict idata);
 ini_t * ini_make(void);
 
 bool ini_addSection(ini_t * restrict idata, const char * restrict secstr, intptr_t seclen);
-IniSection_t * ini_getSection(ini_t * restrict idata, const char * restrict secstr);
+iniSection_t * ini_getSection(ini_t * restrict idata, const char * restrict secstr);
 bool ini_removeSection(ini_t * restrict idata, const char * restrict secstr);
 
-IniE_t ini_checkData(const char * restrict string, intptr_t length);
-IniE_t ini_checkFile(const char * restrict fileName);
+iniErr_t ini_checkData(const char * restrict string, intptr_t length);
+iniErr_t ini_checkFile(const char * restrict fileName);
 
-IniE_t ini_initData(const char * restrict string, intptr_t length, ini_t * restrict pini);
-IniE_t ini_initFile(const char * restrict fileName, ini_t * restrict pini);
+iniErr_t ini_initData(const char * restrict string, intptr_t length, ini_t * restrict pini);
+iniErr_t ini_initFile(const char * restrict fileName, ini_t * restrict pini);
 
 void ini_destroy(ini_t * restrict pini);
 void ini_free(ini_t * restrict pini);

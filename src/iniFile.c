@@ -5,7 +5,7 @@
 #include <string.h>
 
 
-bool ini_str_appendCh(char ** restrict pstr, size_t * restrict psize, size_t * restrict pcap, char ch)
+bool g_ini_strAppendCh(char ** restrict pstr, size_t * restrict psize, size_t * restrict pcap, char ch)
 {
 	assert(pstr  != NULL);
 	assert(psize != NULL);
@@ -28,7 +28,7 @@ bool ini_str_appendCh(char ** restrict pstr, size_t * restrict psize, size_t * r
 
 	return true;
 }
-bool ini_str_appendCP(char ** restrict pstr, size_t * restrict psize, size_t * restrict pcap, uint16_t codePoint)
+bool g_ini_strAppendCP(char ** restrict pstr, size_t * restrict psize, size_t * restrict pcap, uint16_t codePoint)
 {
 	assert(pstr  != NULL);
 	assert(psize != NULL);
@@ -41,35 +41,35 @@ bool ini_str_appendCP(char ** restrict pstr, size_t * restrict psize, size_t * r
 
 	if (codePoint <= 0x7F)
 	{
-		return ini_str_appendCh(pstr, psize, pcap, (char)codePoint);
+		return g_ini_strAppendCh(pstr, psize, pcap, (char)codePoint);
 	}
 	else if (codePoint <= 0x07FF)
 	{
-		if (!ini_str_appendCh(pstr, psize, pcap, (char)(0xC0 | ((codePoint >> 6) & 0x1F))))
+		if (!g_ini_strAppendCh(pstr, psize, pcap, (char)(0xC0 | ((codePoint >> 6) & 0x1F))))
 		{
 			return false;
 		}
-		return ini_str_appendCh(pstr, psize, pcap, (char)(0x80 | (codePoint & 0x3F)));
+		return g_ini_strAppendCh(pstr, psize, pcap, (char)(0x80 | (codePoint & 0x3F)));
 	}
 	else /*if (codePoint <= 0xFFFF)*/
 	{
-		if (!ini_str_appendCh(pstr, psize, pcap, (char)(0xE0 | ((codePoint >> 12) & 0x0F))))
+		if (!g_ini_strAppendCh(pstr, psize, pcap, (char)(0xE0 | ((codePoint >> 12) & 0x0F))))
 		{
 			return false;
 		}
-		if (!ini_str_appendCh(pstr, psize, pcap, (char)(0x80 | ((codePoint >> 6) & 0x3F))))
+		if (!g_ini_strAppendCh(pstr, psize, pcap, (char)(0x80 | ((codePoint >> 6) & 0x3F))))
 		{
 			return false;
 		}
-		return ini_str_appendCh(pstr, psize, pcap, (char)(0x80 | (codePoint & 0x3F)));
+		return g_ini_strAppendCh(pstr, psize, pcap, (char)(0x80 | (codePoint & 0x3F)));
 	}
 }
 
-uint8_t ini_str_hexToNum(char ch)
+uint8_t g_ini_strHexToNum(char ch)
 {
 	return ((ch >= '0') && (ch <= '9')) ? (uint8_t)(ch - '0') : ((ch >= 'A') && (ch <= 'F')) ? (uint8_t)(ch - 'A' + 10) : 0xFF;
 }
-uint16_t ini_str_codePointFromStr(const char * restrict str)
+uint16_t g_ini_strCPFromStr(const char * restrict str)
 {
 	assert(str != NULL);
 
@@ -78,7 +78,7 @@ uint16_t ini_str_codePointFromStr(const char * restrict str)
 	{
 		cp <<= 4;
 		cp &= 0xFFF0;
-		uint16_t res = (uint16_t)ini_str_hexToNum(str[i]);
+		uint16_t res = (uint16_t)g_ini_strHexToNum(str[i]);
 		if (res > 0x0F)
 		{
 			return FORBIDDEN_CODEPOINT;
@@ -89,7 +89,7 @@ uint16_t ini_str_codePointFromStr(const char * restrict str)
 	return cp;
 }
 
-char * ini_escapeStr_s(const char * restrict string, intptr_t length, size_t * restrict psize)
+char * g_ini_escapeStr_s(const char * restrict string, intptr_t length, size_t * restrict psize)
 {
 	assert(string != NULL);
 	assert(psize  != NULL);
@@ -136,7 +136,7 @@ char * ini_escapeStr_s(const char * restrict string, intptr_t length, size_t * r
 					++string;
 					if ((string != end) && ((end - string) >= 4))
 					{
-						if (!ini_str_appendCP(&estr, &estrSize, &estrCap, ini_str_codePointFromStr(string)))
+						if (!g_ini_strAppendCP(&estr, &estrSize, &estrCap, g_ini_strCPFromStr(string)))
 						{
 							free(estr);
 							return NULL;
@@ -176,7 +176,7 @@ char * ini_escapeStr_s(const char * restrict string, intptr_t length, size_t * r
 							break;
 						}
 					}
-					if (!ini_str_appendCh(&estr, &estrSize, &estrCap, appendable))
+					if (!g_ini_strAppendCh(&estr, &estrSize, &estrCap, appendable))
 					{
 						free(estr);
 						return NULL;
@@ -187,7 +187,7 @@ char * ini_escapeStr_s(const char * restrict string, intptr_t length, size_t * r
 		}
 		else
 		{
-			if (!ini_str_appendCh(&estr, &estrSize, &estrCap, *string))
+			if (!g_ini_strAppendCh(&estr, &estrSize, &estrCap, *string))
 			{
 				free(estr);
 				return NULL;
@@ -197,7 +197,7 @@ char * ini_escapeStr_s(const char * restrict string, intptr_t length, size_t * r
 	}
 
 	// Lisab null-terminaatori sõne lõppu
-	if (!ini_str_appendCh(&estr, &estrSize, &estrCap, '\0'))
+	if (!g_ini_strAppendCh(&estr, &estrSize, &estrCap, '\0'))
 	{
 		free(estr);
 		return NULL;
@@ -215,12 +215,12 @@ char * ini_escapeStr_s(const char * restrict string, intptr_t length, size_t * r
 	*psize = estrSize;
 	return estr;
 }
-char * ini_escapeStr(const char * restrict string, intptr_t length)
+char * g_ini_escapeStr(const char * restrict string, intptr_t length)
 {
 	size_t sz;
-	return ini_escapeStr_s(string, length, &sz);
+	return g_ini_escapeStr_s(string, length, &sz);
 }
-char * ini_unescapeStr_s(const char * restrict string, intptr_t length, size_t * restrict psize)
+char * g_ini_unescapeStr_s(const char * restrict string, intptr_t length, size_t * restrict psize)
 {
 	assert(string != NULL);
 	assert(psize  != NULL);
@@ -267,8 +267,8 @@ char * ini_unescapeStr_s(const char * restrict string, intptr_t length, size_t *
 
 		if (appendable != 0)
 		{
-			if (!ini_str_appendCh(&estr, &estrSize, &estrCap, '\\') ||
-				!ini_str_appendCh(&estr, &estrSize, &estrCap, appendable))
+			if (!g_ini_strAppendCh(&estr, &estrSize, &estrCap, '\\') ||
+				!g_ini_strAppendCh(&estr, &estrSize, &estrCap, appendable))
 			{
 				free(estr);
 				return NULL;
@@ -276,7 +276,7 @@ char * ini_unescapeStr_s(const char * restrict string, intptr_t length, size_t *
 		}
 		else
 		{
-			if (!ini_str_appendCh(&estr, &estrSize, &estrCap, *string))
+			if (!g_ini_strAppendCh(&estr, &estrSize, &estrCap, *string))
 			{
 				free(estr);
 				return NULL;
@@ -285,7 +285,7 @@ char * ini_unescapeStr_s(const char * restrict string, intptr_t length, size_t *
 	}
 
 	// Lisab null-terminaatori sõne lõppu
-	if (!ini_str_appendCh(&estr, &estrSize, &estrCap, '\0'))
+	if (!g_ini_strAppendCh(&estr, &estrSize, &estrCap, '\0'))
 	{
 		free(estr);
 		return NULL;
@@ -303,16 +303,16 @@ char * ini_unescapeStr_s(const char * restrict string, intptr_t length, size_t *
 	*psize = estrSize;
 	return estr;
 }
-char * ini_unescapeStr(const char * restrict string, intptr_t length)
+char * g_ini_unescapeStr(const char * restrict string, intptr_t length)
 {
 	size_t sz;
-	return ini_unescapeStr_s(string, length, &sz);
+	return g_ini_unescapeStr_s(string, length, &sz);
 }
 
 
 
 
-bool IniString_init(IniString_t * restrict istr, const char * restrict str, intptr_t length)
+bool iniString_init(iniString_t * restrict istr, const char * restrict str, intptr_t length)
 {
 	assert(istr != NULL);
 
@@ -333,21 +333,21 @@ bool IniString_init(IniString_t * restrict istr, const char * restrict str, intp
 	istr->len = realLen;
 	return true;
 }
-IniString_t * IniString_make(const char * restrict str, intptr_t length)
+iniString_t * iniString_make(const char * restrict str, intptr_t length)
 {
-	IniString_t * mem = malloc(sizeof(IniString_t));
+	iniString_t * mem = malloc(sizeof(iniString_t));
 	if (mem == NULL)
 	{
 		return NULL;
 	}
-	else if (!IniString_init(mem, str, length))
+	else if (!iniString_init(mem, str, length))
 	{
 		free(mem);
 		return NULL;
 	}
 	return mem;
 }
-bool IniString_initEscape(IniString_t * restrict istr, const char * restrict str, intptr_t length)
+bool iniString_initEscape(iniString_t * restrict istr, const char * restrict str, intptr_t length)
 {
 	assert(istr != NULL);
 	if (str == NULL)
@@ -355,7 +355,7 @@ bool IniString_initEscape(IniString_t * restrict istr, const char * restrict str
 		str = "";
 	}
 
-	if ((istr->str = ini_escapeStr_s(str, length, &istr->len)) == NULL)
+	if ((istr->str = g_ini_escapeStr_s(str, length, &istr->len)) == NULL)
 	{
 		return false;
 	}
@@ -363,14 +363,14 @@ bool IniString_initEscape(IniString_t * restrict istr, const char * restrict str
 
 	return true;
 }
-IniString_t * IniString_makeEscape(const char * restrict str, intptr_t length)
+iniString_t * iniString_makeEscape(const char * restrict str, intptr_t length)
 {
-	IniString_t * mem = malloc(sizeof(IniString_t));
+	iniString_t * mem = malloc(sizeof(iniString_t));
 	if (mem == NULL)
 	{
 		return NULL;
 	}
-	else if (!IniString_initEscape(mem, str, length))
+	else if (!iniString_initEscape(mem, str, length))
 	{
 		free(mem);
 		return NULL;
@@ -378,7 +378,7 @@ IniString_t * IniString_makeEscape(const char * restrict str, intptr_t length)
 	return mem;
 }
 
-void IniString_destroy(IniString_t * restrict istr)
+void iniString_destroy(iniString_t * restrict istr)
 {
 	assert(istr != NULL);
 	if (istr->str != NULL)
@@ -387,44 +387,44 @@ void IniString_destroy(IniString_t * restrict istr)
 		istr->str = NULL;
 	}
 }
-void IniString_free(IniString_t * restrict istr)
+void iniString_free(iniString_t * restrict istr)
 {
 	assert(istr != NULL);
-	IniString_destroy(istr);
+	iniString_destroy(istr);
 	free(istr);
 }
 
 
-bool IniValue_init(
-	IniValue_t * restrict ival,
+bool iniValue_init(
+	iniValue_t * restrict ival,
 	const char * restrict keystr, intptr_t keylen,
 	const char * restrict valstr, intptr_t vallen
 )
 {
 	assert(ival != NULL);
 	
-	if (!IniString_init(&ival->key, keystr, keylen))
+	if (!iniString_init(&ival->key, keystr, keylen))
 	{
 		return false;
 	}
-	else if (!IniString_init(&ival->value, valstr, vallen))
+	else if (!iniString_init(&ival->value, valstr, vallen))
 	{
-		IniString_destroy(&ival->key);
+		iniString_destroy(&ival->key);
 		return false;
 	}
 	return true;
 }
-IniValue_t * IniValue_make(
+iniValue_t * iniValue_make(
 	const char * restrict keystr, intptr_t keylen,
 	const char * restrict valstr, intptr_t vallen
 )
 {
-	IniValue_t * mem = malloc(sizeof(IniValue_t));
+	iniValue_t * mem = malloc(sizeof(iniValue_t));
 	if (mem == NULL)
 	{
 		return NULL;
 	}
-	else if (!IniValue_init(mem, keystr, keylen, valstr, vallen))
+	else if (!iniValue_init(mem, keystr, keylen, valstr, vallen))
 	{
 		free(mem);
 		return NULL;
@@ -433,25 +433,25 @@ IniValue_t * IniValue_make(
 	return mem;
 }
 
-void IniValue_destroy(IniValue_t * restrict ival)
+void iniValue_destroy(iniValue_t * restrict ival)
 {
 	assert(ival != NULL);
-	IniString_destroy(&ival->key);
-	IniString_destroy(&ival->value);
+	iniString_destroy(&ival->key);
+	iniString_destroy(&ival->value);
 }
-void IniValue_free(IniValue_t * restrict ival)
+void iniValue_free(iniValue_t * restrict ival)
 {
 	assert(ival != NULL);
-	IniValue_destroy(ival);
+	iniValue_destroy(ival);
 	free(ival);
 }
 
 
-bool IniSection_init(IniSection_t * restrict isect, const char * sectname, intptr_t sectnameLen)
+bool iniSection_init(iniSection_t * restrict isect, const char * sectname, intptr_t sectnameLen)
 {
 	assert(isect != NULL);
 
-	if (!IniString_init(&isect->section, sectname, sectnameLen))
+	if (!iniString_init(&isect->section, sectname, sectnameLen))
 	{
 		return false;
 	}
@@ -462,20 +462,20 @@ bool IniSection_init(IniSection_t * restrict isect, const char * sectname, intpt
 
 	if (!hashMap_init(&isect->valueMap, 1))
 	{
-		IniString_destroy(&isect->section);
+		iniString_destroy(&isect->section);
 		return false;
 	}
 
 	return true;
 }
-IniSection_t * IniSection_make(const char * sectname, intptr_t sectnameLen)
+iniSection_t * iniSection_make(const char * sectname, intptr_t sectnameLen)
 {
-	IniSection_t * mem = malloc(sizeof(IniSection_t));
+	iniSection_t * mem = malloc(sizeof(iniSection_t));
 	if (mem == NULL)
 	{
 		return NULL;
 	}
-	else if (!IniSection_init(mem, sectname, sectnameLen))
+	else if (!iniSection_init(mem, sectname, sectnameLen))
 	{
 		free(mem);
 		return NULL;
@@ -484,8 +484,8 @@ IniSection_t * IniSection_make(const char * sectname, intptr_t sectnameLen)
 	return mem;
 }
 
-bool IniSection_addValue(
-	IniSection_t * restrict isect,
+bool iniSection_addValue(
+	iniSection_t * restrict isect,
 	const char * restrict keystr, intptr_t keylen,
 	const char * restrict valstr, intptr_t vallen
 )
@@ -496,7 +496,7 @@ bool IniSection_addValue(
 	{
 		// Reallocate memory
 		size_t newcap = (isect->numValues + 1) * 2;
-		IniValue_t ** newmem = realloc(isect->values, sizeof(IniValue_t *) * newcap);
+		iniValue_t ** newmem = realloc(isect->values, sizeof(iniValue_t *) * newcap);
 		if (newmem == NULL)
 		{
 			return false;
@@ -511,7 +511,7 @@ bool IniSection_addValue(
 		isect->maxValues = newcap;
 	}
 
-	IniValue_t * val = IniValue_make(keystr, keylen, valstr, vallen);
+	iniValue_t * val = iniValue_make(keystr, keylen, valstr, vallen);
 	if (val == NULL)
 	{
 		return false;
@@ -519,7 +519,7 @@ bool IniSection_addValue(
 
 	if (!hashMap_insert(&isect->valueMap, val->key.str, val))
 	{
-		IniValue_free(val);
+		iniValue_free(val);
 		return false;
 	}
 
@@ -530,7 +530,7 @@ bool IniSection_addValue(
 
 	return true;
 }
-IniValue_t * IniSection_getValue(IniSection_t * restrict isect, const char * restrict keystr)
+iniValue_t * iniSection_getValue(iniSection_t * restrict isect, const char * restrict keystr)
 {
 	assert(isect  != NULL);
 	assert(keystr != NULL);
@@ -542,12 +542,12 @@ IniValue_t * IniSection_getValue(IniSection_t * restrict isect, const char * res
 	}
 	return node->value;
 }
-bool IniSection_removeValue(IniSection_t * restrict isect, const char * restrict keystr)
+bool iniSection_removeValue(iniSection_t * restrict isect, const char * restrict keystr)
 {
 	assert(isect  != NULL);
 	assert(keystr != NULL);
 
-	IniValue_t * val = hashMap_remove(&isect->valueMap, keystr);
+	iniValue_t * val = hashMap_remove(&isect->valueMap, keystr);
 	if (val == NULL)
 	{
 		return false;
@@ -558,22 +558,22 @@ bool IniSection_removeValue(IniSection_t * restrict isect, const char * restrict
 	{
 		--isect->numValues;
 	}
-	IniValue_free(val);
+	iniValue_free(val);
 	return true;
 }
 
-void IniSection_destroy(IniSection_t * restrict isect)
+void iniSection_destroy(iniSection_t * restrict isect)
 {
 	assert(isect != NULL);
 
-	IniString_destroy(&isect->section);
+	iniString_destroy(&isect->section);
 	if (isect->values != NULL)
 	{
 		for (size_t i = 0; i < isect->numValues; ++i)
 		{
 			if (isect->values[i] != NULL)
 			{
-				IniValue_free(isect->values[i]);
+				iniValue_free(isect->values[i]);
 			}
 		}
 		free(isect->values);
@@ -581,10 +581,10 @@ void IniSection_destroy(IniSection_t * restrict isect)
 	}
 	hashMap_destroy(&isect->valueMap);
 }
-void IniSection_free(IniSection_t * restrict isect)
+void iniSection_free(iniSection_t * restrict isect)
 {
 	assert(isect != NULL);
-	IniSection_destroy(isect);
+	iniSection_destroy(isect);
 	free(isect);
 }
 
@@ -633,7 +633,7 @@ bool ini_addSection(ini_t * restrict idata, const char * restrict secstr, intptr
 	if (idata->numSections >= idata->maxSections)
 	{
 		size_t newcap = (idata->numSections + 1) * 2;
-		IniSection_t ** newmem = realloc(idata->sections, sizeof(IniSection_t *) * newcap);
+		iniSection_t ** newmem = realloc(idata->sections, sizeof(iniSection_t *) * newcap);
 		if (newmem == NULL)
 		{
 			return false;
@@ -648,7 +648,7 @@ bool ini_addSection(ini_t * restrict idata, const char * restrict secstr, intptr
 		idata->maxSections = newcap;
 	}
 
-	IniSection_t * sec = IniSection_make(secstr, seclen);
+	iniSection_t * sec = iniSection_make(secstr, seclen);
 	if (sec == NULL)
 	{
 		return false;
@@ -656,7 +656,7 @@ bool ini_addSection(ini_t * restrict idata, const char * restrict secstr, intptr
 
 	if (!hashMap_insert(&idata->sectionMap, sec->section.str, sec))
 	{
-		IniSection_free(sec);
+		iniSection_free(sec);
 		return false;
 	}
 
@@ -666,7 +666,7 @@ bool ini_addSection(ini_t * restrict idata, const char * restrict secstr, intptr
 
 	return true;
 }
-IniSection_t * ini_getSection(ini_t * restrict idata, const char * restrict secstr)
+iniSection_t * ini_getSection(ini_t * restrict idata, const char * restrict secstr)
 {
 	assert(idata  != NULL);
 	assert(secstr != NULL);
@@ -683,7 +683,7 @@ bool ini_removeSection(ini_t * restrict idata, const char * restrict secstr)
 	assert(idata  != NULL);
 	assert(secstr != NULL);
 
-	IniSection_t * val = ini_getSection(idata, secstr);
+	iniSection_t * val = ini_getSection(idata, secstr);
 	if (val == NULL)
 	{
 		return false;
@@ -694,11 +694,11 @@ bool ini_removeSection(ini_t * restrict idata, const char * restrict secstr)
 	{
 		--idata->numSections;
 	}
-	IniSection_free(val);
+	iniSection_free(val);
 	return true;
 }
 
-IniE_t ini_checkData(const char * restrict string, intptr_t length)
+iniErr_t ini_checkData(const char * restrict string, intptr_t length)
 {
 	assert(string != NULL);
 
@@ -736,7 +736,7 @@ IniE_t ini_checkData(const char * restrict string, intptr_t length)
 					++string;
 					if (string == end)
 					{
-						return IniE_ESCAPE;
+						return inieESCAPE;
 					}
 					continue;
 				}
@@ -749,7 +749,7 @@ IniE_t ini_checkData(const char * restrict string, intptr_t length)
 			}
 			if (!found)
 			{
-				return IniE_SECTION;
+				return inieSECTION;
 			}
 			for (; string != end; ++string)
 			{
@@ -770,7 +770,7 @@ IniE_t ini_checkData(const char * restrict string, intptr_t length)
 					++string;
 					if (string == end)
 					{
-						return IniE_ESCAPE;
+						return inieESCAPE;
 					}
 					continue;
 				}
@@ -794,12 +794,12 @@ IniE_t ini_checkData(const char * restrict string, intptr_t length)
 				}
 				else
 				{
-					return IniE_VALUE;
+					return inieVALUE;
 				}
 			}
 			if (found == false)
 			{
-				return IniE_VALUE;
+				return inieVALUE;
 			}
 			for (; string != end; ++string)
 			{
@@ -819,7 +819,7 @@ IniE_t ini_checkData(const char * restrict string, intptr_t length)
 						++string;
 						if (string == end)
 						{
-							return IniE_ESCAPE;
+							return inieESCAPE;
 						}
 						continue;
 					}
@@ -832,7 +832,7 @@ IniE_t ini_checkData(const char * restrict string, intptr_t length)
 				}
 				if (found == false)
 				{
-					return IniE_QUOTE;
+					return inieQUOTE;
 				}
 			}
 			else
@@ -844,7 +844,7 @@ IniE_t ini_checkData(const char * restrict string, intptr_t length)
 						++string;
 						if (string == end)
 						{
-							return IniE_ESCAPE;
+							return inieESCAPE;
 						}
 						continue;
 					}
@@ -858,9 +858,9 @@ IniE_t ini_checkData(const char * restrict string, intptr_t length)
 		}
 	}
 	
-	return IniE_OK;
+	return inieOK;
 }
-IniE_t ini_checkFile(const char * restrict fileName)
+iniErr_t ini_checkFile(const char * restrict fileName)
 {
 	assert(fileName != NULL);
 	
@@ -869,14 +869,14 @@ IniE_t ini_checkFile(const char * restrict fileName)
 	
 	if (str == NULL)
 	{
-		return IniE_MEM;
+		return inieMEM;
 	}
-	IniE_t code = ini_checkData(str, (intptr_t)(sz - 1));
+	iniErr_t code = ini_checkData(str, (intptr_t)(sz - 1));
 	free(str);
 	return code;
 }
 
-IniE_t ini_initData(const char * restrict string, intptr_t length, ini_t * restrict pini)
+iniErr_t ini_initData(const char * restrict string, intptr_t length, ini_t * restrict pini)
 {
 	assert(string != NULL);
 	assert(pini != NULL);
@@ -884,15 +884,15 @@ IniE_t ini_initData(const char * restrict string, intptr_t length, ini_t * restr
 	size_t realLen = (length == -1) ? strlen(string) : strnlen_s(string, (size_t)length);
 
 	// Check
-	IniE_t code = ini_checkData(string, (intptr_t)realLen);
-	if (code != IniE_OK)
+	iniErr_t code = ini_checkData(string, (intptr_t)realLen);
+	if (code != inieOK)
 	{
 		return code;
 	}
 
 	if (!ini_init(pini))
 	{
-		return IniE_MEM;
+		return inieMEM;
 	}
 
 	// Parse
@@ -927,7 +927,7 @@ IniE_t ini_initData(const char * restrict string, intptr_t length, ini_t * restr
 					++secend;
 					if (secend == end)
 					{
-						return IniE_ESCAPE;
+						return inieESCAPE;
 					}
 					continue;
 				}
@@ -937,7 +937,7 @@ IniE_t ini_initData(const char * restrict string, intptr_t length, ini_t * restr
 					if (!ini_addSection(pini, string, secend - string))
 					{
 						ini_destroy(pini);
-						return IniE_MEM;
+						return inieMEM;
 					}
 
 					// Go on
@@ -959,7 +959,7 @@ IniE_t ini_initData(const char * restrict string, intptr_t length, ini_t * restr
 					if (string == end)
 					{
 						ini_destroy(pini);
-						return IniE_ESCAPE;
+						return inieESCAPE;
 					}
 					continue;
 				}
@@ -1001,7 +1001,7 @@ IniE_t ini_initData(const char * restrict string, intptr_t length, ini_t * restr
 						if (string == end)
 						{
 							ini_destroy(pini);
-							return IniE_ESCAPE;
+							return inieESCAPE;
 						}
 						continue;
 					}
@@ -1023,7 +1023,7 @@ IniE_t ini_initData(const char * restrict string, intptr_t length, ini_t * restr
 						if (string == end)
 						{
 							ini_destroy(pini);
-							return IniE_ESCAPE;
+							return inieESCAPE;
 						}
 						continue;
 					}
@@ -1049,18 +1049,18 @@ IniE_t ini_initData(const char * restrict string, intptr_t length, ini_t * restr
 			}
 
 			// Get current section
-			IniSection_t * cursect = pini->sections[pini->numSections - 1];
-			if (!IniSection_addValue(cursect, keystart, keyend - keystart, valstart, valend - valstart))
+			iniSection_t * cursect = pini->sections[pini->numSections - 1];
+			if (!iniSection_addValue(cursect, keystart, keyend - keystart, valstart, valend - valstart))
 			{
 				ini_destroy(pini);
-				return IniE_MEM;
+				return inieMEM;
 			}
 		}
 	}
 
-	return IniE_OK;
+	return inieOK;
 }
-IniE_t ini_initFile(const char * restrict fileName, ini_t * restrict pini)
+iniErr_t ini_initFile(const char * restrict fileName, ini_t * restrict pini)
 {
 	assert(fileName != NULL);
 	assert(pini != NULL);
@@ -1069,10 +1069,10 @@ IniE_t ini_initFile(const char * restrict fileName, ini_t * restrict pini)
 	char * str = fhelper_read(fileName, &sz);
 	if (str == NULL)
 	{
-		return IniE_MEM;
+		return inieMEM;
 	}
 
-	IniE_t code = ini_initData(str, (intptr_t)(sz - 1), pini);
+	iniErr_t code = ini_initData(str, (intptr_t)(sz - 1), pini);
 	free(str);
 	return code;
 }
@@ -1085,7 +1085,7 @@ void ini_destroy(ini_t * restrict pini)
 		{
 			if (pini->sections[i] != NULL)
 			{
-				IniSection_free(pini->sections[i]);
+				iniSection_free(pini->sections[i]);
 			}
 		}
 		free(pini->sections);

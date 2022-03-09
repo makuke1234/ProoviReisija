@@ -15,21 +15,21 @@ int main(void)
 {
 	setlib("ini_escape");
 
-	testEsc("asdasdffsgjfgjDSDDFDFaksdj\u2191", "asdasdffsgjfgjDSDDFDFaksdj\u2191", &ini_escapeStr);
-	testEsc("asdasd", "asdasd", &ini_unescapeStr);
+	testEsc("asdasdffsgjfgjDSDDFDFaksdj\u2191", "asdasdffsgjfgjDSDDFDFaksdj\u2191", &g_ini_escapeStr);
+	testEsc("asdasd", "asdasd", &g_ini_unescapeStr);
 
-	testEsc("Hello world\\n!", "Hello world\n!", &ini_escapeStr);
-	testEsc("Hello world\n!", "Hello world\\n!", &ini_unescapeStr);
-	testEsc("Hello world\\x0020\\n!", "Hello world \n!", &ini_escapeStr);
-	testEsc("Hello world\\x2140\\n!", "Hello world\u2140\n!", &ini_escapeStr);
-	testEsc("Hello world\\x2141\\n!", "Hello world\u2141\n!", &ini_escapeStr);
+	testEsc("Hello world\\n!", "Hello world\n!", &g_ini_escapeStr);
+	testEsc("Hello world\n!", "Hello world\\n!", &g_ini_unescapeStr);
+	testEsc("Hello world\\x0020\\n!", "Hello world \n!", &g_ini_escapeStr);
+	testEsc("Hello world\\x2140\\n!", "Hello world\u2140\n!", &g_ini_escapeStr);
+	testEsc("Hello world\\x2141\\n!", "Hello world\u2141\n!", &g_ini_escapeStr);
 
 	uint16_t value;
-	value = ini_str_codePointFromStr("2191");
+	value = g_ini_strCPFromStr("2191");
 	test(value == 0x2191, "Expected 0x2191, got 0x%X!", value);
 
-	testEsc("Hello world\\x2191\\n!", "Hello world\u2191\n!", &ini_escapeStr);
-	testEsc("Hello world\u2191\n!", "Hello world\u2191\\n!", &ini_unescapeStr);
+	testEsc("Hello world\\x2191\\n!", "Hello world\u2191\n!", &g_ini_escapeStr);
+	testEsc("Hello world\u2191\n!", "Hello world\u2191\\n!", &g_ini_unescapeStr);
 
 	return 0;
 }
