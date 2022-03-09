@@ -1,5 +1,6 @@
 #include "iniFile.h"
 #include "fileHelper.h"
+#include "logger.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -1102,6 +1103,8 @@ iniErr_t ini_initFile(const char * restrict fileName, ini_t * restrict pini)
 	{
 		return inieMEM;
 	}
+
+	writeLogger("File contents: %s", str);
 
 	iniErr_t code = ini_initData(str, (intptr_t)(sz - 1), pini);
 	free(str);

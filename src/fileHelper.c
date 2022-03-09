@@ -1,4 +1,5 @@
 #include "fileHelper.h"
+#include "logger.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,18 +25,23 @@ char * fhelper_read(const char * restrict fileName, size_t * restrict resultLeng
 	FILE * file = fopen(fileName, "r");
 	if (file == NULL)
 	{
+		writeLogger("Error opening file!");
 		return NULL;
 	}
 
+	writeLogger("File open");
+
 	fseek(file, 0, SEEK_END);
 	long ftell_res = ftell(file);
-	if (ftell_res == -1)
+	if (ftell_res == -1L)
 	{
 		fclose(file);
 		return NULL;
 	}
 	size_t length = (size_t)ftell_res;
 	rewind(file);
+
+	writeLogger("File rewund, size %zu characters", length);
 
 	char * content = malloc(length + 1);
 	if (content == NULL)
@@ -45,6 +51,9 @@ char * fhelper_read(const char * restrict fileName, size_t * restrict resultLeng
 	}
 	size_t readBytes = fread(content, 1, length, file);
 	fclose(file);
+
+	writeLogger("Read %zu bytes, file closed", readBytes);
+
 	if (readBytes < length)
 	{
 		char * newmem = realloc(content, readBytes + 1);
@@ -53,7 +62,13 @@ char * fhelper_read(const char * restrict fileName, size_t * restrict resultLeng
 			content = newmem;
 		}
 	}
+	
+	writeLogger("Resized array to fit");
+
 	content[readBytes] = '\0';
+	
+	writeLogger("Added null-terminator");
+	
 	*resultLength = readBytes + 1;
 	return content;
 }
