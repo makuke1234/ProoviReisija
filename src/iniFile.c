@@ -315,6 +315,7 @@ char * ini_unescapeStr(const char * restrict string, intptr_t length)
 bool IniString_init(IniString_t * restrict istr, const char * restrict str, intptr_t length)
 {
 	assert(istr != NULL);
+
 	if (str == NULL)
 	{
 		str = "";
@@ -495,7 +496,7 @@ bool IniSection_addValue(
 	{
 		// Reallocate memory
 		size_t newcap = (isect->numValues + 1) * 2;
-		IniValue_t ** newmem = realloc(isect->values, sizeof(IniValue_t *) * isect->numValues);
+		IniValue_t ** newmem = realloc(isect->values, sizeof(IniValue_t *) * newcap);
 		if (newmem == NULL)
 		{
 			return false;
