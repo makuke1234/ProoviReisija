@@ -15,9 +15,8 @@ static inline void setlib(const char * newlib)
 
 static inline void test(bool cond, const char * errmsg, ...)
 {
-	static int testnum = 0;
+	static int testnum = 1;
 	
-	++testnum;
 	if (cond)
 	{
 		fprintf(stderr, "[%s] Test #%d passed\n", lib, testnum);
@@ -32,12 +31,27 @@ static inline void test(bool cond, const char * errmsg, ...)
 		fprintf(stderr, "\n");
 		exit(1);
 	}
+	++testnum;
 }
 
 static inline void testn(const char * newlib, bool cond, const char * errmsg)
 {
 	setlib(newlib);
 	test(cond, errmsg);
+}
+
+static inline void testmsg(const char * msg)
+{
+	fprintf(stderr, "[%s] %s\n", lib, msg);
+}
+
+static inline void endphase()
+{
+	static int phasenum = 1;
+
+	fprintf(stderr, "[%s] Phase %d complete!\n", lib, phasenum);
+
+	++phasenum;
 }
 
 #endif
