@@ -5,15 +5,15 @@
 
 #define FILE_DATA \
 	"; last modified 1 April 2001 by John Doe\n" \
-	"[owner]\n" \
-	"name = John Doe\n" \
+	"[oWNer]\n" \
+	"naMe = John Doe\n" \
 	"organization = Acme Widgets Inc.\n" \
 	"\n" \
 	"[database]\n" \
 	"; use IP address in case network name resolution is not working\n" \
-	"server = 192.0.2.62     \n" \
-	"port = 143\n" \
-	"file = \"payroll.dat\""
+	"serveR = 192.0.2.62     \n" \
+	"Port = 143\n" \
+	"fIle = \"payroll.dat\""
 
 
 void testkv(iniSection_t * sect, const char * key, const char * value, bool outcome)
