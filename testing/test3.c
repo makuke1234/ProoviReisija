@@ -129,6 +129,8 @@ void t6(ini_t * ptr)
 	testkv(sect, "file", "payroll.dat", true);
 }
 
+
+
 int main(void)
 {
 	setlib("iniFile");
