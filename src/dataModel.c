@@ -3,6 +3,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+void point_zero(point_t * restrict p)
+{
+	assert(p != NULL);
+
+	iniString_zero(&p->id);
+}
 bool point_initStr(point_t * restrict p, const char * restrict idstr, const char * restrict valuestr)
 {
 	assert(p != NULL);
@@ -46,6 +52,14 @@ void point_free(point_t * restrict p)
 	free(p);
 }
 
+void line_zero(line_t * restrict l)
+{
+	assert(l != NULL);
+
+	iniString_zero(&l->id);
+	l->src = NULL;
+	l->dst = NULL;
+}
 bool line_initStr(
 	line_t * restrict l,
 	const hashMap_t * restrict pointmap,
@@ -92,6 +106,19 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 	assert(dm != NULL);
 	assert(filename != NULL);
 
+	*dm = (dataModel_t){
+		.numMidPoints = 0,
+		.teed         = NULL,
+		.numTeed      = 0,
+		.maxTeed      = 0
+	};
+
+	for (size_t i = 0; i < TOTAL_POINTS; ++i)
+	{
+		point_zero(&dm->points[i]);
+	}
+	hashMap_zero(&dm->ristmikud);
+
 	// Räsitabeli koostamine punktidest
 	if (!hashMap_init(&dm->ristmikud, 1))
 	{
@@ -136,6 +163,41 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 		}
 	}
 
+	// Teed
+
+	for (size_t i = 0; i < teed->numValues; ++i)
+	{
+		iniValue_t * val = teed->values[i];
+		if (val != NULL)
+		{
+			// Ruumi tagamine
+			if (dm->numTeed >= dm->maxTeed)
+			{
+				size_t newcap = (dm->numTeed + 1) * 2;
+				line_t * newmem = realloc(dm->teed, sizeof(line_t) * newcap);
+				if (newmem == NULL)
+				{
+					ini_destroy(&inifile);
+					dm_destroy(dm);
+					return dmeMEM;
+				}
+
+				dm->teed    = newmem;
+				dm->maxTeed = newcap;
+			}
+
+			line_t line;
+			if (!line_initStr(&line, &dm->ristmikud, val->key.str, val->value.str))
+			{
+				ini_destroy(&inifile);
+				dm_destroy(dm);
+				return dmeMEM;
+			}
+
+			dm->teed[dm->numTeed] = line;
+			++dm->numTeed;
+		}
+	}
 
 	// Peatused
 
@@ -152,7 +214,6 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 	}
 
 
-	dm->numMidPoints = 0;
 	for (size_t i = 0, realStops = 0; i < peatused->numValues; ++i)
 	{
 		iniValue_t * val = peatused->values[i];
@@ -208,5 +269,15 @@ void dm_destroy(dataModel_t * restrict dm)
 		}
 	}
 	hashMap_destroy(&dm->ristmikud);
+
+	if (dm->teed != NULL)
+	{
+		for (size_t i = 0; i < dm->numTeed; ++i)
+		{
+			line_destroy(&dm->teed[i]);
+		}
+		free(dm->teed);
+		dm->teed = NULL;
+	}
 }
 

@@ -17,6 +17,7 @@ typedef struct point
 
 } point_t;
 
+void point_zero(point_t * restrict p);
 bool point_initStr(point_t * restrict p, const char * restrict idstr, const char * restrict valuestr);
 point_t * point_makeStr(const char * restrict idstr, const char * restrict valuestr);
 void point_destroy(point_t * restrict p);
@@ -26,11 +27,11 @@ void point_free(point_t * restrict p);
 typedef struct line
 {
 	iniString_t id;
-
 	const point_t * src, * dst;
 
 } line_t;
 
+void line_zero(line_t * restrict l);
 bool line_initStr(
 	line_t * restrict l,
 	const hashMap_t * restrict pointmap,
@@ -57,6 +58,9 @@ typedef struct dataModel
 	size_t numMidPoints;
 
 	hashMap_t ristmikud;
+	
+	line_t * teed;
+	size_t numTeed, maxTeed;
 
 
 } dataModel_t;
