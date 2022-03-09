@@ -3,6 +3,35 @@
 
 #include <string.h>
 
+#define FILE_DATA \
+	"; last modified 1 April 2001 by John Doe\n" \
+	"[owner]\n" \
+	"name = John Doe\n" \
+	"organization = Acme Widgets Inc.\n" \
+	"\n" \
+	"[database]\n" \
+	"; use IP address in case network name resolution is not working\n" \
+	"server = 192.0.2.62     \n" \
+	"port = 143\n" \
+	"file = \"payroll.dat\""
+
+
+void testkv(IniSection_t * sect, const char * key, const char * value, bool outcome)
+{
+	IniValue_t * v = IniSection_getValue(sect, key);
+	test(outcome ? v != NULL : v == NULL, outcome ? "No key %s found!" : "Key %s found in wrong place!", key);
+	if (!outcome)
+	{
+		return;
+	}
+
+	test(strncmp(v->key.str, key, v->key.len) == 0, "Key doesn't match! Data: %s", key, v->key.str);
+	test(v->key.len == strlen(key), "Key length doesn't match! Data: %s", v->key.str);
+
+	test(strncmp(v->value.str, value, v->value.len) == 0, "Value doesn't match \"%s\"! Data: %s", value, v->value.str);
+	test(v->value.len == strlen(value), "Value length doesn't match! Data: %s", v->value.str);
+}
+
 void testData(const char * lib_, const char * data, bool pass, void (*testfunc)(ini_t * ptr))
 {
 	setlib(lib_);
@@ -27,14 +56,7 @@ void t1(ini_t * ptr)
 	IniSection_t * sect = ini_getSection(ptr, "");
 	test(sect != NULL, "No global section found!");
 
-	IniValue_t * val = IniSection_getValue(sect, "key");
-	test(val != NULL, "No expected key \"key\"!");
-
-	test(strncmp(val->key.str, "key", val->key.len) == 0, "Key doesn't match real data!");
-	test(val->key.len == 3, "Key length is incorrect!, data: %s", val->key.str);
-
-	test(strncmp(val->value.str, "value", val->value.len) == 0, "Value doesn't match real data!, data: %s", val->value.str);
-	test(val->value.len == 5, "Value length is incorrect!, data: %s", val->value.str);
+	testkv(sect, "key", "value", true);
 }
 void t2(ini_t * ptr)
 {
@@ -44,14 +66,8 @@ void t2(ini_t * ptr)
 	sect = ini_getSection(ptr, "section");
 	test(sect != NULL, "No section [section] found!");
 
-	IniValue_t * val = IniSection_getValue(sect, "key1");
-	test(val != NULL, "No expected key \"key1\"!");
-
-	test(strncmp(val->key.str, "key1", val->key.len) == 0, "Key doesn't match real data!");
-	test(val->key.len == 4, "Key length is incorrect!, data: %s", val->key.str);
-
-	test(strncmp(val->value.str, "a", val->value.len) == 0, "Value doesn't match real data!, data: %s", val->value.str);
-	test(val->value.len == 1, "Value length is incorrect!, data: %s", val->value.str);
+	testkv(sect, "key1", "a", true);
+	testkv(sect, "key2", "b", true);
 }
 void t3(ini_t * ptr)
 {
@@ -61,69 +77,54 @@ void t3(ini_t * ptr)
 	sect = ini_getSection(ptr, "section");
 	test(sect != NULL, "No section [section] found!");
 
-	IniValue_t * val = IniSection_getValue(sect, "domain");
-	test(val != NULL, "No expected key \"domain\"!");
-
-	test(strncmp(val->key.str, "domain", val->key.len) == 0, "Key doesn't match real data!");
-	test(val->key.len == 6, "Key length is incorrect!, data: %s", val->key.str);
-
-	test(strncmp(val->value.str, "wikipedia.org", val->value.len) == 0, "Value doesn't match real data!, data: %s", val->value.str);
-	test(val->value.len == 13, "Value length is incorrect!, data: %s", val->value.str);
+	testkv(sect, "domain", "wikipedia.org", true);
+	testkv(sect, "foo", "bar", false);
 
 	sect = ini_getSection(ptr, "section.subsection");
 	test(sect != NULL, "No section [section.subsection] found!");
 
-	val = IniSection_getValue(sect, "foo");
-	test(val != NULL, "No excpected key \"foo\"!");
-
-	test(strncmp(val->key.str, "foo", val->key.len) == 0, "Key doesn't match real data!");
-	test(val->key.len == 3, "Key length is incorrect!, data: %s", val->key.str);
-
-	test(strncmp(val->value.str, "bar", val->value.len) == 0, "Value doesn't match real data!, data: %s", val->value.str);
-	test(val->value.len == 3, "Value length is incorrect!, data: %s", val->value.str);
+	testkv(sect, "foo", "bar", true);
+	testkv(sect, "domain", "wikipedia.org", false);
 }
 void t4(ini_t * ptr)
 {
 	IniSection_t * sect = ini_getSection(ptr, "");
 	test(sect != NULL, "No global section found!");
 
-	IniValue_t * val = IniSection_getValue(sect, "var");
-	test(val != NULL, "No expected key \"var\"!");
-
-	test(strncmp(val->key.str, "var", val->key.len) == 0, "Key doesn't match real data!");
-	test(val->key.len == 3, "Key length is incorrect!, data: %s", val->key.str);
-
-	test(strncmp(val->value.str, "abc", val->value.len) == 0, "Value doesn't match real data!, data: %s", val->value.str);
-	test(val->value.len == 3, "Value length is incorrect!, data: %s", val->value.str);
-
-	val = IniSection_getValue(sect, "foo");
-	
-	test(strncmp(val->key.str, "foo", val->key.len) == 0, "Key doesn't match real data!");
-	test(val->key.len == 3, "Key length is incorrect!, data: %s", val->key.str);
-
-	test(strncmp(val->value.str, "bar", val->value.len) == 0, "Value doesn't match real data!, data: %s", val->value.str);
-	test(val->value.len == 3, "Value length is incorrect!, data: %s", val->value.str);
+	testkv(sect, "var", "abc", true);
+	testkv(sect, "foo", "bar", true);
 }
 void t5(ini_t * ptr)
 {
 	IniSection_t * sect = ini_getSection(ptr, "");
 	test(sect != NULL, "No global section found!");
 
-	IniValue_t * val = IniSection_getValue(sect, "key");
-	test(val == NULL, "Key \"key\" found in wrong section!");
+	testkv(sect, "key", "domain", false);
 
 	sect = ini_getSection(ptr, "section");
 	test(sect != NULL, "No section \"section\" found!");
 
-	val = IniSection_getValue(sect, "key");
-	test(val != NULL, "No key \"key\" found!");
+	testkv(sect, "key", "domain", true);
+}
+void t6(ini_t * ptr)
+{
+	IniSection_t * sect = ini_getSection(ptr, "");
+	test(sect != NULL, "No global section found!");
 
+	sect = ini_getSection(ptr, "owner");
+	test(sect != NULL, "No \"owner\" section!");
 
-	test(strncmp(val->key.str, "key", val->key.len) == 0, "Key doesn't match!");
-	test(val->key.len == 3, "Key length incorrect!, data: %s", val->key.str);
+	testkv(sect, "name", "John Doe", true);
+	testkv(sect, "organization", "Acme Widgets Inc.", true);
+	testkv(sect, "server", "192.0.2.62", false);
 
-	test(strncmp(val->value.str, "domain", val->value.len) == 0, "Value doesn't match!, data: %s", val->value.str);
-	test(val->value.len == 6, "Value length incorrect!, data: %s", val->value.str);
+	sect = ini_getSection(ptr, "database");
+	test(sect != NULL, "No \"database\" section!");
+
+	testkv(sect, "name", "John Doe", false);
+	testkv(sect, "server", "192.0.2.62", true);
+	testkv(sect, "port", "143", true);
+	testkv(sect, "file", "payroll.dat", true);
 }
 
 int main(void)
@@ -137,6 +138,7 @@ int main(void)
 	testData("iniFile t4", "var = abc\t; This is an inline comment\nfoo = bar\t# This is another inline comment", true, &t4);
 	testData("iniFile t5", "[section]key = domain", true, &t5);
 	testData("iniFile tx", "[section key = domain", false, NULL);
+	testData("iniFile t6", FILE_DATA, true, &t6);
 
 	return 0;
 }
