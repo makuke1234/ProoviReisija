@@ -61,7 +61,7 @@ bulkr_impl: $(bulk_srcs)
 	$(CC) $^ -o $(TARGET).exe $(CDEFFLAGS) $(CFLAGS) $(LIB)
 
 $(TESTS)/bin/%: $(TESTS)/%.c $(objs_test)
-	$(CC) $(CDEFFLAGS) $^ -o $@ $(LIB)
+	$(CC) $(CDEFFLAGS) $^ -o $@ $(LIB) $(CFLAGSD)
 
 test: $(TESTS)/bin $(TESTBINS)
 	for test in $(TESTBINS) ; do ./$$test ; done

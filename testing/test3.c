@@ -19,16 +19,16 @@
 void testkv(IniSection_t * sect, const char * key, const char * value, bool outcome)
 {
 	IniValue_t * v = IniSection_getValue(sect, key);
-	test(outcome ? v != NULL : v == NULL, outcome ? "No key %s found!" : "Key %s found in wrong place!", key);
+	test(outcome ? (v != NULL) : (v == NULL), outcome ? "No key %s found!" : "Key %s found in wrong place!", key);
 	if (!outcome)
 	{
 		return;
 	}
-
-	test(strncmp(v->key.str, key, v->key.len) == 0, "Key doesn't match! Data: %s", key, v->key.str);
+	
+	test(v->key.str != NULL && strncmp(v->key.str, key, v->key.len) == 0, "Key doesn't match! Data: %s", key, v->key.str);
 	test(v->key.len == strlen(key), "Key length doesn't match! Data: %s", v->key.str);
 
-	test(strncmp(v->value.str, value, v->value.len) == 0, "Value doesn't match \"%s\"! Data: %s", value, v->value.str);
+	test(v->value.str != NULL && strncmp(v->value.str, value, v->value.len) == 0, "Value doesn't match \"%s\"! Data: %s", value, v->value.str);
 	test(v->value.len == strlen(value), "Value length doesn't match! Data: %s", v->value.str);
 }
 
@@ -110,6 +110,8 @@ void t6(ini_t * ptr)
 {
 	IniSection_t * sect = ini_getSection(ptr, "");
 	test(sect != NULL, "No global section found!");
+	
+	testkv(sect, "name", "John Doe", false);
 
 	sect = ini_getSection(ptr, "owner");
 	test(sect != NULL, "No \"owner\" section!");
