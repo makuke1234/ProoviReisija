@@ -49,6 +49,7 @@ void hashNodeCK_recursiveFree(hashNodeCK_t * restrict self);
 
 
 
+void hashMap_zero(hashMap_t * restrict self);
 bool hashMap_init(hashMap_t * restrict self, size_t minSize);
 hashMap_t * hashMap_make(size_t minSize);
 
@@ -63,6 +64,7 @@ void hashMap_destroy(hashMap_t * restrict self);
 void hashMap_free(hashMap_t * restrict self);
 
 
+void hashMapCK_zero(hashMap_t * restrict self);
 bool hashMapCK_init(hashMapCK_t * restrict self, size_t minSize);
 hashMapCK_t * hashMapCK_make(size_t minSize);
 

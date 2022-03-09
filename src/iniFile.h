@@ -75,6 +75,7 @@ char * g_ini_unescapeStr(const char * restrict string, intptr_t length);
 
 
 
+void iniString_zero(iniString_t * restrict pstr);
 bool iniString_init(iniString_t * restrict pstr, const char * restrict str, intptr_t length);
 iniString_t * iniString_make(const char * restrict str, intptr_t length);
 bool iniString_initEscape(iniString_t * restrict pstr, const char * restrict str, intptr_t length);

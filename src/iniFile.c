@@ -314,6 +314,15 @@ char * g_ini_unescapeStr(const char * restrict string, intptr_t length)
 
 
 
+void iniString_zero(iniString_t * restrict pstr)
+{
+	assert(pstr != NULL);
+
+	*pstr = (iniString_t){
+		.str = NULL,
+		.len = 0
+	};
+}
 bool iniString_init(iniString_t * restrict pstr, const char * restrict str, intptr_t length)
 {
 	assert(pstr != NULL);

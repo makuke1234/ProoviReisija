@@ -107,6 +107,16 @@ static inline size_t s_hashMap_findNextPrime(size_t lowerBound)
 }
 
 
+void hashMap_zero(hashMap_t * restrict self)
+{
+	assert(self != NULL);
+
+	*self = (hashMap_t){
+		.nodes    = NULL,
+		.numNodes = 0,
+		.numItems = 0
+	};
+}
 bool hashMap_init(hashMap_t * restrict self, size_t minSize)
 {
 	assert(self != NULL);
