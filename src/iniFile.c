@@ -967,38 +967,64 @@ IniE_t ini_initData(const char * restrict string, intptr_t length, ini_t * restr
 					break;
 				}
 			}
-			for (; string != end; ++string)
+			if (*valstart == '"')
 			{
-				if (*string == '\\')
+				++valstart;
+				for (; string != end; ++string)
 				{
-					++string;
-					if (string == end)
-					{
-						ini_destroy(pini);
-						return IniE_ESCAPE;
-					}
-					continue;
-				}
-				else if ((*string == ';') || (*string == '#') || (*string == '\n') || (*string == '\r'))
-				{
-					valend = string;
-					if ((*(valend - 1) == ' ') || (*(valend - 1) == '\t'))
-					{
-						--valend;
-						for (; valend != valstart; --valend)
-						{
-							if ((*valend != ' ') && (*valend != '\t'))
-							{
-								break;
-							}
-						}
-						++valend;
-					}
-					else if ((*string != ';') && (*string != '#'))
+					if (*string == '\\')
 					{
 						++string;
+						if (string == end)
+						{
+							ini_destroy(pini);
+							return IniE_ESCAPE;
+						}
+						continue;
 					}
-					break;
+					else if (*string == '"')
+					{
+						valend = string;
+						++string;
+						break;
+					}
+				}
+			}
+			else
+			{
+				for (; string != end; ++string)
+				{
+					if (*string == '\\')
+					{
+						++string;
+						if (string == end)
+						{
+							ini_destroy(pini);
+							return IniE_ESCAPE;
+						}
+						continue;
+					}
+					else if ((*string == ';') || (*string == '#') || (*string == '\n') || (*string == '\r'))
+					{
+						valend = string;
+						if ((*(valend - 1) == ' ') || (*(valend - 1) == '\t'))
+						{
+							--valend;
+							for (; valend != valstart; --valend)
+							{
+								if ((*valend != ' ') && (*valend != '\t'))
+								{
+									break;
+								}
+							}
+							++valend;
+						}
+						else if ((*string != ';') && (*string != '#'))
+						{
+							++string;
+						}
+						break;
+					}
 				}
 			}
 
