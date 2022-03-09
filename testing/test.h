@@ -45,7 +45,7 @@ static inline void testmsg(const char * msg)
 	fprintf(stderr, "[%s] %s\n", lib, msg);
 }
 
-static inline void endphase()
+static inline void endphase(void)
 {
 	static int phasenum = 1;
 
