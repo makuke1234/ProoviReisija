@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 
 bool g_ini_strAppendCh(char ** restrict pstr, size_t * restrict psize, size_t * restrict pcap, char ch)
@@ -377,6 +378,36 @@ iniString_t * iniString_makeEscape(const char * restrict str, intptr_t length)
 	}
 	return mem;
 }
+bool iniString_initEscapeLower(iniString_t * restrict pstr, const char * restrict str, intptr_t length)
+{
+	assert(pstr != NULL);
+	if (!iniString_initEscape(pstr, str, length))
+	{
+		return false;
+	}
+
+	// Convert string to lower-case
+	for (char * it = pstr->str, * end = pstr->str + pstr->len; it != end; ++it)
+	{
+		*it = (char)tolower(*it);
+	}
+
+	return true;
+}
+iniString_t * iniString_makeEscapeLower(const char * restrict str, intptr_t length)
+{
+	iniString_t * mem = malloc(sizeof(iniString_t));
+	if (mem == NULL)
+	{
+		return NULL;
+	}
+	else if (!iniString_initEscapeLower(mem, str, length))
+	{
+		free(mem);
+		return NULL;
+	}
+	return mem;
+}
 
 void iniString_destroy(iniString_t * restrict pstr)
 {
@@ -403,11 +434,11 @@ bool iniValue_init(
 {
 	assert(pval != NULL);
 	
-	if (!iniString_init(&pval->key, keystr, keylen))
+	if (!iniString_initEscapeLower(&pval->key, keystr, keylen))
 	{
 		return false;
 	}
-	else if (!iniString_init(&pval->value, valstr, vallen))
+	else if (!iniString_initEscape(&pval->value, valstr, vallen))
 	{
 		iniString_destroy(&pval->key);
 		return false;
@@ -451,7 +482,7 @@ bool iniSection_init(iniSection_t * restrict psect, const char * sectname, intpt
 {
 	assert(psect != NULL);
 
-	if (!iniString_init(&psect->section, sectname, sectnameLen))
+	if (!iniString_initEscapeLower(&psect->section, sectname, sectnameLen))
 	{
 		return false;
 	}

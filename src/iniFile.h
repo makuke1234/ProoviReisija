@@ -79,6 +79,8 @@ bool iniString_init(iniString_t * restrict pstr, const char * restrict str, intp
 iniString_t * iniString_make(const char * restrict str, intptr_t length);
 bool iniString_initEscape(iniString_t * restrict pstr, const char * restrict str, intptr_t length);
 iniString_t * iniString_makeEscape(const char * restrict str, intptr_t length);
+bool iniString_initEscapeLower(iniString_t * restrict pstr, const char * restrict str, intptr_t length);
+iniString_t * iniString_makeEscapeLower(const char * restrict str, intptr_t length);
 
 void iniString_destroy(iniString_t * restrict pstr);
 void iniString_free(iniString_t * restrict pstr);
