@@ -8,12 +8,12 @@
 void point_zero(point_t * restrict p)
 {
 	assert(p != NULL);
-
 	iniString_zero(&p->id);
 }
 bool point_initStr(point_t * restrict p, const char * restrict idstr, const char * restrict valuestr)
 {
-	assert(p != NULL);
+	assert(p        != NULL);
+	assert(valuestr != NULL);
 
 	if (!iniString_init(&p->id, idstr, -1))
 	{
@@ -28,6 +28,8 @@ bool point_initStr(point_t * restrict p, const char * restrict idstr, const char
 }
 point_t * point_makeStr(const char * restrict idstr, const char * restrict valuestr)
 {
+	assert(valuestr != NULL);
+
 	point_t * p = malloc(sizeof(point_t));
 	if (p == NULL)
 	{
@@ -50,7 +52,6 @@ void point_destroy(point_t * restrict p)
 void point_free(point_t * restrict p)
 {
 	assert(p != NULL);
-
 	point_destroy(p);
 	free(p);
 }
@@ -70,7 +71,9 @@ bool line_initStr(
 	const char * restrict valuestr
 )
 {
-	assert(l != NULL);
+	assert(l        != NULL);
+	assert(pointmap != NULL);
+	assert(valuestr != NULL);
 
 	if (!iniString_init(&l->id, idstr, -1))
 	{
@@ -105,6 +108,72 @@ bool line_initStr(
 
 	return true;
 }
+line_t * line_makeStr(
+	const hashMap_t * restrict pointmap,
+	const char * restrict idstr,
+	const char * restrict valuestr
+)
+{
+	assert(pointmap != NULL);
+	assert(valuestr != NULL);
+
+	line_t * mem = malloc(sizeof(line_t));
+	if (mem == NULL)
+	{
+		return false;
+	}
+	else if (!line_initStr(mem, pointmap, idstr, valuestr))
+	{
+		free(mem);
+		return false;
+	}
+
+	return mem;
+}
+bool line_init(
+	line_t * restrict l,
+	const char * restrict idstr,
+	const point_t * restrict src,
+	const point_t * restrict dst
+)
+{
+	assert(l   != NULL);
+	assert(src != NULL);
+	assert(dst != NULL);
+	assert(src != dst);
+
+	if (!iniString_init(&l->id, idstr, -1))
+	{
+		return false;
+	}
+	l->src = src;
+	l->dst = dst;
+
+	return true;
+}
+line_t * line_make(
+	const char * restrict idstr,
+	const point_t * restrict src,
+	const point_t * restrict dst
+)
+{
+	assert(src != NULL);
+	assert(dst != NULL);
+	assert(src != dst);
+
+	line_t * mem = malloc(sizeof(line_t));
+	if (mem == NULL)
+	{
+		return false;
+	}
+	else if (!line_init(mem, idstr, src, dst))
+	{
+		free(mem);
+		return false;
+	}
+
+	return mem;
+}
 
 void line_intersect(
 	point_t * restrict ci,
@@ -112,6 +181,10 @@ void line_intersect(
 	const line_t * restrict line
 )
 {
+	assert(ci     != NULL);
+	assert(startp != NULL);
+	assert(line   != NULL);
+
 	if (line->dx == 0)
 	{
 		ci->x = line->src->x;
@@ -144,10 +217,17 @@ void line_destroy(line_t * restrict l)
 	assert(l != NULL);
 	iniString_destroy(&l->id);
 }
+void line_free(line_t * restrict l)
+{
+	assert(l != NULL);
+	line_destroy(l);
+	free(l);
+}
+
 
 dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filename)
 {
-	assert(dm != NULL);
+	assert(dm       != NULL);
 	assert(filename != NULL);
 
 	*dm = (dataModel_t){
@@ -215,32 +295,17 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 		iniValue_t * val = teed->values[i];
 		if (val != NULL)
 		{
-			// Ruumi tagamine
-			if (dm->numTeed >= dm->maxTeed)
+			line_t * line = line_makeStr(&dm->ristmikud, val->key.str, val->value.str);
+			if ((line == NULL) || !dm_addLine(dm, line))
 			{
-				size_t newcap = (dm->numTeed + 1) * 2;
-				line_t * newmem = realloc(dm->teed, sizeof(line_t) * newcap);
-				if (newmem == NULL)
+				if (line != NULL)
 				{
-					ini_destroy(&inifile);
-					dm_destroy(dm);
-					return dmeMEM;
+					free(line);
 				}
-
-				dm->teed    = newmem;
-				dm->maxTeed = newcap;
-			}
-
-			line_t line;
-			if (!line_initStr(&line, &dm->ristmikud, val->key.str, val->value.str))
-			{
 				ini_destroy(&inifile);
 				dm_destroy(dm);
 				return dmeMEM;
 			}
-
-			dm->teed[dm->numTeed] = line;
-			++dm->numTeed;
 		}
 	}
 
@@ -301,6 +366,8 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 }
 bool dm_addStops(dataModel_t * restrict dm)
 {
+	assert(dm != NULL);
+
 	size_t totPoints = 2 + dm->numMidPoints;
 
 	for (size_t i = 0; i < totPoints; ++i)
@@ -309,12 +376,13 @@ bool dm_addStops(dataModel_t * restrict dm)
 		// Otsib lähima tee konkreetsele punktile
 		float shortestLen2;
 		point_t bestPoint;
+		line_t * tee = NULL;
 		bool pointSet = false;
 
 		for (size_t j = 0; j < dm->numTeed; ++j)
 		{
 			point_t tempPoint;
-			line_intersect(&tempPoint, p, &dm->teed[j]);
+			line_intersect(&tempPoint, p, dm->teed[j]);
 
 			float dx = tempPoint.x - p->x;
 			float dy = tempPoint.y - p->y;
@@ -326,19 +394,81 @@ bool dm_addStops(dataModel_t * restrict dm)
 
 				shortestLen2 = len2;
 				bestPoint = tempPoint;
+				tee = dm->teed[j];
 			}
 		}
 
-		if (!pointSet)
+		if (!pointSet || !iniString_copy(&bestPoint.id, &p->id))
 		{
 			return false;
 		}
+
+		// Tee "poolitamine"
+		
+		// Saadud "ideaalne" punkt lisatakse uue ristmikuna, mille id = peatuse id
+		point_t * pointmem = malloc(sizeof(point_t));
+		if (pointmem == NULL)
+		{
+			point_destroy(&bestPoint);
+			return false;
+		}
+		*pointmem = bestPoint;
+		if (!hashMap_insert(&dm->ristmikud, pointmem->id.str, pointmem))
+		{
+			point_free(pointmem);
+			return false;
+		}
+
+		line_t * linemem = line_make(pointmem->id.str, pointmem, tee->dst);
+		if (linemem == NULL)
+		{
+			return false;
+		}
+
+		// Lisatakse uus tee, mille id = peatuse id
+		if (!dm_addLine(dm, linemem))
+		{
+			line_free(linemem);
+			return false;
+		}
+		tee->dst = pointmem;
 	}
 
 	return true;
 }
+bool dm_addLine(dataModel_t * restrict dm, line_t * restrict pline)
+{
+	assert(dm    != NULL);
+	assert(pline != NULL);
+
+	if (dm->numTeed >= dm->maxTeed)
+	{
+		size_t newcap = (dm->numTeed + 1) * 2;
+		line_t ** newmem = realloc(dm->teed, sizeof(line_t *) * newcap);
+		if (newmem == NULL)
+		{
+			return false;
+		}
+
+		for (size_t i = dm->maxTeed; i < newcap; ++i)
+		{
+			newmem[i] = NULL;
+		}
+
+		dm->teed    = newmem;
+		dm->maxTeed = newcap;
+	}
+
+	dm->teed[dm->numTeed] = pline;
+	++dm->numTeed;
+
+	return true;
+}
+
 void dm_destroy(dataModel_t * restrict dm)
 {
+	assert(dm != NULL);
+
 	point_destroy(&dm->beg);
 	point_destroy(&dm->end);
 
@@ -362,7 +492,10 @@ void dm_destroy(dataModel_t * restrict dm)
 	{
 		for (size_t i = 0; i < dm->numTeed; ++i)
 		{
-			line_destroy(&dm->teed[i]);
+			if (dm->teed[i] != NULL)
+			{
+				line_free(dm->teed[i]);
+			}
 		}
 		free(dm->teed);
 		dm->teed = NULL;

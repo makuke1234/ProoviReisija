@@ -41,6 +41,22 @@ bool line_initStr(
 	const char * restrict idstr,
 	const char * restrict valuestr
 );
+line_t * line_makeStr(
+	const hashMap_t * restrict pointmap,
+	const char * restrict idstr,
+	const char * restrict valuestr
+);
+bool line_init(
+	line_t * restrict l,
+	const char * restrict idstr,
+	const point_t * restrict src,
+	const point_t * restrict dst
+);
+line_t * line_make(
+	const char * restrict idstr,
+	const point_t * restrict src,
+	const point_t * restrict dst
+);
 
 void line_intersect(
 	point_t * restrict ci,
@@ -49,6 +65,7 @@ void line_intersect(
 );
 
 void line_destroy(line_t * restrict l);
+void line_free(line_t * restrict l);
 
 
 #define MAX_MID_POINTS 10
@@ -69,9 +86,8 @@ typedef struct dataModel
 
 	hashMap_t ristmikud;
 	
-	line_t * teed;
+	line_t ** teed;
 	size_t numTeed, maxTeed;
-
 
 } dataModel_t;
 
@@ -81,11 +97,14 @@ typedef enum dmErr
 	dmeMEM,
 	dmeSECTIONS,
 	dmeSTOPS_LIMIT
+
 } dmErr_t;
 
 
 dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filename);
 bool dm_addStops(dataModel_t * restrict dm);
+bool dm_addLine(dataModel_t * restrict dm, line_t * restrict pline);
+
 void dm_destroy(dataModel_t * restrict dm);
 
 
