@@ -29,6 +29,8 @@ typedef struct line
 	iniString_t id;
 	const point_t * src, * dst;
 
+	float dx, dy, length2;
+
 } line_t;
 
 void line_zero(line_t * restrict l);

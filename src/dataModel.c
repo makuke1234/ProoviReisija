@@ -93,6 +93,10 @@ bool line_initStr(
 	l->src = n1->value;
 	l->dst = n2->value;
 
+	l->dx = l->dst->x - l->src->x;
+	l->dy = l->dst->y - l->src->y;
+	l->length2 = (l->dx * l->dx) + (l->dy * l->dy);
+
 	return true;
 }
 void line_destroy(line_t * restrict l)
