@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 void point_zero(point_t * restrict p)
 {
@@ -81,11 +82,30 @@ bool line_initStr(
 	}
 	
 	char id1[MAX_ID], id2[MAX_ID];
-	writeLogger("sscanf_s input: \"%s\"", valuestr);
-	if (sscanf_s(valuestr, "%s,%s", id1, MAX_ID, id2, MAX_ID) < 2)
+	bool found = false;
+	for (size_t i = 0, len = strlen(valuestr); i < len; ++i)
+	{
+		if (valuestr[i] == ',')
+		{
+			found = true;
+			memcpy(id1, valuestr, sizeof(char) * i);
+			id1[i] = '\0';
+
+			++i;
+			for (; i < len; ++i)
+			{
+				if ((valuestr[i] != ' ') && (valuestr[i] != '\t'))
+				{
+					break;
+				}
+			}
+			
+			memcpy(id2, &valuestr[i], sizeof(char) * (len - i + 1));
+		}
+	}
+	if (!found)
 	{
 		iniString_destroy(&l->id);
-		writeLogger("sscanf_s failed");
 		return false;
 	}
 	writeLogger("id1: \"%s\", id2: \"%s\"", id1, id2);
