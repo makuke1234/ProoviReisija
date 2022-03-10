@@ -10,7 +10,8 @@ int main(void)
 
 	dataModel_t dm;
 
-	test(dm_initDataFile(&dm, "test.ini") == dmeOK, "Data reading failed!");
+	dmErr_t code = dm_initDataFile(&dm, "test.ini");
+	test(code == dmeOK, "Data reading failed with code %d!", code);
 
 	teststr(dm.beg.id.str, "p0");
 	teststr(dm.end.id.str, "p1");
