@@ -1,5 +1,5 @@
-#ifndef DATAMODEL_H
-#define DATAMODEL_H
+#ifndef DATA_MODEL_H
+#define DATA_MODEL_H
 
 #include "iniFile.h"
 #include "hashmap.h"
@@ -24,7 +24,7 @@ point_t * point_makeStr(const char * restrict idstr, const char * restrict value
 void point_intersect(
 	point_t * restrict ci,
 	const point_t * restrict startp,
-	const point_t * restrict linep1, const point_t * restrict linep2
+	const line_t * restrict line
 );
 
 void point_destroy(point_t * restrict p);

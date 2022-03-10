@@ -1,5 +1,5 @@
-#ifndef FILEHELPER_H
-#define FILEHELPER_H
+#ifndef FILE_HELPER_H
+#define FILE_HELPER_H
 
 #include <stdint.h>
 
