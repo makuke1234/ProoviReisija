@@ -20,6 +20,13 @@ typedef struct point
 void point_zero(point_t * restrict p);
 bool point_initStr(point_t * restrict p, const char * restrict idstr, const char * restrict valuestr);
 point_t * point_makeStr(const char * restrict idstr, const char * restrict valuestr);
+
+void point_intersect(
+	point_t * restrict ci,
+	const point_t * restrict startp,
+	const point_t * restrict linep1, const point_t * restrict linep2
+);
+
 void point_destroy(point_t * restrict p);
 void point_free(point_t * restrict p);
 
@@ -77,6 +84,7 @@ typedef enum dmErr
 
 
 dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filename);
+bool dm_addStops(dataModel_t * restrict dm);
 void dm_destroy(dataModel_t * restrict dm);
 
 

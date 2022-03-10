@@ -1,4 +1,5 @@
 #include "dataModel.h"
+#include "logger.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -39,6 +40,16 @@ point_t * point_makeStr(const char * restrict idstr, const char * restrict value
 
 	return p;
 }
+
+void point_intersect(
+	point_t * restrict ci,
+	const point_t * restrict startp,
+	const point_t * restrict linep1, const point_t * restrict linep2
+)
+{
+
+}
+
 void point_destroy(point_t * restrict p)
 {
 	assert(p != NULL);
@@ -75,11 +86,14 @@ bool line_initStr(
 	}
 	
 	char id1[MAX_ID], id2[MAX_ID];
-	if (sscanf_s(valuestr, "%s, %s", id1, MAX_ID, id2, MAX_ID) < 2)
+	writeLogger("sscanf_s input: \"%s\"", valuestr);
+	if (sscanf_s(valuestr, "%s,%s", id1, MAX_ID, id2, MAX_ID) < 2)
 	{
 		iniString_destroy(&l->id);
+		writeLogger("sscanf_s failed");
 		return false;
 	}
+	writeLogger("id1: \"%s\", id2: \"%s\"", id1, id2);
 
 	const hashNode_t * n1, * n2;
 	n1 = hashMap_get(pointmap, id1);
@@ -132,6 +146,7 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 	ini_t inifile;
 	if (ini_initFile(filename, &inifile) != inieOK)
 	{
+		writeLogger("File error!");
 		return dmeMEM;
 	}
 
@@ -211,7 +226,7 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 		numStops += (peatused->values[i] != NULL);
 	}
 	// Peatuste lisamine
-	if (numStops > (MAX_MID_POINTS + 2))
+	if (numStops > TOTAL_POINTS)
 	{
 		ini_destroy(&inifile);
 		return dmeSTOPS_LIMIT;
@@ -244,14 +259,58 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 			++realStops;
 		}
 	}
+	
+	if (!dm_addStops(dm))
+	{
+		ini_destroy(&inifile);
+		dm_destroy(dm);
+		return dmeMEM;
+	}
 
 
 	// Mälu vabastamine, kui kõik on õnnestunud siiamaani
 	ini_destroy(&inifile);
 
-
-
 	return dmeOK;
+}
+bool dm_addStops(dataModel_t * restrict dm)
+{
+	size_t totPoints = 2 + dm->numMidPoints;
+
+	for (size_t i = 0; i < totPoints; ++i)
+	{
+		point_t * p = &dm->points[i];
+		// Otsib lähima tee konkreetsele punktile
+		float shortestLen2;
+		point_t bestPoint;
+		bool pointSet = false;
+
+		for (size_t j = 0; j < dm->numTeed; ++j)
+		{
+			line_t * tee = &dm->teed[j];
+			point_t tempPoint;
+			point_intersect(&tempPoint, p, tee->src, tee->dst);
+
+			float dx = tempPoint.x - p->x;
+			float dy = tempPoint.y - p->y;
+			float len2 = (dx * dx) + (dy * dy);
+
+			if (!pointSet || (len2 < shortestLen2))
+			{
+				pointSet = true;
+
+				shortestLen2 = len2;
+				bestPoint = tempPoint;
+			}
+		}
+
+		if (!pointSet)
+		{
+			return false;
+		}
+	}
+
+	return true;
 }
 void dm_destroy(dataModel_t * restrict dm)
 {
