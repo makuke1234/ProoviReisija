@@ -189,16 +189,52 @@ void iniString_zero(iniString_t * restrict pstr);
  */
 bool iniString_init(iniString_t * restrict pstr, const char * restrict str, intptr_t length);
 /**
- * @brief Allocated memory for iniString structure, initialises it, copies "str" contents to new memory
+ * @brief Allocates memory for iniString structure, initialises it, copies "str" contents to new memory
  * 
  * @param str Pointer to character array holding input
  * @param length Lnegth of string incharacter (not including null-terminator), -1 if null-terminated and/or unspecified
  * @return iniString_t* Pointer to heap-allocated iniString structure, NULL on failure
  */
 iniString_t * iniString_make(const char * restrict str, intptr_t length);
+/**
+ * @brief Initialises iniString structure, copies & escapes contents of "str" to newly allocated location
+ * 
+ * @param pstr Pointer to iniString structure
+ * @param str Pointer to character array holding input string
+ * @param length Length of string in characters (not including null-terminator), -1 if null-terminated and/or unspecified
+ * @return true Initialisation succeeded
+ * @return false Failure
+ */
 bool iniString_initEscape(iniString_t * restrict pstr, const char * restrict str, intptr_t length);
+/**
+ * @brief Allocates memory & initialises iniString structure,
+ * copies & escapes contents of "str" to newly allocated location
+ * 
+ * @param str Pointer to character array holding input string
+ * @param length Length of string in characters (not including null-terminator), -1 if null-terminated and/or unspecified
+ * @return iniString_t* Pointer to heap-allocated iniString structure, NULL on failure
+ */
 iniString_t * iniString_makeEscape(const char * restrict str, intptr_t length);
+/**
+ * @brief Initialises iniString structure, copies, escapes & converts "str" contents
+ * to lowercase. Contents will be copied to newly allocateed location, leaving original
+ * string untampered.
+ * 
+ * @param pstr Pointer to iniString structure
+ * @param str Pointer to character array holding input string
+ * @param length Length of string in characters (not including null-terminator), -1 if null-terminated and/or unspecified
+ * @return true Success
+ * @return false Failure
+ */
 bool iniString_initEscapeLower(iniString_t * restrict pstr, const char * restrict str, intptr_t length);
+/**
+ * @brief Allocates memory for iniString strucutre, initialises it with escaped,
+ * lower-case converted copied string of "str"
+ * 
+ * @param str Pointer to character array holding input string
+ * @param length Length of string in characters (not including null-terminator), -1 if null-terminated and/or unspecified
+ * @return iniString_t* Pointer to heap-allocated iniString structure, NULL on failure
+ */
 iniString_t * iniString_makeEscapeLower(const char * restrict str, intptr_t length);
 
 bool iniString_copy(iniString_t * restrict pstr, const iniString_t * restrict src);
