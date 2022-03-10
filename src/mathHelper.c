@@ -83,6 +83,8 @@ intptr_t mh_imax(intptr_t a, intptr_t b)
 }
 
 
+
+
 float mh_clampf(float value, float min, float max)
 {
 	return (value < min) ? min : (max < value) ? max : value;
