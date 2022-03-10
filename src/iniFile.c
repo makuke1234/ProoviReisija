@@ -419,6 +419,40 @@ iniString_t * iniString_makeEscapeLower(const char * restrict str, intptr_t leng
 	return mem;
 }
 
+bool iniString_copy(iniString_t * restrict pstr, const iniString_t * restrict src)
+{
+	assert(pstr != NULL);
+	assert(src  != NULL);
+	assert(pstr != src);
+
+	pstr->str = malloc(sizeof(char) * (src->len + 1));
+	if (pstr->str == NULL)
+	{
+		return false;
+	}
+	memcpy(pstr->str, src->str, sizeof(char) * (src->len + 1));
+	pstr->len = src->len;
+	
+	return true;
+}
+iniString_t * iniString_copymake(const iniString_t * restrict src)
+{
+	assert(src != NULL);
+
+	iniString_t * mem = malloc(sizeof(iniString_t));
+	if (mem == NULL)
+	{
+		return NULL;
+	}
+	else if (!iniString_copy(mem, src))
+	{
+		free(mem);
+		return NULL;
+	}
+
+	return mem;
+}
+
 void iniString_destroy(iniString_t * restrict pstr)
 {
 	assert(pstr != NULL);
