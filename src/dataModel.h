@@ -21,12 +21,6 @@ void point_zero(point_t * restrict p);
 bool point_initStr(point_t * restrict p, const char * restrict idstr, const char * restrict valuestr);
 point_t * point_makeStr(const char * restrict idstr, const char * restrict valuestr);
 
-void point_intersect(
-	point_t * restrict ci,
-	const point_t * restrict startp,
-	const line_t * restrict line
-);
-
 void point_destroy(point_t * restrict p);
 void point_free(point_t * restrict p);
 
@@ -47,6 +41,13 @@ bool line_initStr(
 	const char * restrict idstr,
 	const char * restrict valuestr
 );
+
+void line_intersect(
+	point_t * restrict ci,
+	const point_t * restrict startp,
+	const line_t * restrict line
+);
+
 void line_destroy(line_t * restrict l);
 
 

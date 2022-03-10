@@ -1,5 +1,6 @@
 #include "dataModel.h"
 #include "logger.h"
+#include "mathHelper.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -39,15 +40,6 @@ point_t * point_makeStr(const char * restrict idstr, const char * restrict value
 	}
 
 	return p;
-}
-
-void point_intersect(
-	point_t * restrict ci,
-	const point_t * restrict startp,
-	const point_t * restrict linep1, const point_t * restrict linep2
-)
-{
-
 }
 
 void point_destroy(point_t * restrict p)
@@ -113,6 +105,40 @@ bool line_initStr(
 
 	return true;
 }
+
+void line_intersect(
+	point_t * restrict ci,
+	const point_t * restrict startp,
+	const line_t * restrict line
+)
+{
+	if (line->dx == 0)
+	{
+		ci->x = line->src->x;
+		ci->y = startp->y;
+	}
+	else if (line->dy == 0)
+	{
+		ci->x = startp->x;
+		ci->y = line->src->y;
+	}
+	else
+	{
+		float k1 = line->dy / line->dx;
+		float k2 = -1.f / k1;
+
+		float c1 = line->src->y - k1 * line->src->x;
+		float c2 = startp->y    - k2 * startp->x;
+
+		ci->x = (c2 - c1) / (k1 - k2);
+		ci->y = k1 * ci->x + c1;
+	}
+
+	// Clamping
+	ci->x = mh_clampUnif(ci->x, line->src->x, line->dst->x);
+	ci->y = mh_clampUnif(ci->y, line->src->y, line->dst->y);
+}
+
 void line_destroy(line_t * restrict l)
 {
 	assert(l != NULL);
@@ -287,9 +313,8 @@ bool dm_addStops(dataModel_t * restrict dm)
 
 		for (size_t j = 0; j < dm->numTeed; ++j)
 		{
-			line_t * tee = &dm->teed[j];
 			point_t tempPoint;
-			point_intersect(&tempPoint, p, tee->src, tee->dst);
+			line_intersect(&tempPoint, p, &dm->teed[j]);
 
 			float dx = tempPoint.x - p->x;
 			float dy = tempPoint.y - p->y;
