@@ -6,7 +6,7 @@
 [![Total downloads](https://img.shields.io/github/downloads/makuke1234/ProoviReisija/total)](https://github.com/makuke1234/ProoviReisija/releases)
 ![C version](https://img.shields.io/badge/version-C11-blue.svg)
 ![Tests](https://img.shields.io/badge/build-none-red.svg)
-![Time spent](https://wakatime.com/share/badges/projects?q=ProoviReisija)
+[![wakatime](https://wakatime.com/badge/github/makuke1234/ProoviReisija.svg)](https://wakatime.com/badge/github/makuke1234/ProoviReisija)
 
 
 # Praegune plaan
