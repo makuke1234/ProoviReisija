@@ -10,6 +10,10 @@
 #define FORBIDDEN_CODEPOINT 0xFFFF
 
 
+/**
+ * @brief Data structure to remember string length associated with character array.
+ * 
+ */
 typedef struct iniString
 {
 	char * str;
@@ -17,6 +21,11 @@ typedef struct iniString
 	
 } iniString_t;
 
+/**
+ * @brief Data structure for INI file key-value pair, also holds index to remember
+ * place in key-value ordered array.
+ * 
+ */
 typedef struct iniValue_t
 {
 	iniString_t key, value;
@@ -25,6 +34,11 @@ typedef struct iniValue_t
 
 } iniValue_t;
 
+/**
+ * @brief Data structure for INI file section structure, also holds index to remember
+ * place in sections' ordered array. Holds hashmap of value key's.
+ * 
+ */
 typedef struct iniSection
 {
 	iniString_t section;
@@ -38,6 +52,11 @@ typedef struct iniSection
 
 } iniSection_t;
 
+/**
+ * @brief Data structure for INI file, holds memory for iniSection structure array.
+ * Holds hashmap of section names.
+ * 
+ */
 typedef struct ini
 {
 	iniSection_t ** sections;
@@ -47,6 +66,10 @@ typedef struct ini
 
 } ini_t;
 
+/**
+ * @brief Enumerator for INI-file related error codes
+ * 
+ */
 typedef enum iniErr
 {
 	inieOK,
