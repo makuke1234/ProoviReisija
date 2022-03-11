@@ -14,8 +14,8 @@ int main(void)
 	test(code == dmeOK, "Data reading failed with code %d!", code);
 
 	teststr(dm.beg.id.str, "p0");
-	teststr(dm.end.id.str, "p1");
-	test(dm.numMidPoints == 0, "%zu middle points exist!", dm.numMidPoints);
+	teststr(dm.end.id.str, "p2");
+	test(dm.numMidPoints == 1, "%zu middle points exist!", dm.numMidPoints);
 
 	// Väljastab vahepunktid
 	for (size_t i = 0; i < dm.numTeed; ++i)
@@ -26,8 +26,8 @@ int main(void)
 			printf(
 				"Tee %s: %s: (%f, %f) -> %s: (%f, %f)\n",
 				tee->id.str,
-				tee->src->id.str, tee->src->x, tee->src->y,
-				tee->dst->id.str, tee->dst->x, tee->dst->y
+				tee->src->id.str, (double)tee->src->x, (double)tee->src->y,
+				tee->dst->id.str, (double)tee->dst->x, (double)tee->dst->y
 			);
 		}
 	}
