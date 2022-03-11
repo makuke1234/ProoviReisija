@@ -58,11 +58,14 @@ line_t * line_make(
 	const point_t * restrict dst
 );
 
+void line_calc(line_t * restrict l);
 void line_intersect(
 	point_t * restrict ci,
 	const point_t * restrict startp,
 	const line_t * restrict line
 );
+void line_setSrc(line_t * restrict l, const point_t * restrict src);
+void line_setDest(line_t * restrict l, const point_t * restrict dst);
 
 void line_destroy(line_t * restrict l);
 void line_free(line_t * restrict l);

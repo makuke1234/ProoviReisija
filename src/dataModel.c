@@ -23,6 +23,10 @@ bool point_initStr(point_t * restrict p, const char * restrict idstr, const char
 
 	char * next = NULL;
 	p->x = strtof(valuestr, &next);
+	if (*next == ',')
+	{
+		++next;
+	}
 	p->y = strtof(next, NULL);
 
 	return true;
@@ -122,9 +126,7 @@ bool line_initStr(
 	l->src = n1->value;
 	l->dst = n2->value;
 
-	l->dx = l->dst->x - l->src->x;
-	l->dy = l->dst->y - l->src->y;
-	l->length2 = (l->dx * l->dx) + (l->dy * l->dy);
+	line_calc(l);
 
 	return true;
 }
@@ -168,6 +170,7 @@ bool line_init(
 	}
 	l->src = src;
 	l->dst = dst;
+	line_calc(l);
 
 	return true;
 }
@@ -195,6 +198,16 @@ line_t * line_make(
 	return mem;
 }
 
+void line_calc(line_t * restrict l)
+{
+	assert(l      != NULL);
+	assert(l->src != NULL);
+	assert(l->dst != NULL);
+
+	l->dx = l->dst->x - l->src->x;
+	l->dy = l->dst->y - l->src->x;
+	l->length2 = (l->dx * l->dx) + (l->dy * l->dy);
+}
 void line_intersect(
 	point_t * restrict ci,
 	const point_t * restrict startp,
@@ -208,11 +221,11 @@ void line_intersect(
 	if (line->dx == 0)
 	{
 		ci->x = line->src->x;
-		ci->y = startp->y;
+		ci->y = mh_clampUnif(startp->y, line->src->y, line->dst->y);
 	}
 	else if (line->dy == 0)
 	{
-		ci->x = startp->x;
+		ci->x = mh_clampUnif(startp->x, line->src->x, line->dst->x);
 		ci->y = line->src->y;
 	}
 	else
@@ -223,13 +236,27 @@ void line_intersect(
 		float c1 = line->src->y - k1 * line->src->x;
 		float c2 = startp->y    - k2 * startp->x;
 
-		ci->x = (c2 - c1) / (k1 - k2);
+		ci->x = mh_clampUnif((c2 - c1) / (k1 - k2), line->src->x, line->dst->x);
 		ci->y = k1 * ci->x + c1;
 	}
+}
+void line_setSrc(line_t * restrict l, const point_t * restrict src)
+{
+	assert(l   != NULL);
+	assert(src != NULL);
 
-	// Clamping
-	ci->x = mh_clampUnif(ci->x, line->src->x, line->dst->x);
-	ci->y = mh_clampUnif(ci->y, line->src->y, line->dst->y);
+	l->src = src;
+	
+	line_calc(l);
+}
+void line_setDest(line_t * restrict l, const point_t * restrict dst)
+{
+	assert(l   != NULL);
+	assert(dst != NULL);
+	
+	l->dst = dst;
+	
+	line_calc(l);
 }
 
 void line_destroy(line_t * restrict l)
@@ -451,7 +478,7 @@ bool dm_addStops(dataModel_t * restrict dm)
 			line_free(linemem);
 			return false;
 		}
-		tee->dst = pointmem;
+		line_setDest(tee, pointmem);
 	}
 
 	return true;
