@@ -26,8 +26,8 @@ tekiks optimaalne teekond.
 
 Projekti ajalogi on saadaval [siin](./ajalogi.txt).
 
-- [ ] Andmete lugemine failist
-- [ ] Punktide lisamine vahepunktidena lähimatele teedele
+- [x] Andmete lugemine failist
+- [x] Punktide lisamine vahepunktidena lähimatele teedele
 - [ ] Dijkstra algoritmi implementatsioon
 - [ ] Optimaalse teekonna leidmine
 - [ ] Lihtne kasutajaliides
