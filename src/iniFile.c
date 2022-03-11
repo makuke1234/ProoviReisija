@@ -951,7 +951,7 @@ iniErr_t ini_checkFile(const char * restrict fileName)
 	return code;
 }
 
-iniErr_t ini_initData(const char * restrict string, intptr_t length, ini_t * restrict pini)
+iniErr_t ini_initData(ini_t * restrict pini, const char * restrict string, intptr_t length)
 {
 	assert(string != NULL);
 	assert(pini != NULL);
@@ -1135,7 +1135,7 @@ iniErr_t ini_initData(const char * restrict string, intptr_t length, ini_t * res
 
 	return inieOK;
 }
-iniErr_t ini_initFile(const char * restrict fileName, ini_t * restrict pini)
+iniErr_t ini_initFile(ini_t * restrict pini, const char * restrict fileName)
 {
 	assert(fileName != NULL);
 	assert(pini != NULL);
@@ -1149,7 +1149,7 @@ iniErr_t ini_initFile(const char * restrict fileName, ini_t * restrict pini)
 
 	writeLogger("File contents: %s", str);
 
-	iniErr_t code = ini_initData(str, (intptr_t)(sz - 1), pini);
+	iniErr_t code = ini_initData(pini, str, (intptr_t)(sz - 1));
 	free(str);
 	return code;
 }

@@ -270,7 +270,7 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 	}
 
 	ini_t inifile;
-	if (ini_initFile(filename, &inifile) != inieOK)
+	if (ini_initFile(&inifile, filename) != inieOK)
 	{
 		writeLogger("File error!");
 		return dmeMEM;

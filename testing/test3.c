@@ -41,7 +41,7 @@ void testData(const char * lib_, const char * data, bool pass, void (*testfunc)(
 	if (pass)
 	{
 		ini_t ini;
-		test(ini_initData(data, -1, &ini) == inieOK, "INI structure initialization failed!");
+		test(ini_initData(&ini, data, -1) == inieOK, "INI structure initialization failed!");
 
 		// More tests
 		testfunc(&ini);
