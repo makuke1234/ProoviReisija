@@ -216,7 +216,7 @@ void hashMap_free(hashMap_t * restrict self);
  * 
  * @param self Pointer to the hashMapCK structure
  */
-void hashMapCK_zero(hashMap_t * restrict self);
+void hashMapCK_zero(hashMapCK_t * restrict self);
 /**
  * @brief Initialises hashMapCK structure with pre-determined hashtable size
  * 

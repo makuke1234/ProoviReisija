@@ -340,6 +340,16 @@ void hashMap_free(hashMap_t * restrict self)
 }
 
 
+void hashMapCK_zero(hashMapCK_t * restrict self)
+{
+	assert(self != NULL);
+
+	*self = (hashMapCK_t){
+		.nodes    = NULL,
+		.numNodes = 0,
+		.numItems = 0
+	};
+}
 bool hashMapCK_init(hashMapCK_t * restrict self, size_t minSize)
 {
 	assert(self != NULL);
