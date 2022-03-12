@@ -254,9 +254,9 @@ bool hashMapCK_initCopy(hashMapCK_t * restrict self, size_t minSize, const hashM
  * @param minSize Minimum desired size for the new hashmap (number of slots), this
  * will be calculated to be the next closest prime number
  * @param other Source hashmap
- * @return hashMap_t* Newly heap-allocated copy of other, NULL on failure
+ * @return hashMapCK_t* Newly heap-allocated copy of other, NULL on failure
  */
-hashMap_t * hashMapCK_makeCopy(size_t minSize, const hashMapCK_t * restrict other);
+hashMapCK_t * hashMapCK_makeCopy(size_t minSize, const hashMapCK_t * restrict other);
 
 /**
  * @brief Resizes said hashMapCK structure's slot-array to have a new minimum desired size
