@@ -37,12 +37,12 @@ typedef struct line
 void line_zero(line_t * restrict l);
 bool line_initStr(
 	line_t * restrict l,
-	const hashMap_t * restrict pointmap,
+	const hashMapCK_t * restrict pointmap,
 	const char * restrict idstr,
 	const char * restrict valuestr
 );
 line_t * line_makeStr(
-	const hashMap_t * restrict pointmap,
+	const hashMapCK_t * restrict pointmap,
 	const char * restrict idstr,
 	const char * restrict valuestr
 );
@@ -87,7 +87,7 @@ typedef struct dataModel
 	};
 	size_t numMidPoints;
 
-	hashMap_t ristmikud;
+	hashMapCK_t ristmikud;
 	
 	line_t ** teed;
 	size_t numTeed, maxTeed;

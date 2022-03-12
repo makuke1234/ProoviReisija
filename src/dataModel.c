@@ -71,7 +71,7 @@ void line_zero(line_t * restrict l)
 }
 bool line_initStr(
 	line_t * restrict l,
-	const hashMap_t * restrict pointmap,
+	const hashMapCK_t * restrict pointmap,
 	const char * restrict idstr,
 	const char * restrict valuestr
 )
@@ -114,9 +114,9 @@ bool line_initStr(
 	}
 	writeLogger("id1: \"%s\", id2: \"%s\"", id1, id2);
 
-	const hashNode_t * n1, * n2;
-	n1 = hashMap_get(pointmap, id1);
-	n2 = hashMap_get(pointmap, id2);
+	const hashNodeCK_t * n1, * n2;
+	n1 = hashMapCK_get(pointmap, id1);
+	n2 = hashMapCK_get(pointmap, id2);
 	if ((n1 == NULL) || (n2 == NULL))
 	{
 		iniString_destroy(&l->id);
@@ -131,7 +131,7 @@ bool line_initStr(
 	return true;
 }
 line_t * line_makeStr(
-	const hashMap_t * restrict pointmap,
+	const hashMapCK_t * restrict pointmap,
 	const char * restrict idstr,
 	const char * restrict valuestr
 )
@@ -297,10 +297,10 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 	{
 		point_zero(&dm->points[i]);
 	}
-	hashMap_zero(&dm->ristmikud);
+	hashMapCK_zero(&dm->ristmikud);
 
 	// Räsitabeli koostamine punktidest
-	if (!hashMap_init(&dm->ristmikud, 1))
+	if (!hashMapCK_init(&dm->ristmikud, 1))
 	{
 		return dmeMEM;
 	}
@@ -331,7 +331,7 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 		{
 			point_t * p = point_makeStr(val->key.str, val->value.str);
 			// Punkti p id räsitabelisse lisamine
-			if ((p == NULL) || !hashMap_insert(&dm->ristmikud, p->id.str, p))
+			if ((p == NULL) || !hashMapCK_insert(&dm->ristmikud, p->id.str, p))
 			{
 				if (p != NULL)
 				{
@@ -496,7 +496,7 @@ bool dm_addStops(dataModel_t * restrict dm)
 			return false;
 		}
 		*pointmem = bestPoint;
-		if (!hashMap_insert(&dm->ristmikud, pointmem->id.str, pointmem))
+		if (!hashMapCK_insert(&dm->ristmikud, pointmem->id.str, pointmem))
 		{
 			point_free(pointmem);
 			free(tTeed);
@@ -567,14 +567,14 @@ void dm_destroy(dataModel_t * restrict dm)
 
 	for (size_t i = 0; i < dm->ristmikud.numNodes; ++i)
 	{
-		hashNode_t * node = dm->ristmikud.nodes[i];
+		hashNodeCK_t * node = dm->ristmikud.nodes[i];
 		if (node != NULL)
 		{
 			point_free(node->value);
 			node->value = NULL;
 		}
 	}
-	hashMap_destroy(&dm->ristmikud);
+	hashMapCK_destroy(&dm->ristmikud);
 
 	if (dm->teed != NULL)
 	{

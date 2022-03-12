@@ -535,7 +535,7 @@ bool iniSection_init(iniSection_t * restrict psect, const char * sectname, intpt
 	psect->numValues = 0;
 	psect->maxValues = 0;
 
-	if (!hashMap_init(&psect->valueMap, 1))
+	if (!hashMapCK_init(&psect->valueMap, 1))
 	{
 		iniString_destroy(&psect->section);
 		return false;
@@ -592,7 +592,7 @@ bool iniSection_addValue(
 		return false;
 	}
 
-	if (!hashMap_insert(&psect->valueMap, val->key.str, val))
+	if (!hashMapCK_insert(&psect->valueMap, val->key.str, val))
 	{
 		iniValue_free(val);
 		return false;
@@ -610,7 +610,7 @@ iniValue_t * iniSection_getValue(iniSection_t * restrict psect, const char * res
 	assert(psect  != NULL);
 	assert(keystr != NULL);
 
-	hashNode_t * node = hashMap_get(&psect->valueMap, keystr);
+	hashNodeCK_t * node = hashMapCK_get(&psect->valueMap, keystr);
 	if (node == NULL)
 	{
 		return NULL;
@@ -622,7 +622,7 @@ bool iniSection_removeValue(iniSection_t * restrict psect, const char * restrict
 	assert(psect  != NULL);
 	assert(keystr != NULL);
 
-	iniValue_t * val = hashMap_remove(&psect->valueMap, keystr);
+	iniValue_t * val = hashMapCK_remove(&psect->valueMap, keystr);
 	if (val == NULL)
 	{
 		return false;
@@ -654,7 +654,7 @@ void iniSection_destroy(iniSection_t * restrict psect)
 		free(psect->values);
 		psect->values = NULL;
 	}
-	hashMap_destroy(&psect->valueMap);
+	hashMapCK_destroy(&psect->valueMap);
 }
 void iniSection_free(iniSection_t * restrict psect)
 {
@@ -672,7 +672,7 @@ bool ini_init(ini_t * restrict pini)
 	pini->numSections = 0;
 	pini->maxSections = 0;
 
-	if (!hashMap_init(&pini->sectionMap, 1))
+	if (!hashMapCK_init(&pini->sectionMap, 1))
 	{
 		return false;
 	}
@@ -729,7 +729,7 @@ bool ini_addSection(ini_t * restrict pini, const char * restrict secstr, intptr_
 		return false;
 	}
 
-	if (!hashMap_insert(&pini->sectionMap, sec->section.str, sec))
+	if (!hashMapCK_insert(&pini->sectionMap, sec->section.str, sec))
 	{
 		iniSection_free(sec);
 		return false;
@@ -746,7 +746,7 @@ iniSection_t * ini_getSection(ini_t * restrict pini, const char * restrict secst
 	assert(pini  != NULL);
 	assert(secstr != NULL);
 
-	hashNode_t * node = hashMap_get(&pini->sectionMap, secstr);
+	hashNodeCK_t * node = hashMapCK_get(&pini->sectionMap, secstr);
 	if (node == NULL)
 	{
 		return NULL;
@@ -1168,7 +1168,7 @@ void ini_destroy(ini_t * restrict pini)
 		free(pini->sections);
 		pini->sections = NULL;
 	}
-	hashMap_destroy(&pini->sectionMap);
+	hashMapCK_destroy(&pini->sectionMap);
 }
 void ini_free(ini_t * restrict pini)
 {

@@ -46,7 +46,7 @@ typedef struct iniSection
 	iniValue_t ** values;
 	size_t numValues, maxValues;
 
-	hashMap_t valueMap;
+	hashMapCK_t valueMap;
 
 	size_t idx;
 
@@ -62,7 +62,7 @@ typedef struct ini
 	iniSection_t ** sections;
 	size_t numSections, maxSections;
 
-	hashMap_t sectionMap;
+	hashMapCK_t sectionMap;
 
 } ini_t;
 
