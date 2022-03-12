@@ -205,7 +205,7 @@ void line_calc(line_t * restrict l)
 	assert(l->dst != NULL);
 
 	l->dx = l->dst->x - l->src->x;
-	l->dy = l->dst->y - l->src->x;
+	l->dy = l->dst->y - l->src->y;
 	l->length2 = (l->dx * l->dx) + (l->dy * l->dy);
 }
 void line_intersect(
@@ -231,7 +231,7 @@ void line_intersect(
 	else
 	{
 		float k1 = line->dy / line->dx;
-		float k2 = -1.f / k1;
+		float k2 = -1.0f / k1;
 
 		float c1 = line->src->y - k1 * line->src->x;
 		float c2 = startp->y    - k2 * startp->x;
@@ -239,6 +239,15 @@ void line_intersect(
 		ci->x = mh_clampUnif((c2 - c1) / (k1 - k2), line->src->x, line->dst->x);
 		ci->y = k1 * ci->x + c1;
 	}
+
+	writeLogger(
+		"line %s: dx: %.3g, dy: %.3g, %s (%.3g; %.3g) -> %s (%.3g; %.3g), startpoint: (%.3g; %.3g) -> new point: (%.3g; %.3g)",
+		line->id.str, (double)line->dx, (double)line->dy,
+		line->src->id.str, (double)line->src->x, (double)line->src->y,
+		line->dst->id.str, (double)line->dst->x, (double)line->dst->y,
+		(double)startp->x, (double)startp->y,
+		(double)ci->x, (double)ci->y
+	);
 }
 void line_setSrc(line_t * restrict l, const point_t * restrict src)
 {
@@ -417,6 +426,31 @@ bool dm_addStops(dataModel_t * restrict dm)
 
 	size_t totPoints = 2 + dm->numMidPoints;
 
+	// Teeb praegustest teedest koopia
+	for (size_t i = 0; i < dm->numTeed; ++i)
+	{
+		if (dm->teed[i] == NULL)
+		{
+			return false;
+		}
+	}
+
+	size_t tNumTeed = dm->numTeed;
+	line_t * tTeed = malloc(sizeof(line_t) * tNumTeed);
+	if (tTeed == NULL)
+	{
+		return false;
+	}
+	for (size_t i = 0, idx = 0; i < dm->numTeed; ++i)
+	{
+		if (!line_init(&tTeed[i], dm->teed[i]->id.str, dm->teed[i]->src, dm->teed[i]->dst))
+		{
+			free(tTeed);
+			return false;
+		}
+		++idx;
+	}
+
 	for (size_t i = 0; i < totPoints; ++i)
 	{
 		point_t * p = &dm->points[i];
@@ -426,10 +460,10 @@ bool dm_addStops(dataModel_t * restrict dm)
 		line_t * tee = NULL;
 		bool pointSet = false;
 
-		for (size_t j = 0; j < dm->numTeed; ++j)
+		for (size_t j = 0; j < tNumTeed; ++j)
 		{
 			point_t tempPoint;
-			line_intersect(&tempPoint, p, dm->teed[j]);
+			line_intersect(&tempPoint, p, &tTeed[j]);
 
 			float dx = tempPoint.x - p->x;
 			float dy = tempPoint.y - p->y;
@@ -447,6 +481,7 @@ bool dm_addStops(dataModel_t * restrict dm)
 
 		if (!pointSet || !iniString_copy(&bestPoint.id, &p->id))
 		{
+			free(tTeed);
 			return false;
 		}
 
@@ -457,18 +492,21 @@ bool dm_addStops(dataModel_t * restrict dm)
 		if (pointmem == NULL)
 		{
 			point_destroy(&bestPoint);
+			free(tTeed);
 			return false;
 		}
 		*pointmem = bestPoint;
 		if (!hashMap_insert(&dm->ristmikud, pointmem->id.str, pointmem))
 		{
 			point_free(pointmem);
+			free(tTeed);
 			return false;
 		}
 
 		line_t * linemem = line_make(pointmem->id.str, pointmem, tee->dst);
 		if (linemem == NULL)
 		{
+			free(tTeed);
 			return false;
 		}
 
@@ -476,10 +514,13 @@ bool dm_addStops(dataModel_t * restrict dm)
 		if (!dm_addLine(dm, linemem))
 		{
 			line_free(linemem);
+			free(tTeed);
 			return false;
 		}
 		line_setDest(tee, pointmem);
 	}
+
+	free(tTeed);
 
 	return true;
 }
