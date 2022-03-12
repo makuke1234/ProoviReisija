@@ -129,6 +129,27 @@ bool hashMap_init(hashMap_t * restrict self, size_t minSize);
 hashMap_t * hashMap_make(size_t minSize);
 
 /**
+ * @brief Copies the contents of one hashmap to another
+ * 
+ * @param self Destination hashmap
+ * @param minSize Minimum desired size for the new hashmap (number of slots), this
+ * will be calculated to be the next closest prime number
+ * @param other Source hashmap
+ * @return true Success copying
+ * @return false Failure
+ */
+bool hashMap_initCopy(hashMap_t * restrict self, size_t minSize, const hashMap_t * restrict other);
+/**
+ * @brief Heap-allocates memory for new hashmap, copies contents from existing hashmap
+ *
+ * @param minSize Minimum desired size for the new hashmap (number of slots), this
+ * will be calculated to be the next closest prime number
+ * @param other Source hashmap
+ * @return hashMap_t* Newly heap-allocated copy of other, NULL on failure
+ */
+hashMap_t * hashMap_makeCopy(size_t minSize, const hashMap_t * restrict other);
+
+/**
  * @brief Resizes said hashMap structure's slot-array to have a new minimum desired size
  * Reserves the original hashMap structure in case of failure
  * 
@@ -215,6 +236,27 @@ bool hashMapCK_init(hashMapCK_t * restrict self, size_t minSize);
  * @return hashMapCK_t* Pointer to the newly allocated hashMapCK, NULL on failure
  */
 hashMapCK_t * hashMapCK_make(size_t minSize);
+
+/**
+ * @brief Copies the contents of one hashmap to another
+ * 
+ * @param self Destination hashmap
+ * @param minSize Minimum desired size for the new hashmap (number of slots), this
+ * will be calculated to be the next closest prime number
+ * @param other Source hashmap
+ * @return true Success copying
+ * @return false Failure
+ */
+bool hashMapCK_initCopy(hashMapCK_t * restrict self, size_t minSize, const hashMapCK_t * restrict other);
+/**
+ * @brief Heap-allocates memory for new hashmap, copies contents from existing hashmap
+ *
+ * @param minSize Minimum desired size for the new hashmap (number of slots), this
+ * will be calculated to be the next closest prime number
+ * @param other Source hashmap
+ * @return hashMap_t* Newly heap-allocated copy of other, NULL on failure
+ */
+hashMap_t * hashMapCK_makeCopy(size_t minSize, const hashMapCK_t * restrict other);
 
 /**
  * @brief Resizes said hashMapCK structure's slot-array to have a new minimum desired size

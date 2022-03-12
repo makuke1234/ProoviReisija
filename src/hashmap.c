@@ -154,30 +154,61 @@ hashMap_t * hashMap_make(size_t minSize)
 	return map;
 }
 
+bool hashMap_initCopy(hashMap_t * restrict self, size_t minSize, const hashMap_t * restrict other)
+{
+	assert(self != NULL);
+	assert(minSize > 0);
+	assert(other != NULL);
+	
+	if (!hashMap_init(self, minSize))
+	{
+		return false;
+	}
+
+	for (size_t i = 0; i < other->numNodes; ++i)
+	{
+		hashNode_t * node = other->nodes[i];
+		while (node != NULL)
+		{
+			if (!hashMap_insert(self, node->key, node->value))
+			{
+				hashMap_destroy(self);
+				return false;
+			}
+			node = node->next;
+		}
+	}
+
+	return true;
+}
+hashMap_t * hashMap_makeCopy(size_t minSize, const hashMap_t * restrict other)
+{
+	assert(minSize > 0);
+	assert(other != NULL);
+
+	hashMap_t * mem = malloc(sizeof(hashMap_t));
+	if (mem == NULL)
+	{
+		return NULL;
+	}
+	else if (!hashMap_initCopy(mem, minSize, other))
+	{
+		free(mem);
+		return NULL;
+	}
+
+	return mem;
+}
+
 bool hashMap_resize(hashMap_t * restrict self, size_t minSize)
 {
 	assert(self != NULL);
 	assert(minSize > 0);
 
 	hashMap_t newMap;
-	if (!hashMap_init(&newMap, minSize))
+	if (!hashMap_initCopy(&newMap, minSize, self))
 	{
 		return false;
-	}
-
-	// Add all items from old hasmap to new one
-	for (size_t i = 0; i < self->numNodes; ++i)
-	{
-		hashNode_t * node = self->nodes[i];
-		while (node != NULL)
-		{
-			if (!hashMap_insert(&newMap, node->key, node->value))
-			{
-				hashMap_destroy(&newMap);
-				return false;
-			}
-			node = node->next;
-		}
 	}
 
 	// Destroy old hashmap
@@ -346,30 +377,61 @@ hashMapCK_t * hashMapCK_make(size_t minSize)
 	return map;
 }
 
+bool hashMapCK_initCopy(hashMapCK_t * restrict self, size_t minSize, const hashMapCK_t * restrict other)
+{
+	assert(self != NULL);
+	assert(minSize > 0);
+	assert(other != NULL);
+	
+	if (!hashMapCK_init(self, minSize))
+	{
+		return false;
+	}
+
+	for (size_t i = 0; i < other->numNodes; ++i)
+	{
+		hashNodeCK_t * node = other->nodes[i];
+		while (node != NULL)
+		{
+			if (!hashMapCK_insert(self, node->key, node->value))
+			{
+				hashMapCK_destroy(self);
+				return false;
+			}
+			node = node->next;
+		}
+	}
+
+	return true;
+}
+hashMapCK_t * hashMapCK_makeCopy(size_t minSize, const hashMapCK_t * restrict other)
+{
+	assert(minSize > 0);
+	assert(other != NULL);
+
+	hashMapCK_t * mem = malloc(sizeof(hashMapCK_t));
+	if (mem == NULL)
+	{
+		return NULL;
+	}
+	else if (!hashMapCK_initCopy(mem, minSize, other))
+	{
+		free(mem);
+		return NULL;
+	}
+
+	return mem;
+}
+
 bool hashMapCK_resize(hashMapCK_t * restrict self, size_t minSize)
 {
 	assert(self != NULL);
 	assert(minSize > 0);
 
 	hashMapCK_t newMap;
-	if (!hashMapCK_init(&newMap, minSize))
+	if (!hashMapCK_initCopy(&newMap, minSize, self))
 	{
 		return false;
-	}
-
-	// Add all items from old hasmap to new one
-	for (size_t i = 0; i < self->numNodes; ++i)
-	{
-		hashNodeCK_t * node = self->nodes[i];
-		while (node != NULL)
-		{
-			if (!hashMapCK_insert(&newMap, node->key, node->value))
-			{
-				hashMapCK_destroy(&newMap);
-				return false;
-			}
-			node = node->next;
-		}
 	}
 
 	// Destroy old hashmap
