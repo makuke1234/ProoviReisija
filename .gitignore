@@ -5,3 +5,4 @@ test*.txt
 .mintty*
 logger.txt
 .bash_history
+*.docx
