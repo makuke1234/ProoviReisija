@@ -41,3 +41,4 @@ Projekti ajalogi on saadaval [siin](./ajalogi.txt).
 - [Specials (Unicode block) wiki](https://en.wikipedia.org/wiki/Specials_(Unicode_block)) -> Sealt pärineb koodis kokkuleppeline "keelatud" Unicode märgend *hex* väärtusega 0xFFFF
 - [C reference](https://en.cppreference.com/w/c) -> Alati abiks C standardteegi mõistmisel
 - [UTF-8 wiki](https://en.wikipedia.org/wiki/UTF-8#Encoding) -> Abiks Unicode *code pointide* UTF-8'ks konverteerimisel
+- [Dijkstra's algorithm wiki](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm) -> Abiks lühima tee leidmisel kahe punkti vahel
