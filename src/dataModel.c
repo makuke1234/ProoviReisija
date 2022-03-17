@@ -414,6 +414,8 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 		return dmeMEM;
 	}
 
+	dm_updateJunctionIndexes(dm);
+
 
 	// Mälu vabastamine, kui kõik on õnnestunud siiamaani
 	ini_destroy(&inifile);
@@ -551,6 +553,24 @@ bool dm_addLine(dataModel_t * restrict dm, line_t * restrict pline)
 	++dm->numTeed;
 
 	return true;
+}
+void dm_updateJunctionIndexes(dataModel_t * dm)
+{
+	size_t idx = 0;
+	for (size_t i = 0; i < dm->ristmikud.numItems; ++i)
+	{
+		hashNodeCK_t * node = dm->ristmikud.nodes[i];
+		while (node != NULL)
+		{
+			if (node->value != NULL)
+			{
+				((point_t *)node->value)->idx = idx;
+				++idx;
+			}
+
+			node = node->next;
+		}
+	}
 }
 
 void dm_destroy(dataModel_t * restrict dm)

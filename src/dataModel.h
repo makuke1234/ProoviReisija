@@ -15,6 +15,8 @@ typedef struct point
 	iniString_t id;
 	float x, y;
 
+	size_t idx;
+
 } point_t;
 
 void point_zero(point_t * restrict p);
@@ -107,6 +109,7 @@ typedef enum dmErr
 dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filename);
 bool dm_addStops(dataModel_t * restrict dm);
 bool dm_addLine(dataModel_t * restrict dm, line_t * restrict pline);
+void dm_updateJunctionIndexes(dataModel_t * dm);
 
 void dm_destroy(dataModel_t * restrict dm);
 
