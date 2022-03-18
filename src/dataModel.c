@@ -416,7 +416,6 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 
 	dm_updateJunctionIndexes(dm);
 
-
 	// Mälu vabastamine, kui kõik on õnnestunud siiamaani
 	ini_destroy(&inifile);
 
@@ -554,8 +553,10 @@ bool dm_addLine(dataModel_t * restrict dm, line_t * restrict pline)
 
 	return true;
 }
-void dm_updateJunctionIndexes(dataModel_t * dm)
+void dm_updateJunctionIndexes(dataModel_t * restrict dm)
 {
+	assert(dm != NULL);
+
 	size_t idx = 0;
 	for (size_t i = 0; i < dm->ristmikud.numItems; ++i)
 	{
