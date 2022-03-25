@@ -108,12 +108,8 @@ bool dijkstra_poc(
 		return false;
 	}
 
-	pQ_t pq;
-	if (!pQ_init(&pq))
-	{
-		free(prevdist);
-		return false;
-	}
+	fibHeap_t pq;
+	pq_init(&pq);
 
 	// Initialise previous distance
 	for (size_t i = 0; i < numRelations; ++i)
@@ -133,9 +129,9 @@ bool dijkstra_poc(
 			};
 		}
 
-		if (!pQ_addPriority(&pq, i, prevdist[i].dist))
+		if (!pq_pushWithPriority(&pq, i, prevdist[i].dist))
 		{
-			pQ_destroy(&pq);
+			pq_destroy(&pq);
 			free(prevdist);
 			return false;
 		}
@@ -145,7 +141,7 @@ bool dijkstra_poc(
 	const point_t ** points = malloc(sizeof(const point_t *) * numRelations);
 	if (points == NULL)
 	{
-		pQ_destroy(&pq);
+		pq_destroy(&pq);
 		free(prevdist);
 		return false;
 	}
@@ -162,7 +158,7 @@ bool dijkstra_poc(
 
 	while (!pQ_empty(&pq))
 	{
-		size_t uIdx = pQ_extractMin(&pq);
+		size_t uIdx = pq_extractMin(&pq);
 		for (size_t i = 0; i < numRelations; ++i)
 		{
 			// Check if point is neighbour
@@ -179,15 +175,15 @@ bool dijkstra_poc(
 						.dist = alt,
 						.prev = points[uIdx]
 					};
-					pQ_decPriority(&pq, i, alt);
+					pq_decPriority(&pq, i, alt);
 				}
 			}
 		}
 	}
 
 	free(points);
-	pQ_destroy(&pq);
+	pq_destroy(&pq);
 	*pprevdist = prevdist;
-	
+
 	return true;
 }
