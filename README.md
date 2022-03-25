@@ -44,3 +44,4 @@ Projekti ajalogi on saadaval [siin](./ajalogi.txt).
 - [Dijkstra's algorithm wiki](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm) -> Abiks lühima tee leidmisel kahe punkti vahel
 - [*Dijkstra's algorithm - Computerphile* video](https://www.youtube.com/watch?v=GazC3A4OQTE) -> Abiks Dijkstra algoritmi mõistmisel
 - [Fibonacci heap wiki](https://en.wikipedia.org/wiki/Fibonacci_heap) -> Abiks eelisjärjekorra andmestruktuuri implementeerimisel
+- [Fibonacci heap](https://www.programiz.com/dsa/fibonacci-heap) -> Abiks Fibonacci kuhja andmestruktuuri implementeerimisel
