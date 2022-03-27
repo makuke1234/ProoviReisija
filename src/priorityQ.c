@@ -13,13 +13,21 @@ static inline void pq_print_impl(fibNode_t * n, fibNode_t * firstParent);
 static inline void pq_merge_impl(fibHeap_t * q, fibNode_t * master, fibNode_t * slave)
 {
 	assert(q != NULL);
+	assert(master != NULL);
+	assert(slave != NULL);
+	assert(master != slave);
 
 	// Remove slave from root
 	slave->left->right = slave->right;
 	slave->right->left = slave->left;
 
-	slave->left = slave;
+	slave->left  = slave;
 	slave->right = slave;
+
+	if (q->min == slave)
+	{
+		q->min = master;
+	}
 
 	// Attach slave to master's children
 	if (master->child == NULL)
@@ -71,8 +79,8 @@ static inline void pq_free_impl(fibNode_t * n, fibNode_t * firstParent)
 	if (n->left != firstParent)
 	{
 		pq_free_impl(n->left, firstParent);
-		pq_free_impl(n->child, n->child);
 	}
+	pq_free_impl(n->child, n->child);
 	free(n);
 
 }
@@ -87,9 +95,9 @@ static inline void pq_print_impl(fibNode_t * n, fibNode_t * firstParent)
 	if (n->left != firstParent)
 	{
 		pq_print_impl(n->left, firstParent);
-		printf("Children\n");
-		pq_print_impl(n->child, n->child);
 	}
+	printf("%zu Children\n", n->idx);
+	pq_print_impl(n->child, n->child);
 }
 
 void pq_init(fibHeap_t * q)
@@ -196,11 +204,9 @@ size_t pq_extractMin(fibHeap_t * q)
 	q->min->left = min->left;
 	q->min->left->right = q->min;
 	
-	if ((min == min->right) && (child == NULL))
+	if (min == min->right)
 	{
-		free(min);
 		q->min = NULL;
-		return idx;
 	}
 	free(min);
 
@@ -215,57 +221,73 @@ size_t pq_extractMin(fibHeap_t * q)
 			temp = temp->right;
 		} while (temp != child);
 
-		// Promote children to root
-		q->min->left->right = child;
-		fibNode_t * oldLeft = q->min->left;
-		q->min->left = child->left;
-		child->left->right = q->min;
-		child->left = oldLeft;
+		if (q->min == NULL)
+		{
+			q->min = child;
+		}
+		else
+		{
+			// Promote children to root
+			q->min->left->right = child;
+			fibNode_t * oldLeft = q->min->left;
+			q->min->left = child->left;
+			child->left->right = q->min;
+			child->left = oldLeft;
+		}
+	}
+	else if (q->min == NULL)
+	{
+		return idx;
 	}
 
-	/*// Merge all roots with equal degree
-	fibNode_t * A[MAX_DEGREE];
-	for (size_t i = 0; i < MAX_DEGREE; ++i)
+	// Merge all roots with equal degree
+	size_t degree = (size_t)(LOG2_GR_REC * log2((float)q->n)) + 1;
+	fibNode_t ** A = malloc(sizeof(fibNode_t *) * degree);
+	if (A == NULL)
+	{
+		return SIZE_MAX;
+	}
+	for (size_t i = 0; i < degree; ++i)
 	{
 		A[i] = NULL;
 	}
 
-	*/fibNode_t * temp = q->min;/*
-	do
+	bool breakFlag = false;
+	fibNode_t * temp = q->min;
+	while (1)
 	{
 		size_t d = temp->degree;
-		while (A[d] != NULL)
+		while ((d < degree) && (A[d] != NULL))
 		{
 			fibNode_t * t2 = A[d];
-			
-			if (temp->key < t2->key)
+			if (temp == t2)
 			{
-				pq_merge_impl(q, temp, t2);
+				breakFlag = true;
+				break;
 			}
-			else
+			if (temp->key > t2->key)
 			{
-				if (temp == q->min)
-				{
-					q->min = t2;
-				}
-				pq_merge_impl(q, t2, temp);
+				fibNode_t * t = temp;
 				temp = t2;
-				if (t2->right == t2)
-				{
-					q->min = t2;
-				}
+				t2 = t;
 			}
+
+			pq_merge_impl(q, temp, t2);
 			A[d] = NULL;
 			++d;
 		}
-		A[d] = temp;
+		if (breakFlag || ((d == temp->degree) && (d >= degree)))
+		{
+			break;
+		}
+		A[temp->degree] = temp;
 		temp = temp->right;
-
-	} while (temp != q->min);*/
+	}
+	free(A);
+	q->min = temp;
 	
 	// Find new minimum
-	temp = q->min;
-	fibNode_t * oldmin = q->min;
+	fibNode_t * oldmin = temp;
 	do
 	{
 		if (temp->key < q->min->key)

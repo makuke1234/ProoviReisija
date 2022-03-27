@@ -15,8 +15,7 @@
 #define MARKED 1
 #define NOT_MARKED 0
 
-
-#define GOLDEN_RATIO 1.61803398875f
+#define LOG2_GR_REC 1.4404829720657015340797013126062
 
 
 typedef struct fibNode
