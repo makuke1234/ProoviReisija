@@ -53,6 +53,7 @@ bool pq_empty(fibHeap_t * q);
 bool pq_pushWithPriority(fibHeap_t * q, size_t idx, float distance);
 size_t pq_extractMin(fibHeap_t * q);
 void pq_decPriority(fibHeap_t * q, size_t idx, float distance);
+void pq_print(fibHeap_t * q);
 
 void pq_destroy(fibHeap_t * q);
 

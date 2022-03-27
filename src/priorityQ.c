@@ -3,10 +3,12 @@
 #include <math.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 static inline void pq_merge_impl(fibHeap_t * q, fibNode_t * master, fibNode_t * slave);
 static inline void pq_promote_impl(fibHeap_t * q, fibNode_t * n);
 static inline void pq_free_impl(fibNode_t * n, fibNode_t * firstParent);
+static inline void pq_print_impl(fibNode_t * n, fibNode_t * firstParent);
 
 static inline void pq_merge_impl(fibHeap_t * q, fibNode_t * master, fibNode_t * slave)
 {
@@ -66,9 +68,28 @@ static inline void pq_free_impl(fibNode_t * n, fibNode_t * firstParent)
 		return;
 	}
 
-	pq_free_impl(n->left, firstParent);
-	pq_free_impl(n->child, n);
+	if (n->left != firstParent)
+	{
+		pq_free_impl(n->left, firstParent);
+		pq_free_impl(n->child, n->child);
+	}
 	free(n);
+
+}
+static inline void pq_print_impl(fibNode_t * n, fibNode_t * firstParent)
+{
+	if (n == NULL)
+	{
+		return;
+	}
+	printf("%f id: %zu\n", (double)n->key, n->idx);
+	
+	if (n->left != firstParent)
+	{
+		pq_print_impl(n->left, firstParent);
+		printf("Children\n");
+		pq_print_impl(n->child, n->child);
+	}
 }
 
 void pq_init(fibHeap_t * q)
@@ -170,14 +191,30 @@ size_t pq_extractMin(fibHeap_t * q)
 
 	size_t idx = min->idx;
 	q->n = q->n + min->degree - 1;
-	min->left->right = min->right;
-	min->right->left = min->left;
 	q->min = min->right;
+
+	q->min->left = min->left;
+	q->min->left->right = q->min;
 	
+	if ((min == min->right) && (child == NULL))
+	{
+		free(min);
+		q->min = NULL;
+		return idx;
+	}
 	free(min);
 
 	if (child != NULL)
 	{
+		// Remove children parents
+		fibNode_t * temp = child;
+		do
+		{
+			temp->parent = NULL;
+			temp->marked = NOT_MARKED;
+			temp = temp->right;
+		} while (temp != child);
+
 		// Promote children to root
 		q->min->left->right = child;
 		fibNode_t * oldLeft = q->min->left;
@@ -186,14 +223,14 @@ size_t pq_extractMin(fibHeap_t * q)
 		child->left = oldLeft;
 	}
 
-	// Merge all roots with equal degree
+	/*// Merge all roots with equal degree
 	fibNode_t * A[MAX_DEGREE];
 	for (size_t i = 0; i < MAX_DEGREE; ++i)
 	{
 		A[i] = NULL;
 	}
 
-	fibNode_t * temp = q->min;
+	*/fibNode_t * temp = q->min;/*
 	do
 	{
 		size_t d = temp->degree;
@@ -224,7 +261,7 @@ size_t pq_extractMin(fibHeap_t * q)
 		A[d] = temp;
 		temp = temp->right;
 
-	} while (temp != q->min);
+	} while (temp != q->min);*/
 	
 	// Find new minimum
 	temp = q->min;
@@ -315,6 +352,10 @@ void pq_decPriority(fibHeap_t * q, size_t idx, float distance)
 			}
 		}
 	}
+}
+void pq_print(fibHeap_t * q)
+{
+	pq_print_impl(q->min, q->min);
 }
 
 void pq_destroy(fibHeap_t * q)
