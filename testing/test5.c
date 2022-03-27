@@ -23,10 +23,10 @@ int main(void)
 
 	// Insert 4, 3, 0, 2
 
-	pq_pushWithPriority(&q, 0, 4.0f);
-	pq_pushWithPriority(&q, 1, 3.0f);
-	pq_pushWithPriority(&q, 2, 0.0f);
-	pq_pushWithPriority(&q, 3, 2.0f);
+	test(pq_pushWithPriority(&q, 0, 4.0f), "Pushing failed!");
+	test(pq_pushWithPriority(&q, 1, 3.0f), "Pushing failed!");
+	test(pq_pushWithPriority(&q, 2, 0.0f), "Pushing failed!");
+	test(pq_pushWithPriority(&q, 3, 2.0f), "Pushing failed!");
 
 	testidx(pq_extractMin(&q), 2);
 	testidx(pq_extractMin(&q), 3);
