@@ -5,18 +5,18 @@
 #include <stdbool.h>
 
 #if SIZE_MAX == UINT64_MAX
-	#define DEGREE_BITS 62
+	#define DEGREE_BITS 63
+	#define MAX_DEGREE 28
 #else
-	#define DEGREE_BITS 30
+	#define DEGREE_BITS 31
+	#define MAX_DEGREE 14
 #endif
-
-#define VISITED 1
-#define NOT_VISITED 0
 
 #define MARKED 1
 #define NOT_MARKED 0
 
-#define MAX_DEGREE (DEGREE_BITS + 1)
+
+#define GOLDEN_RATIO 1.61803398875f
 
 
 typedef struct fibNode
@@ -26,7 +26,6 @@ typedef struct fibNode
 	size_t idx;
 
 	size_t marked:1;
-	size_t visited:1;
 	size_t degree:DEGREE_BITS;
 
 	// Linked list behaviour

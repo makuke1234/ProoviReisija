@@ -4,21 +4,10 @@
 #include <assert.h>
 #include <stdlib.h>
 
-static inline size_t pq_calDegree_impl(size_t n);
 static inline void pq_merge_impl(fibHeap_t * q, fibNode_t * master, fibNode_t * slave);
 static inline void pq_promote_impl(fibHeap_t * q, fibNode_t * n);
 static inline void pq_free_impl(fibNode_t * n, fibNode_t * firstParent);
 
-static inline size_t pq_calDegree_impl(size_t n)
-{
-	size_t c = 0;
-	while (n > 0)
-	{
-		n >>= 1;
-		++c;
-	}
-	return c;
-}
 static inline void pq_merge_impl(fibHeap_t * q, fibNode_t * master, fibNode_t * slave)
 {
 	assert(q != NULL);
@@ -50,7 +39,6 @@ static inline void pq_merge_impl(fibHeap_t * q, fibNode_t * master, fibNode_t * 
 
 	// Decrease root degree by 1
 	--(q->n);
-
 }
 static inline void pq_promote_impl(fibHeap_t * q, fibNode_t * n)
 {
@@ -104,11 +92,23 @@ bool pq_pushWithPriority(fibHeap_t * q, size_t idx, float distance)
 {
 	assert(q != NULL);
 
-	// Search if node with that idx already exists
-	if (idx < q->n_lut && q->lut[idx] != NULL)
+	// Resize lut if necessary
+	if (idx >= q->n_lut)
 	{
-		pq_decPriority(q, idx, -INFINITY);
-		pq_extractMin(q);
+		size_t newcap = (idx + 1) * 2;
+		fibNode_t ** nmem = realloc(q->lut, sizeof(fibNode_t *) * newcap);
+		if (nmem == NULL)
+		{
+			return false;
+		}
+
+		for (size_t i = q->n_lut; i < newcap; ++i)
+		{
+			nmem[i] = NULL;
+		}
+
+		q->lut = nmem;
+		q->n_lut = newcap;
 	}
 	
 	fibNode_t * n = malloc(sizeof(fibNode_t));
@@ -120,7 +120,6 @@ bool pq_pushWithPriority(fibHeap_t * q, size_t idx, float distance)
 		.key = distance,
 		.idx = idx,
 		.marked = NOT_MARKED,
-		.visited = NOT_VISITED,
 		.degree = 0,
 		.left = n,
 		.right = n,
@@ -128,38 +127,25 @@ bool pq_pushWithPriority(fibHeap_t * q, size_t idx, float distance)
 		.child = NULL
 	};
 
-	// Add q to lut
-	if (idx >= q->n_lut)
+	// Search if node with that idx already exists
+	if (idx < q->n_lut && q->lut[idx] != NULL)
 	{
-		size_t newcap = (idx + 1) * 2;
-		fibNode_t ** nmem = realloc(q->lut, sizeof(fibNode_t *) * newcap);
-		if (nmem == NULL)
-		{
-			free(n);
-			return false;
-		}
-
-		for (size_t i = q->n_lut; i < newcap; ++i)
-		{
-			nmem[i] = NULL;
-		}
-
-		q->lut = nmem;
-		q->n_lut = newcap;
-
+		pq_decPriority(q, idx, -INFINITY);
+		pq_extractMin(q);
 	}
+	// Add q to lut
 	q->lut[idx] = n;
 
-	// Try to add node to the Fibonacci heap
+	// Add node to the Fibonacci heap
 	if (q->min == NULL)
 	{
 		q->min = n;
 	}
 	else
 	{
-		q->min->left->right = n;
 		n->right = q->min;
 		n->left  = q->min->left;
+		q->min->left->right = n;
 		q->min->left = n;
 		if (n->key < q->min->key)
 		{
@@ -190,17 +176,19 @@ size_t pq_extractMin(fibHeap_t * q)
 	
 	free(min);
 
-	// Promote children to root
-	q->min->left->right = child;
-	fibNode_t * oldLeft = q->min->left;
-	q->min->left = child->left;
-	child->left->right = q->min;
-	child->left = oldLeft;
+	if (child != NULL)
+	{
+		// Promote children to root
+		q->min->left->right = child;
+		fibNode_t * oldLeft = q->min->left;
+		q->min->left = child->left;
+		child->left->right = q->min;
+		child->left = oldLeft;
+	}
 
 	// Merge all roots with equal degree
 	fibNode_t * A[MAX_DEGREE];
-	size_t degree = pq_calDegree_impl(q->n);
-	for (size_t i = 0; i <= degree; ++i)
+	for (size_t i = 0; i < MAX_DEGREE; ++i)
 	{
 		A[i] = NULL;
 	}
