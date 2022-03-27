@@ -13,11 +13,17 @@
 #define VISITED 1
 #define NOT_VISITED 0
 
+#define MARKED 1
+#define NOT_MARKED 0
+
+#define MAX_DEGREE (DEGREE_BITS + 1)
+
 
 typedef struct fibNode
 {
 	// Data
 	float key;
+	size_t idx;
 
 	size_t marked:1;
 	size_t visited:1;
@@ -36,13 +42,11 @@ typedef struct fibHeap
 	size_t n;
 	fibNode_t * min;
 
-	size_t n_lut, max_lut;
+	size_t n_lut;
 	fibNode_t ** lut;
 
 } fibHeap_t, pq_t;
 
-
-size_t fibCalc(size_t idx);
 
 void pq_init(fibHeap_t * q);
 
