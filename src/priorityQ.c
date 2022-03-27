@@ -240,7 +240,8 @@ size_t pq_extractMin(fibHeap_t * q)
 		return idx;
 	}
 
-	// Merge all roots with equal degree
+	// Merge all roots with equal degree, consolidate heap
+	// Special thanks to woodfrog's repository https://github.com/woodfrog/FibonacciHeap helping to implement heap consolidation
 	size_t degree = (size_t)(LOG2_GR_REC * log2((float)q->n)) + 1;
 	fibNode_t ** A = malloc(sizeof(fibNode_t *) * degree);
 	if (A == NULL)

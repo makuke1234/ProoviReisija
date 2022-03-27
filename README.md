@@ -45,3 +45,5 @@ Projekti ajalogi on saadaval [siin](./ajalogi.txt).
 - [*Dijkstra's algorithm - Computerphile* video](https://www.youtube.com/watch?v=GazC3A4OQTE) -> Abiks Dijkstra algoritmi mõistmisel
 - [Fibonacci heap wiki](https://en.wikipedia.org/wiki/Fibonacci_heap) -> Abiks eelisjärjekorra andmestruktuuri implementeerimisel
 - [Fibonacci heap](https://www.programiz.com/dsa/fibonacci-heap) -> Abiks Fibonacci kuhja andmestruktuuri implementeerimisel
+- [FibonacciHeap repositoorium](https://github.com/woodfrog/FibonacciHeap) -> Abiks Fibonacci kuhja algoritmilise osa implementeerimisel
+
