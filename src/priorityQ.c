@@ -240,48 +240,6 @@ size_t pq_extractMin(fibHeap_t * q)
 	} while (temp != oldmin);
 
 	return idx;
-
-	/*fibNode_t * temp = q->min, * ptr = temp, * x = NULL;
-
-	if (temp->child != NULL)
-	{
-		x = temp->child;
-		do
-		{
-			ptr = x->right;
-			q->min->left->right = x;
-			x->right = q->min;
-			x->left = q->min->left;
-			q->min->left = x;
-			if (x->key < q->min->key)
-			{
-				q->min = x;
-			}
-			x->parent = NULL;
-			x = ptr;
-		} while (ptr != temp->child);
-	}
-
-	temp->left->right = temp->right;
-	temp->right->left = temp->left;
-
-	if ((temp == temp->right) && (temp->child == NULL))
-	{
-		q->min = NULL;
-	}
-	else
-	{
-		q->min = temp->right;
-		pq_consolidate_impl(q);
-	}
-	--(q->n);
-
-	size_t idx = temp->idx;
-	q->lut[idx] = NULL;
-
-	free(temp);
-
-	return idx;*/
 }
 void pq_decPriority(fibHeap_t * q, size_t idx, float distance)
 {
