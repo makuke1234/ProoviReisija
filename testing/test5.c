@@ -29,21 +29,27 @@ int main(void)
 	test(pq_pushWithPriority(&q, 3, 2.0f), "Pushing failed!");
 
 	pq_print(&q);
+	putchar('\n');
 
 	testidx(pq_extractMin(&q), 2);
 	pq_print(&q);
+	putchar('\n');
 	
 	testidx(pq_extractMin(&q), 3);
 	pq_print(&q);
+	putchar('\n');
 	
 	testidx(pq_extractMin(&q), 1);
 	pq_print(&q);
+	putchar('\n');
 	
 	testidx(pq_extractMin(&q), 0);
 	pq_print(&q);
+	putchar('\n');
 	
 	testidx(pq_extractMin(&q), SIZE_MAX);
 	pq_print(&q);
+	putchar('\n');
 
 
 	pq_destroy(&q);
