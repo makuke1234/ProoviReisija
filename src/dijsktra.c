@@ -8,7 +8,7 @@ void dijkstra_bSet(uint8_t * bArray, size_t idx, bool value)
 {
 	const uint8_t sop = idx % 8, shift1 = 0x01 << sop, shift2 = value << sop;
 	const size_t idx8 = idx / 8;
-	bArray[idx8] = (bArray[idx8] & ~shift1) | shift2;
+	bArray[idx8] = (uint8_t)((bArray[idx8] & ~shift1) | shift2);
 }
 bool dijkstra_bGet(const uint8_t * bArray, size_t idx)
 {
@@ -64,7 +64,7 @@ uint8_t * dijkstra_createRelations(
 	// Populate matrix
 	for (size_t i = 0; i < numTeed; ++i)
 	{
-		line_t * tee = teed[i];
+		const line_t * tee = teed[i];
 		if (tee != NULL)
 		{
 			size_t i1 = tee->src->idx, i2 = tee->dst->idx;
@@ -156,7 +156,7 @@ bool dijkstra_poc(
 		}
 	}
 
-	while (!pQ_empty(&pq))
+	while (!pq_empty(&pq))
 	{
 		size_t uIdx = pq_extractMin(&pq);
 		for (size_t i = 0; i < numRelations; ++i)

@@ -1,6 +1,8 @@
 #include "priorityQ.h"
 
 #include <math.h>
+#include <assert.h>
+#include <stdlib.h>
 
 static inline size_t pq_calDegree_impl(size_t n);
 static inline void pq_merge_impl(fibHeap_t * q, fibNode_t * master, fibNode_t * slave);
@@ -15,6 +17,7 @@ static inline size_t pq_calDegree_impl(size_t n)
 		n >>= 1;
 		++c;
 	}
+	return c;
 }
 static inline void pq_merge_impl(fibHeap_t * q, fibNode_t * master, fibNode_t * slave)
 {
@@ -68,6 +71,18 @@ static inline void pq_promote_impl(fibHeap_t * q, fibNode_t * n)
 		q->min = n;
 	}
 }
+static inline void pq_free_impl(fibNode_t * n, fibNode_t * firstParent)
+{
+	if (n == NULL)
+	{
+		return;
+	}
+
+	pq_free_impl(n->left, firstParent);
+	pq_free_impl(n->child, n);
+	free(n);
+}
+
 void pq_init(fibHeap_t * q)
 {
 	assert(q != NULL);
@@ -81,6 +96,10 @@ void pq_init(fibHeap_t * q)
 	};
 }
 
+bool pq_empty(fibHeap_t * q)
+{
+	return q->min == NULL;
+}
 bool pq_pushWithPriority(fibHeap_t * q, size_t idx, float distance)
 {
 	assert(q != NULL);
@@ -168,7 +187,6 @@ size_t pq_extractMin(fibHeap_t * q)
 	min->left->right = min->right;
 	min->right->left = min->left;
 	q->min = min->right;
-	size_t oldDegree = min->degree;
 	
 	free(min);
 
@@ -294,7 +312,7 @@ void pq_decPriority(fibHeap_t * q, size_t idx, float distance)
 		if ((parent != NULL) && (distance < parent->key))
 		{
 			// Promote to root list
-			if (n->parent->child = n)
+			if (n->parent->child == n)
 			{
 				if (n->left == n)
 				{
