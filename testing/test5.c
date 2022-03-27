@@ -28,11 +28,23 @@ int main(void)
 	test(pq_pushWithPriority(&q, 2, 0.0f), "Pushing failed!");
 	test(pq_pushWithPriority(&q, 3, 2.0f), "Pushing failed!");
 
+	pq_print(&q);
+
 	testidx(pq_extractMin(&q), 2);
+	pq_print(&q);
+	
 	testidx(pq_extractMin(&q), 3);
+	pq_print(&q);
+	
 	testidx(pq_extractMin(&q), 1);
+	pq_print(&q);
+	
 	testidx(pq_extractMin(&q), 0);
+	pq_print(&q);
+	
 	testidx(pq_extractMin(&q), SIZE_MAX);
+	pq_print(&q);
+
 
 	pq_destroy(&q);
 
