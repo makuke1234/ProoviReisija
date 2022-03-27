@@ -207,12 +207,16 @@ size_t pq_extractMin(fibHeap_t * q)
 			}
 			else
 			{
-				if (t2 == q->min)
+				if (temp == q->min)
 				{
-					q->min = temp;
+					q->min = t2;
 				}
 				pq_merge_impl(q, t2, temp);
 				temp = t2;
+				if (t2->right == t2)
+				{
+					q->min = t2;
+				}
 			}
 			A[d] = NULL;
 			++d;
