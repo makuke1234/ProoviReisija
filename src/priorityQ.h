@@ -69,7 +69,7 @@ typedef struct fibHeap
  * 
  * @param q Pointer to fibHeap_t structure
  */
-void pq_init(fibHeap_t * q);
+void pq_init(fibHeap_t * restrict q);
 
 /**
  * @brief Checks whether the heap is empty.
@@ -79,7 +79,7 @@ void pq_init(fibHeap_t * q);
  * @return true Heap is empty
  * @return false Heap contains items
  */
-bool pq_empty(fibHeap_t * q);
+bool pq_empty(fibHeap_t * restrict q);
 /**
  * @brief Pushes a new item to the heap with a particular identifier 'idx' &
  * priority of 'distance'. 'Updates' item's priority if it already exists.
@@ -92,7 +92,7 @@ bool pq_empty(fibHeap_t * q);
  * @return true Success pushing
  * @return false Failure
  */
-bool pq_pushWithPriority(fibHeap_t * q, size_t idx, float distance);
+bool pq_pushWithPriority(fibHeap_t * restrict q, size_t idx, float distance);
 /**
  * @brief Extracts first item's (minimum item's) identifier 'idx' from heap and also
  * removes it.
@@ -101,7 +101,7 @@ bool pq_pushWithPriority(fibHeap_t * q, size_t idx, float distance);
  * @param q Pointer to fibHeap_t structure
  * @return size_t Identifier of minimum item in the heap
  */
-size_t pq_extractMin(fibHeap_t * q);
+size_t pq_extractMin(fibHeap_t * restrict q);
 /**
  * @brief Decreases the priority of a node with identifier 'idx'. New priority must be
  * smaller!
@@ -111,14 +111,14 @@ size_t pq_extractMin(fibHeap_t * q);
  * @param idx Identifier of decreaseable node
  * @param distance New decreased priority of the node
  */
-void pq_decPriority(fibHeap_t * q, size_t idx, float distance);
+void pq_decPriority(fibHeap_t * restrict q, size_t idx, float distance);
 /**
  * @brief Prints the entire Fibonacci heap structure.
  * Complexity: O(n).
  * 
  * @param q Pointer to fibHeap_t structure
  */
-void pq_print(fibHeap_t * q);
+void pq_print(fibHeap_t * restrict q);
 
 /**
  * @brief Destroys the Fibonacci heap.
@@ -126,6 +126,6 @@ void pq_print(fibHeap_t * q);
  * 
  * @param q Pointer to fibHeap_t structure
  */
-void pq_destroy(fibHeap_t * q);
+void pq_destroy(fibHeap_t * restrict q);
 
 #endif

@@ -5,12 +5,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-static inline void pq_merge_impl(fibHeap_t * q, fibNode_t * master, fibNode_t * slave);
-static inline void pq_promote_impl(fibHeap_t * q, fibNode_t * n);
+static inline void pq_merge_impl(fibHeap_t * restrict q, fibNode_t * restrict master, fibNode_t * restrict slave);
+static inline void pq_promote_impl(fibHeap_t * restrict q, fibNode_t * restrict n);
 static inline void pq_free_impl(fibNode_t * n, fibNode_t * firstParent);
 static inline void pq_print_impl(fibNode_t * n, fibNode_t * firstParent);
 
-static inline void pq_merge_impl(fibHeap_t * q, fibNode_t * master, fibNode_t * slave)
+static inline void pq_merge_impl(fibHeap_t * restrict q, fibNode_t * restrict master, fibNode_t * restrict slave)
 {
 	assert(q != NULL);
 	assert(master != NULL);
@@ -50,7 +50,7 @@ static inline void pq_merge_impl(fibHeap_t * q, fibNode_t * master, fibNode_t * 
 	// Decrease root degree by 1
 	--(q->n);
 }
-static inline void pq_promote_impl(fibHeap_t * q, fibNode_t * n)
+static inline void pq_promote_impl(fibHeap_t * restrict q, fibNode_t * restrict n)
 {
 	n->parent = NULL;
 	n->marked = NOT_MARKED;
@@ -100,7 +100,7 @@ static inline void pq_print_impl(fibNode_t * n, fibNode_t * firstParent)
 	pq_print_impl(n->child, n->child);
 }
 
-void pq_init(fibHeap_t * q)
+void pq_init(fibHeap_t * restrict q)
 {
 	assert(q != NULL);
 
@@ -113,11 +113,11 @@ void pq_init(fibHeap_t * q)
 	};
 }
 
-bool pq_empty(fibHeap_t * q)
+bool pq_empty(fibHeap_t * restrict q)
 {
 	return q->min == NULL;
 }
-bool pq_pushWithPriority(fibHeap_t * q, size_t idx, float distance)
+bool pq_pushWithPriority(fibHeap_t * restrict q, size_t idx, float distance)
 {
 	assert(q != NULL);
 
@@ -198,7 +198,7 @@ bool pq_pushWithPriority(fibHeap_t * q, size_t idx, float distance)
 
 	return true;
 }
-size_t pq_extractMin(fibHeap_t * q)
+size_t pq_extractMin(fibHeap_t * restrict q)
 {
 	assert(q != NULL);
 	
@@ -314,7 +314,7 @@ size_t pq_extractMin(fibHeap_t * q)
 
 	return idx;
 }
-void pq_decPriority(fibHeap_t * q, size_t idx, float distance)
+void pq_decPriority(fibHeap_t * restrict q, size_t idx, float distance)
 {
 	assert(q != NULL);
 
@@ -389,12 +389,12 @@ void pq_decPriority(fibHeap_t * q, size_t idx, float distance)
 		}
 	}
 }
-void pq_print(fibHeap_t * q)
+void pq_print(fibHeap_t * restrict q)
 {
 	pq_print_impl(q->min, q->min);
 }
 
-void pq_destroy(fibHeap_t * q)
+void pq_destroy(fibHeap_t * restrict q)
 {
 	assert(q != NULL);
 
