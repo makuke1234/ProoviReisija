@@ -4,13 +4,13 @@
 #include <math.h>
 #include <string.h>
 
-void dijkstra_bSet(uint8_t * bArray, size_t idx, bool value)
+void dijkstra_bSet(uint8_t * restrict bArray, size_t idx, bool value)
 {
 	const uint8_t sop = idx % 8, shift1 = 0x01 << sop, shift2 = value << sop;
 	const size_t idx8 = idx / 8;
 	bArray[idx8] = (uint8_t)((bArray[idx8] & ~shift1) | shift2);
 }
-bool dijkstra_bGet(const uint8_t * bArray, size_t idx)
+bool dijkstra_bGet(const uint8_t * restrict bArray, size_t idx)
 {
 	return (bArray[idx / 8] & (0x01 << (idx % 8))) != 0;
 }
@@ -24,9 +24,9 @@ size_t dijkstra_calcIdx(size_t row, size_t col, size_t numCols)
 }
 
 uint8_t * dijkstra_createRelations(
-	size_t * numRelations,
-	const hashMapCK_t * map,
-	const line_t ** teed,
+	size_t * restrict numRelations,
+	const hashMapCK_t * restrict map,
+	const line_t * const restrict * restrict teed,
 	size_t numTeed
 )
 {
@@ -81,14 +81,14 @@ uint8_t * dijkstra_createRelations(
 }
 
 
-bool dijkstra_poc(
-	prevdist_t ** pprevdist,
-	const point_t *** ppoints,
-	const line_t ** roads,
+bool dijkstra_search_poc(
+	prevdist_t * restrict * restrict pprevdist,
+	const point_t *** restrict ppoints,
+	const line_t * const restrict * restrict roads,
 	size_t numRoads,
-	const uint8_t * relations,
+	const uint8_t * restrict relations,
 	size_t numRelations,
-	const point_t * start
+	const point_t * restrict start
 )
 {
 	assert(roads != NULL);

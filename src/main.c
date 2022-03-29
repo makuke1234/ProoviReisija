@@ -42,7 +42,7 @@ int main(int argc, char ** argv)
 
 	// Koostab maatriksi lühimatest kaugustest punktide vahel
 	size_t numRel;
-	uint8_t * relations = dijkstra_createRelations(&numRel, &dm.ristmikud, dm.teed, dm.numTeed);
+	uint8_t * relations = dijkstra_createRelations(&numRel, &dm.ristmikud, (const line_t * const *)dm.teed, dm.numTeed);
 
 	if (relations == NULL)
 	{
@@ -50,12 +50,12 @@ int main(int argc, char ** argv)
 		return 1;
 	}
 
-	prevdist_t * distances;
-	const point_t ** points;
-	if (!dijkstra_poc(
+	prevdist_t * distances = NULL;
+	const point_t ** points = NULL;
+	if (!dijkstra_search_poc(
 			&distances,
 			&points,
-			dm.teed,
+			(const line_t * const *)dm.teed,
 			dm.numTeed,
 			relations,
 			numRel,
