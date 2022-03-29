@@ -64,7 +64,8 @@ typedef struct fibHeap
 
 
 /**
- * @brief Initializes Fibonacci heap data structure
+ * @brief Initializes Fibonacci heap data structure.
+ * Complexity: O(1).
  * 
  * @param q Pointer to fibHeap_t structure
  */
@@ -104,7 +105,7 @@ size_t pq_extractMin(fibHeap_t * q);
 /**
  * @brief Decreases the priority of a node with identifier 'idx'. New priority must be
  * smaller!
- * Complexity: O(1)
+ * Complexity: O(1).
  * 
  * @param q Pointer to fibHeap_t structure
  * @param idx Identifier of decreaseable node
@@ -113,7 +114,7 @@ size_t pq_extractMin(fibHeap_t * q);
 void pq_decPriority(fibHeap_t * q, size_t idx, float distance);
 /**
  * @brief Prints the entire Fibonacci heap structure.
- * Complexity: O(n)
+ * Complexity: O(n).
  * 
  * @param q Pointer to fibHeap_t structure
  */
@@ -121,7 +122,7 @@ void pq_print(fibHeap_t * q);
 
 /**
  * @brief Destroys the Fibonacci heap.
- * Complexity: O(n)
+ * Complexity: O(n).
  * 
  * @param q Pointer to fibHeap_t structure
  */
