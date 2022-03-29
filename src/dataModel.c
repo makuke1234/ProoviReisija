@@ -331,6 +331,7 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 		{
 			point_t * p = point_makeStr(val->key.str, val->value.str);
 			// Punkti p id räsitabelisse lisamine
+			printf("Punkt %p: %s\n", p, p->id.str);
 			if ((p == NULL) || !hashMapCK_insert(&dm->ristmikud, p->id.str, p))
 			{
 				if (p != NULL)
@@ -442,14 +443,13 @@ bool dm_addStops(dataModel_t * restrict dm)
 	{
 		return false;
 	}
-	for (size_t i = 0, idx = 0; i < dm->numTeed; ++i)
+	for (size_t i = 0; i < dm->numTeed; ++i)
 	{
 		if (!line_init(&tTeed[i], dm->teed[i]->id.str, dm->teed[i]->src, dm->teed[i]->dst))
 		{
 			free(tTeed);
 			return false;
 		}
-		++idx;
 	}
 
 	for (size_t i = 0; i < totPoints; ++i)
@@ -497,6 +497,9 @@ bool dm_addStops(dataModel_t * restrict dm)
 			return false;
 		}
 		*pointmem = bestPoint;
+		// Lisa punkti projektsiooni viit õigesse kohta
+		dm->pointsp[i] = pointmem;
+		printf("uus parim punkt: %p: %s\n", pointmem, pointmem->id.str);
 		if (!hashMapCK_insert(&dm->ristmikud, pointmem->id.str, pointmem))
 		{
 			point_free(pointmem);
@@ -558,7 +561,7 @@ void dm_updateJunctionIndexes(dataModel_t * restrict dm)
 	assert(dm != NULL);
 
 	size_t idx = 0;
-	for (size_t i = 0; i < dm->ristmikud.numItems; ++i)
+	for (size_t i = 0; i < dm->ristmikud.numNodes; ++i)
 	{
 		hashNodeCK_t * node = dm->ristmikud.nodes[i];
 		while (node != NULL)
@@ -566,6 +569,7 @@ void dm_updateJunctionIndexes(dataModel_t * restrict dm)
 			if (node->value != NULL)
 			{
 				((point_t *)node->value)->idx = idx;
+				printf("Ristmik %s\n", ((point_t *)node->value)->id.str);
 				++idx;
 			}
 

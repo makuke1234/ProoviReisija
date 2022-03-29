@@ -87,6 +87,15 @@ typedef struct dataModel
 		};
 		point_t points[TOTAL_POINTS];
 	};
+	union
+	{
+		struct
+		{
+			const point_t * begp, * endp;
+			const point_t * midp[MAX_MID_POINTS];
+		};
+		const point_t * pointsp[TOTAL_POINTS];
+	};
 	size_t numMidPoints;
 
 	hashMapCK_t ristmikud;

@@ -36,9 +36,9 @@ uint8_t * dijkstra_createRelations(
 	assert(numTeed > 0);
 
 	*numRelations = 0;
-	for (size_t i = 0; i < map->numItems; ++i)
+	for (size_t i = 0; i < map->numNodes; ++i)
 	{
-		const hashNodeCK_t * node = map->nodes[map->numItems - i - 1];
+		const hashNodeCK_t * node = map->nodes[i];
 		if (node == NULL)
 		{
 			continue;
@@ -48,8 +48,12 @@ uint8_t * dijkstra_createRelations(
 			node = node->next;
 		}
 
-		*numRelations = ((point_t *)node->value)->idx + 1;
-		break;
+		size_t newRel = ((point_t *)node->value)->idx + 1;
+
+		if (newRel > *numRelations)
+		{
+			*numRelations = newRel;
+		}
 	}
 	assert(*numRelations > 0);
 
@@ -79,12 +83,12 @@ uint8_t * dijkstra_createRelations(
 
 bool dijkstra_poc(
 	prevdist_t ** pprevdist,
+	const point_t *** ppoints,
 	const line_t ** roads,
 	size_t numRoads,
 	const uint8_t * relations,
 	size_t numRelations,
-	const point_t * start,
-	const point_t * stop
+	const point_t * start
 )
 {
 	assert(roads != NULL);
@@ -92,15 +96,6 @@ bool dijkstra_poc(
 	assert(relations != NULL);
 	assert(numRelations > 0);
 	assert(start != NULL);
-	assert(stop != NULL);
-
-	// Priority Q variant:
-	/*
-		prevdist -> Array of vertices containing distance and previous vertex
-
-		pq -> priority Q
-
-	*/
 
 	prevdist_t * prevdist = malloc(sizeof(prevdist_t) * numRelations);
 	if (prevdist == NULL)
@@ -181,7 +176,7 @@ bool dijkstra_poc(
 		}
 	}
 
-	free(points);
+	*ppoints = points;
 	pq_destroy(&pq);
 	*pprevdist = prevdist;
 

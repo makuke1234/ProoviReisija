@@ -743,7 +743,7 @@ bool ini_addSection(ini_t * restrict pini, const char * restrict secstr, intptr_
 }
 iniSection_t * ini_getSection(ini_t * restrict pini, const char * restrict secstr)
 {
-	assert(pini  != NULL);
+	assert(pini   != NULL);
 	assert(secstr != NULL);
 
 	hashNodeCK_t * node = hashMapCK_get(&pini->sectionMap, secstr);

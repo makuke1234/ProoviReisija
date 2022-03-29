@@ -25,12 +25,12 @@ typedef struct prevdist
 
 bool dijkstra_poc(
 	prevdist_t ** pprevdist,
+	const point_t *** ppoints,
 	const line_t ** roads,
 	size_t numRoads,
 	const uint8_t * relations,
 	size_t numRelations,
-	const point_t * start,
-	const point_t * stop
+	const point_t * start
 );
 
 #endif

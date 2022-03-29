@@ -1,8 +1,10 @@
 #include "iniFile.h"
 #include "dataModel.h"
 #include "logger.h"
+#include "dijkstra.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 int main(int argc, char ** argv)
 {
@@ -30,13 +32,52 @@ int main(int argc, char ** argv)
 		{
 			line_t * tee = dm.teed[i];
 			printf(
-				"Tee %s: %s: (%f, %f) -> %s: (%f, %f)\n",
+				"Tee %s: %s, %zu: (%f, %f) -> %s, %zu: (%f, %f)\n",
 				tee->id.str,
-				tee->src->id.str, (double)tee->src->x, (double)tee->src->y,
-				tee->dst->id.str, (double)tee->dst->x, (double)tee->dst->y
+				tee->src->id.str, tee->src->idx, (double)tee->src->x, (double)tee->src->y,
+				tee->dst->id.str, tee->dst->idx, (double)tee->dst->x, (double)tee->dst->y
 			);
 		}
 	}
+
+	// Koostab maatriksi lühimatest kaugustest punktide vahel
+	size_t numRel;
+	uint8_t * relations = dijkstra_createRelations(&numRel, &dm.ristmikud, dm.teed, dm.numTeed);
+
+	if (relations == NULL)
+	{
+		fprintf(stderr, "Viga graafi relatsioonide tegemisel!\n");
+		return 1;
+	}
+
+	prevdist_t * distances;
+	const point_t ** points;
+	if (!dijkstra_poc(
+			&distances,
+			&points,
+			dm.teed,
+			dm.numTeed,
+			relations,
+			numRel,
+			dm.begp
+		)
+	)
+	{
+		fprintf(stderr, "Viga Dijkstra algoritmi t55s!\n");
+		return 1;
+	}
+
+
+	printf("Kaugused punktide vahel: \n");
+	for (size_t i = 0; i < numRel; ++i)
+	{
+		prevdist_t * dist = &distances[i];
+		printf("Eelmine punkt %s -> %s: %.3f\n", dist->prev != NULL ? dist->prev->id.str : "pole", points[i]->id.str, (double)dist->dist);
+	}
+	free(points);
+	free(distances);
+	free(relations);
+
 
 	dm_destroy(&dm);
 

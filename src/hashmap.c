@@ -482,6 +482,21 @@ bool hashMapCK_insert(hashMapCK_t * restrict self, const char * key, void * valu
 
 	*pnode = node;
 	++self->numItems;
+
+	// Prindib sisu
+	printf("hashmap contents:\n");
+	for (size_t i = 0; i < self->numNodes; ++i)
+	{
+		hashNodeCK_t * node = self->nodes[i];
+		while (node != NULL)
+		{
+			printf("node %s: %p\n", node->key, node->value);
+
+			node = node->next;
+		}
+	}
+	printf("\n");
+
 	return true;
 }
 hashNodeCK_t * hashMapCK_get(const hashMapCK_t * restrict self, const char * key)
