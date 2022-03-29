@@ -159,8 +159,21 @@ bool pq_pushWithPriority(fibHeap_t * q, size_t idx, float distance)
 	// Search if node with that idx already exists
 	if (idx < q->n_lut && q->lut[idx] != NULL)
 	{
-		pq_decPriority(q, idx, -INFINITY);
-		pq_extractMin(q);
+		if (distance < q->lut[idx]->key)
+		{
+			pq_decPriority(q, idx, distance);
+			free(n);
+			return true;
+		}
+		else if (distance > q->lut[idx]->key)
+		{
+			pq_decPriority(q, idx, -INFINITY);
+			pq_extractMin(q);
+		}
+		else
+		{
+			return true;
+		}
 	}
 	// Add q to lut
 	q->lut[idx] = n;
