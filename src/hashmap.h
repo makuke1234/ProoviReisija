@@ -57,7 +57,8 @@ typedef struct hashMapConstKey
 
 /**
  * @brief Creates hashtable's node using "key" and value, allocates memory for key and
- * the object itself
+ * the object itself.
+ * Complexity: O(1).
  * 
  * @param key Pointer to null-terminated character array that holds "key"
  * @param value Pointer, value, will be copied to data structure
@@ -65,13 +66,15 @@ typedef struct hashMapConstKey
  */
 hashNode_t * hashNode_make(const char * key, void * value);
 /**
- * @brief Frees memory held by hashtable's node, frees memory held by "key"
+ * @brief Frees memory held by hashtable's node, frees memory held by "key".
+ * Complexity: O(1).
  * 
  * @param self Pointer to heap-allocated hashNode structure
  */
 void hashNode_free(hashNode_t * restrict self);
 /**
- * @brief Frees memory held by hashtable's node recursively, first node of nodes' linked list must be given
+ * @brief Frees memory held by hashtable's node recursively, first node of nodes' linked list must be given.
+ * Complexity: O(n).
  * 
  * @param self Pointer to heap-allocated hashNode structure, first node in a hashtable's "slot"
  */
@@ -79,7 +82,8 @@ void hashNode_recursiveFree(hashNode_t * restrict self);
 
 /**
  * @brief Creates hashtable's node using "key" and value, allocates memory only for the object itself,
- * key's pointer is just copied
+ * key's pointer is just copied.
+ * Complexity: O(1).
  * 
  * @param key Pointer to null-terminated character array that holds "key", must
  * be "alive" for the entire lifetime of the object with this "key"
@@ -88,13 +92,15 @@ void hashNode_recursiveFree(hashNode_t * restrict self);
  */
 hashNodeCK_t * hashNodeCK_make(const char * key, void * value);
 /**
- * @brief Frees memory held by hashtable's node
+ * @brief Frees memory held by hashtable's node.
+ * Complexity: O(1).
  * 
  * @param self Pointer to heap-allocated hashNodeCK structure
  */
 void hashNodeCK_free(hashNodeCK_t * restrict self);
 /**
- * @brief Frees memory held by hashtable's node recursively, first node of nodes' linked list must be given
+ * @brief Frees memory held by hashtable's node recursively, first node of nodes' linked list must be given.
+ * Complexity: O(n).
  * 
  * @param self Pointer to heap-allocated hashNode structure, first node in a hashtable's "slot"
  */
@@ -103,13 +109,15 @@ void hashNodeCK_recursiveFree(hashNodeCK_t * restrict self);
 
 
 /**
- * @brief Zeros the memory of the hashMap structure
+ * @brief Zeros the memory of the hashMap structure.
+ * Complexity: O(1).
  * 
  * @param self Pointer to the hashMap structure
  */
 void hashMap_zero(hashMap_t * restrict self);
 /**
- * @brief Initialises hashMap structure with pre-determined hashtable size
+ * @brief Initialises hashMap structure with pre-determined hashtable size.
+ * Complexity: O(minSize).
  * 
  * @param self Pointer to the hashMap structure
  * @param minSize Minimum desired size of the hashtable in number of slots, this will
@@ -120,7 +128,8 @@ void hashMap_zero(hashMap_t * restrict self);
 bool hashMap_init(hashMap_t * restrict self, size_t minSize);
 /**
  * @brief Allocates memory for the hashMap structure on the heap and initialises
- * hashMap structure with pre-determined hashtable size
+ * hashMap structure with pre-determined hashtable size.
+ * Complexity: O(minSize).
  * 
  * @param minSize Minimum desired size of the hashtable in number of slots, this will be
  * calculated to be the next closest prime number
@@ -129,7 +138,8 @@ bool hashMap_init(hashMap_t * restrict self, size_t minSize);
 hashMap_t * hashMap_make(size_t minSize);
 
 /**
- * @brief Copies the contents of one hashmap to another
+ * @brief Copies the contents of one hashmap to another.
+ * Complexity: O(minSize).
  * 
  * @param self Destination hashmap
  * @param minSize Minimum desired size for the new hashmap (number of slots), this
@@ -140,7 +150,8 @@ hashMap_t * hashMap_make(size_t minSize);
  */
 bool hashMap_initCopy(hashMap_t * restrict self, size_t minSize, const hashMap_t * restrict other);
 /**
- * @brief Heap-allocates memory for new hashmap, copies contents from existing hashmap
+ * @brief Heap-allocates memory for new hashmap, copies contents from existing hashmap.
+ * Complexity: O(minSize).
  *
  * @param minSize Minimum desired size for the new hashmap (number of slots), this
  * will be calculated to be the next closest prime number
@@ -151,7 +162,8 @@ hashMap_t * hashMap_makeCopy(size_t minSize, const hashMap_t * restrict other);
 
 /**
  * @brief Resizes said hashMap structure's slot-array to have a new minimum desired size
- * Reserves the original hashMap structure in case of failure
+ * Reserves the original hashMap structure in case of failure.
+ * Complexity: O(minSize).
  * 
  * @param self Pointer to hashMap structure to be resized
  * @param minSize New minimum desired size, closest larger prime number of it is calculated
@@ -161,7 +173,8 @@ hashMap_t * hashMap_makeCopy(size_t minSize, const hashMap_t * restrict other);
 bool hashMap_resize(hashMap_t * restrict self, size_t minSize);
 /**
  * @brief Hashmap's default hash function, is used to calculated the slot index of
- * given key with given hashmap size
+ * given key with given hashmap size.
+ * Complexity: O(strlen(key)).
  * 
  * @param key Pointer to null-terminated character array of "key"
  * @param mapSize Hashmap's size/number of slots
@@ -170,7 +183,8 @@ bool hashMap_resize(hashMap_t * restrict self, size_t minSize);
 size_t hashMap_hash(const char * key, size_t mapSize);
 
 /**
- * @brief Inserts a new "key" with a pointer-sized value to the hashmap
+ * @brief Inserts a new "key" with a pointer-sized value to the hashmap.
+ * Complexity: O(1).
  * 
  * @param self Pointer to the hashMap structure
  * @param key Pointer to null-terminated character array of data's "key"
@@ -180,7 +194,8 @@ size_t hashMap_hash(const char * key, size_t mapSize);
  */
 bool hashMap_insert(hashMap_t * restrict self, const char * key, void * value);
 /**
- * @brief Finds corresponding hashNode object with desired "key" from hashmap
+ * @brief Finds corresponding hashNode object with desired "key" from hashmap.
+ * Complexity: O(1).
  * 
  * @param self Pointer to hashMap structure
  * @param key Pointer to null-terminated character array of desired "key"
@@ -188,7 +203,8 @@ bool hashMap_insert(hashMap_t * restrict self, const char * key, void * value);
  */
 hashNode_t * hashMap_get(const hashMap_t * restrict self, const char * key);
 /**
- * @brief Removes object from hashmap with desired "key"
+ * @brief Removes object from hashmap with desired "key".
+ * Complexity: O(1).
  * 
  * @param self Pointer to hashMap structure
  * @param key Pointer to null-terminated character array of desired "key"
@@ -198,13 +214,15 @@ hashNode_t * hashMap_get(const hashMap_t * restrict self, const char * key);
 void * hashMap_remove(hashMap_t * restrict self, const char * key);
 
 /**
- * @brief Destroys the hashMap object
+ * @brief Destroys the hashMap object.
+ * Complexity: O(n).
  * 
  * @param self Pointer to hashMap structure
  */
 void hashMap_destroy(hashMap_t * restrict self);
 /**
- * @brief Destroys the hashMap object, frees memory
+ * @brief Destroys the hashMap object, frees memory.
+ * Complexity: O(n).
  * 
  * @param self Pointer to heap-allocated hashMap structure
  */
@@ -212,13 +230,15 @@ void hashMap_free(hashMap_t * restrict self);
 
 
 /**
- * @brief Zeros the memory of the hashMapCK structure
+ * @brief Zeros the memory of the hashMapCK structure.
+ * Complexity: O(1).
  * 
  * @param self Pointer to the hashMapCK structure
  */
 void hashMapCK_zero(hashMapCK_t * restrict self);
 /**
- * @brief Initialises hashMapCK structure with pre-determined hashtable size
+ * @brief Initialises hashMapCK structure with pre-determined hashtable size.
+ * Complexity: O(1).
  * 
  * @param self Pointer to the hashMapCK structure
  * @param minSize Minimum desired size of the hashtable in number of slots, this will
@@ -238,7 +258,8 @@ bool hashMapCK_init(hashMapCK_t * restrict self, size_t minSize);
 hashMapCK_t * hashMapCK_make(size_t minSize);
 
 /**
- * @brief Copies the contents of one hashmap to another
+ * @brief Copies the contents of one hashmap to another.
+ * Complexity: O(minSize).
  * 
  * @param self Destination hashmap
  * @param minSize Minimum desired size for the new hashmap (number of slots), this
@@ -249,7 +270,8 @@ hashMapCK_t * hashMapCK_make(size_t minSize);
  */
 bool hashMapCK_initCopy(hashMapCK_t * restrict self, size_t minSize, const hashMapCK_t * restrict other);
 /**
- * @brief Heap-allocates memory for new hashmap, copies contents from existing hashmap
+ * @brief Heap-allocates memory for new hashmap, copies contents from existing hashmap.
+ * Complexity: O(minSize).
  *
  * @param minSize Minimum desired size for the new hashmap (number of slots), this
  * will be calculated to be the next closest prime number
@@ -260,7 +282,8 @@ hashMapCK_t * hashMapCK_makeCopy(size_t minSize, const hashMapCK_t * restrict ot
 
 /**
  * @brief Resizes said hashMapCK structure's slot-array to have a new minimum desired size
- * Reserves the original hashMapCK structure in case of failure
+ * Reserves the original hashMapCK structure in case of failure.
+ * Complexity: O(minSize).
  * 
  * @param self Pointer to hashMapCK structure to be resized
  * @param minSize New minimum desired size, closest larger prime number of it is calculated
@@ -270,7 +293,8 @@ hashMapCK_t * hashMapCK_makeCopy(size_t minSize, const hashMapCK_t * restrict ot
 bool hashMapCK_resize(hashMapCK_t * restrict self, size_t minSize);
 
 /**
- * @brief Inserts a new "key" with a pointer-sized value to the hashmap
+ * @brief Inserts a new "key" with a pointer-sized value to the hashmap.
+ * Complexity: O(1).
  * 
  * @param self Pointer to the hashMapCK structure
  * @param key Pointer to null-terminated character array of data's "key", key is copied, thus it must be left
@@ -281,7 +305,8 @@ bool hashMapCK_resize(hashMapCK_t * restrict self, size_t minSize);
  */
 bool hashMapCK_insert(hashMapCK_t * restrict self, const char * key, void * value);
 /**
- * @brief Finds corresponding hashNode object with desired "key" from hashmap
+ * @brief Finds corresponding hashNode object with desired "key" from hashmap.
+ * Complexity: O(1).
  * 
  * @param self Pointer to hashMapCK structure
  * @param key Pointer to null-terminated character array of desired "key"
@@ -289,7 +314,8 @@ bool hashMapCK_insert(hashMapCK_t * restrict self, const char * key, void * valu
  */
 hashNodeCK_t * hashMapCK_get(const hashMapCK_t * restrict self, const char * key);
 /**
- * @brief Removes object from hashmap with desired "key"
+ * @brief Removes object from hashmap with desired "key".
+ * Complexity: O(1).
  * 
  * @param self Pointer to hashMapCK structure
  * @param key Pointer to null-terminated character array of desired "key"
@@ -299,13 +325,15 @@ hashNodeCK_t * hashMapCK_get(const hashMapCK_t * restrict self, const char * key
 void * hashMapCK_remove(hashMapCK_t * restrict self, const char * key);
 
 /**
- * @brief Destroys the hashMapCK object
+ * @brief Destroys the hashMapCK object.
+ * Complexity: O(n).
  * 
  * @param self Pointer to hashMapCK structure
  */
 void hashMapCK_destroy(hashMapCK_t * restrict self);
 /**
- * @brief Destroys the hashMapCK object, frees memory
+ * @brief Destroys the hashMapCK object, frees memory.
+ * Complexity: O(n).
  * 
  * @param self Pointer to heap-allocated hashMapCK structure
  */
