@@ -331,7 +331,6 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 		{
 			point_t * p = point_makeStr(val->key.str, val->value.str);
 			// Punkti p id räsitabelisse lisamine
-			printf("Punkt %p: %s\n", p, p->id.str);
 			if ((p == NULL) || !hashMapCK_insert(&dm->ristmikud, p->id.str, p))
 			{
 				if (p != NULL)
@@ -499,7 +498,6 @@ bool dm_addStops(dataModel_t * restrict dm)
 		*pointmem = bestPoint;
 		// Lisa punkti projektsiooni viit õigesse kohta
 		dm->pointsp[i] = pointmem;
-		printf("uus parim punkt: %p: %s\n", pointmem, pointmem->id.str);
 		if (!hashMapCK_insert(&dm->ristmikud, pointmem->id.str, pointmem))
 		{
 			point_free(pointmem);
@@ -569,7 +567,6 @@ void dm_updateJunctionIndexes(dataModel_t * restrict dm)
 			if (node->value != NULL)
 			{
 				((point_t *)node->value)->idx = idx;
-				printf("Ristmik %s\n", ((point_t *)node->value)->id.str);
 				++idx;
 			}
 
