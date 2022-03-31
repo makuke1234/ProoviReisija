@@ -314,10 +314,16 @@ size_t pq_extractMin(fibHeap_t * restrict q)
 void pq_decPriority(fibHeap_t * restrict q, size_t idx, float distance)
 {
 	assert(q != NULL);
-	assert(idx < q->n_lut);
+
+	if ((idx >= q->n_lut) || (q->lut[idx] == NULL))
+	{
+		pq_pushWithPriority(q, idx, distance);
+		return;
+	}
 
 	fibNode_t * n = q->lut[idx];
-	if ((n == NULL) || (n->key < distance))
+	assert(distance <= n->key);
+	if (distance == n->key)
 	{
 		return;
 	}
@@ -337,8 +343,8 @@ void pq_decPriority(fibHeap_t * restrict q, size_t idx, float distance)
 			{
 				n->parent->child = n->left;
 			}
-			--(n->parent->degree);
 		}
+		--(n->parent->degree);
 		n->left->right = n->right;
 		n->right->left = n->left;
 		n->left = n;
@@ -347,7 +353,7 @@ void pq_decPriority(fibHeap_t * restrict q, size_t idx, float distance)
 
 		while (parent != NULL)
 		{
-			if (parent->marked == NOT_MARKED)
+			if ((parent->parent != NULL) && (parent->marked == NOT_MARKED))
 			{
 				parent->marked = MARKED;
 				break;
@@ -355,20 +361,23 @@ void pq_decPriority(fibHeap_t * restrict q, size_t idx, float distance)
 			else
 			{
 				// Promote to root list
-				if ((parent->parent != NULL) && (parent->parent->child = parent))
+				if (parent->parent != NULL)
 				{
-					if (parent->left == parent)
+					if (parent->parent->child == parent)
 					{
-						parent->parent->child = NULL;
-					}
-					else
-					{
-						parent->parent->child = parent->left;
+						if (parent->left == parent)
+						{
+							parent->parent->child = NULL;
+						}
+						else
+						{
+							parent->parent->child = parent->left;
+						}
 					}
 					--(parent->parent->degree);
 				}
-				parent->left->right = n->right;
-				parent->right->left = n->left;
+				parent->left->right = parent->right;
+				parent->right->left = parent->left;
 				parent->left = parent;
 				parent->right = parent;
 				
@@ -379,7 +388,7 @@ void pq_decPriority(fibHeap_t * restrict q, size_t idx, float distance)
 			}
 		}
 	}
-	else if ((parent == NULL) && (distance < q->min->key))
+	if ((parent == NULL) && (distance < q->min->key))
 	{
 		q->min = n;
 	}
