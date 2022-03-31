@@ -56,7 +56,10 @@ int main(void)
 	endphase();
 
 	testidx(pq_extractMin(&q), 2);
+	test(pq_pushWithPriority(&q, 8, 50.0f), "Pushing failed!");
 	testidx(pq_extractMin(&q), 3);
+	pq_decPriority(&q, 1, 49.0f);
+	pq_pushWithPriority(&q, 2, 49.5f);
 	testidx(pq_extractMin(&q), 0);
 
 	testidx_or(pq_extractMin(&q), 3, 5, 6, 7);
@@ -64,6 +67,8 @@ int main(void)
 	testidx_or(pq_extractMin(&q), 3, 5, 6, 7);
 	testidx(pq_extractMin(&q), 4);
 	testidx(pq_extractMin(&q), 1);
+	testidx(pq_extractMin(&q), 2);
+	testidx(pq_extractMin(&q), 8);
 
 	testidx(pq_extractMin(&q), SIZE_MAX);
 
