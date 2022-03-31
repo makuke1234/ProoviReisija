@@ -137,10 +137,11 @@ bool dijkstra_search_poc(
 	while (!pq_empty(&pq))
 	{
 		size_t uIdx = pq_extractMin(&pq);
+		assert(uIdx != SIZE_MAX);
 		for (size_t i = 0; i < numRelations; ++i)
 		{
 			// Check if point is neighbour
-			if (i != uIdx && dijkstra_bGet(relations, dijkstra_calcIdx(uIdx, i, numRelations)))
+			if ((i != uIdx) && dijkstra_bGet(relations, dijkstra_calcIdx(uIdx, i, numRelations)))
 			{
 				//Calc uvDist
 				float dx = points[uIdx]->x - points[i]->x;
