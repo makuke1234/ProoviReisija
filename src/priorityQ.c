@@ -139,6 +139,14 @@ bool pq_pushWithPriority(fibHeap_t * restrict q, size_t idx, float distance)
 		q->lut = nmem;
 		q->n_lut = newcap;
 	}
+	else if ((q->lut[idx] != NULL) && (distance <= q->lut[idx]->key))
+	{
+		if (distance < q->lut[idx]->key)
+		{
+			pq_decPriority(q, idx, distance);
+		}
+		return true;
+	}
 	
 	fibNode_t * n = malloc(sizeof(fibNode_t));
 	if (n == NULL)
@@ -157,23 +165,11 @@ bool pq_pushWithPriority(fibHeap_t * restrict q, size_t idx, float distance)
 	};
 
 	// Search if node with that idx already exists
-	if (idx < q->n_lut && q->lut[idx] != NULL)
+	if (q->lut[idx] != NULL)
 	{
-		if (distance < q->lut[idx]->key)
-		{
-			pq_decPriority(q, idx, distance);
-			free(n);
-			return true;
-		}
-		else if (distance > q->lut[idx]->key)
-		{
-			pq_decPriority(q, idx, -INFINITY);
-			pq_extractMin(q);
-		}
-		else
-		{
-			return true;
-		}
+		pq_decPriority(q, idx, -INFINITY);
+		printf("Idx: %zu, New min: %zu: %f, key of idx: %f\n", idx, q->min->idx, q->min->key, q->lut[idx]->key);
+		pq_extractMin(q);
 	}
 	// Add q to lut
 	q->lut[idx] = n;
@@ -189,7 +185,7 @@ bool pq_pushWithPriority(fibHeap_t * restrict q, size_t idx, float distance)
 		n->left  = q->min->left;
 		q->min->left->right = n;
 		q->min->left = n;
-		if (n->key < q->min->key)
+		if (distance < q->min->key)
 		{
 			q->min = n;
 		}
@@ -211,6 +207,8 @@ size_t pq_extractMin(fibHeap_t * restrict q)
 	fibNode_t * child = min->child;
 
 	size_t idx = min->idx;
+	q->lut[idx] = NULL;
+
 	q->n = q->n + min->degree - 1;
 	q->min = min->right;
 
@@ -317,76 +315,74 @@ size_t pq_extractMin(fibHeap_t * restrict q)
 void pq_decPriority(fibHeap_t * restrict q, size_t idx, float distance)
 {
 	assert(q != NULL);
+	assert(idx < q->n_lut);
 
-	if (idx >= q->n_lut || q->lut[idx] == NULL)
-	{
-		return;
-	}
 	fibNode_t * n = q->lut[idx];
-
-	if (n->key < distance)
+	if ((n == NULL) || (n->key < distance))
 	{
 		return;
 	}
-	else
+
+	n->key = distance;
+	fibNode_t * parent = n->parent;
+	if ((parent != NULL) && (distance < parent->key))
 	{
-		n->key = distance;
-		fibNode_t * parent = n->parent;
-		if ((parent != NULL) && (distance < parent->key))
+		// Promote to root list
+		if (n->parent->child == n)
 		{
-			// Promote to root list
-			if (n->parent->child == n)
+			if (n->left == n)
 			{
-				if (n->left == n)
-				{
-					n->parent->child = NULL;
-				}
-				else
-				{
-					n->parent->child = n->left;
-				}
-				--(n->parent->degree);
+				n->parent->child = NULL;
 			}
-			n->left->right = n->right;
-			n->right->left = n->left;
-			n->left = n;
-			n->right = n;
-			pq_promote_impl(q, n);
-
-			while (parent != NULL)
+			else
 			{
-				if (parent->marked == NOT_MARKED)
-				{
-					parent->marked = MARKED;
-					break;
-				}
-				else
-				{
-					// Promote to root list
-					if ((parent->parent != NULL) && (parent->parent->child = parent))
-					{
-						if (parent->left == parent)
-						{
-							parent->parent->child = NULL;
-						}
-						else
-						{
-							parent->parent->child = parent->left;
-						}
-						--(parent->parent->degree);
-					}
-					parent->left->right = n->right;
-					parent->right->left = n->left;
-					parent->left = parent;
-					parent->right = parent;
-					
-					fibNode_t * gp = parent->parent;
-					pq_promote_impl(q, parent);
+				n->parent->child = n->left;
+			}
+			--(n->parent->degree);
+		}
+		n->left->right = n->right;
+		n->right->left = n->left;
+		n->left = n;
+		n->right = n;
+		pq_promote_impl(q, n);
 
-					parent = gp;
+		while (parent != NULL)
+		{
+			if (parent->marked == NOT_MARKED)
+			{
+				parent->marked = MARKED;
+				break;
+			}
+			else
+			{
+				// Promote to root list
+				if ((parent->parent != NULL) && (parent->parent->child = parent))
+				{
+					if (parent->left == parent)
+					{
+						parent->parent->child = NULL;
+					}
+					else
+					{
+						parent->parent->child = parent->left;
+					}
+					--(parent->parent->degree);
 				}
+				parent->left->right = n->right;
+				parent->right->left = n->left;
+				parent->left = parent;
+				parent->right = parent;
+				
+				fibNode_t * gp = parent->parent;
+				pq_promote_impl(q, parent);
+
+				parent = gp;
 			}
 		}
+	}
+	else if ((parent == NULL) && (distance < q->min->key))
+	{
+		q->min = n;
 	}
 }
 void pq_print(fibHeap_t * restrict q)
