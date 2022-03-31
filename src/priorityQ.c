@@ -168,7 +168,6 @@ bool pq_pushWithPriority(fibHeap_t * restrict q, size_t idx, float distance)
 	if (q->lut[idx] != NULL)
 	{
 		pq_decPriority(q, idx, -INFINITY);
-		printf("Idx: %zu, New min: %zu: %f, key of idx: %f\n", idx, q->min->idx, q->min->key, q->lut[idx]->key);
 		pq_extractMin(q);
 	}
 	// Add q to lut
