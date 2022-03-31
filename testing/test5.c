@@ -12,7 +12,12 @@ bool isclose(float a, float b, float epsilon)
 
 void testidx(size_t idx, size_t expectedIdx)
 {
-	test(idx == expectedIdx, "Expected index %zu, got %zu", expectedIdx, idx);
+	test(
+		idx == expectedIdx,
+		"Expected index %zu, got %zu",
+		expectedIdx,
+		idx
+	);
 }
 void testidx_or(size_t idx, size_t numExp, ...)
 {
@@ -45,18 +50,21 @@ int main(void)
 	test(pq_pushWithPriority(&q, 4, 10.0f), "Pushing failed!");
 	test(pq_pushWithPriority(&q, 5, 8.0f), "Pushing failed!");
 	test(pq_pushWithPriority(&q, 6, 8.0f), "Pushing failed!");
+	test(pq_pushWithPriority(&q, 1, 100.0f), "Pushing failed!");
 	test(pq_pushWithPriority(&q, 7, 8.0f), "Pushing failed!");
+
+	endphase();
 
 	testidx(pq_extractMin(&q), 2);
 	testidx(pq_extractMin(&q), 3);
-	testidx(pq_extractMin(&q), 1);
 	testidx(pq_extractMin(&q), 0);
 
 	testidx_or(pq_extractMin(&q), 3, 5, 6, 7);
 	testidx_or(pq_extractMin(&q), 3, 5, 6, 7);
 	testidx_or(pq_extractMin(&q), 3, 5, 6, 7);
 	testidx(pq_extractMin(&q), 4);
-	
+	testidx(pq_extractMin(&q), 1);
+
 	testidx(pq_extractMin(&q), SIZE_MAX);
 
 	pq_destroy(&q);
