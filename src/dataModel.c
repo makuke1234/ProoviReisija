@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 void point_zero(point_t * restrict p)
 {
@@ -206,7 +207,7 @@ void line_calc(line_t * restrict l)
 
 	l->dx = l->dst->x - l->src->x;
 	l->dy = l->dst->y - l->src->y;
-	l->length2 = (l->dx * l->dx) + (l->dy * l->dy);
+	l->length = sqrtf((l->dx * l->dx) + (l->dy * l->dy));
 }
 void line_intersect(
 	point_t * restrict ci,

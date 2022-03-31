@@ -74,7 +74,7 @@ typedef struct line
 	iniString_t id;
 	const point_t * src, * dst;
 
-	float dx, dy, length2;
+	float dx, dy, length;
 
 } line_t;
 

@@ -146,7 +146,7 @@ bool dijkstra_search_poc(
 				//Calc uvDist
 				float dx = points[uIdx]->x - points[i]->x;
 				float dy = points[uIdx]->y - points[i]->y;
-				float uvDist = (dx * dx) + (dy * dy);
+				float uvDist = sqrtf((dx * dx) + (dy * dy));
 				float alt = prevdist[uIdx].dist + uvDist;
 				if (alt < prevdist[i].dist)
 				{
