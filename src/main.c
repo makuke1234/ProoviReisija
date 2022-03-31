@@ -113,7 +113,7 @@ int main(int argc, char ** argv)
 	for (size_t i = 0; i < numRelations; ++i)
 	{
 		prevdist_t * dist = &distances[i];
-		printf("Eelmine punkt %s -> %s: %.3f\n", dist->prev != NULL ? dist->prev->id.str : "pole", points[i]->id.str, (double)dist->dist);
+		printf("Punkti %s kaudu -> %s: %.3f\n", dist->prev != NULL ? dist->prev->id.str : "pole", points[i]->id.str, (double)dist->dist);
 	}
 	free(points);
 	free(distances);
