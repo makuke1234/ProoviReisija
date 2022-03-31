@@ -26,7 +26,7 @@ void testidx_or(size_t idx, size_t numExp, ...)
 	va_end(ap);
 
 	test(isExp, "Got index %zu", idx);
-	printf("Got index %zu\n", idx);
+	fprintf(stderr, "Got index %zu\n", idx);
 }
 
 int main(void)
@@ -47,35 +47,17 @@ int main(void)
 	test(pq_pushWithPriority(&q, 6, 8.0f), "Pushing failed!");
 	test(pq_pushWithPriority(&q, 7, 8.0f), "Pushing failed!");
 
-	pq_print(&q);
-	putchar('\n');
-
 	testidx(pq_extractMin(&q), 2);
-	pq_print(&q);
-	putchar('\n');
-	
 	testidx(pq_extractMin(&q), 3);
-	pq_print(&q);
-	putchar('\n');
-	
 	testidx(pq_extractMin(&q), 1);
-	pq_print(&q);
-	putchar('\n');
-	
 	testidx(pq_extractMin(&q), 0);
-	pq_print(&q);
-	putchar('\n');
 
 	testidx_or(pq_extractMin(&q), 3, 5, 6, 7);
 	testidx_or(pq_extractMin(&q), 3, 5, 6, 7);
 	testidx_or(pq_extractMin(&q), 3, 5, 6, 7);
 	testidx(pq_extractMin(&q), 4);
-
 	
 	testidx(pq_extractMin(&q), SIZE_MAX);
-	pq_print(&q);
-	putchar('\n');
-
 
 	pq_destroy(&q);
 
