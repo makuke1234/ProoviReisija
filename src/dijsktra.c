@@ -1,4 +1,5 @@
 #include "dijkstra.h"
+#include "mathHelper.h"
 
 #include <stdlib.h>
 #include <math.h>
@@ -23,36 +24,28 @@ size_t dijkstra_calcIdx(size_t row, size_t col, size_t numCols)
 	return row * numCols + col;
 }
 
-uint8_t * dijkstra_createRelations(
+bool dijkstra_createRelations(
+	uint8_t ** restrict prelations,
 	size_t * restrict numRelations,
-	const hashMapCK_t * restrict map,
+	const point_t *** restrict ppoints,
 	const line_t * const restrict * restrict teed,
 	size_t numTeed
 )
 {
+	assert(prelations != NULL);
 	assert(numRelations != NULL);
-	assert(map != NULL);
+	assert(ppoints != NULL);
 	assert(teed != NULL);
 	assert(numTeed > 0);
 
 	*numRelations = 0;
-	for (size_t i = 0; i < map->numNodes; ++i)
+	for (size_t i = 0; i < numTeed; ++i)
 	{
-		const hashNodeCK_t * node = map->nodes[i];
-		if (node == NULL)
+		const line_t * tee = teed[i];
+		if (tee != NULL)
 		{
-			continue;
-		}
-		while (node->next != NULL)
-		{
-			node = node->next;
-		}
-
-		size_t newRel = ((point_t *)node->value)->idx + 1;
-
-		if (newRel > *numRelations)
-		{
-			*numRelations = newRel;
+			size_t newRel = mh_zmax(tee->src->idx, tee->dst->idx) + 1;
+			*numRelations = mh_zmax(*numRelations, newRel);
 		}
 	}
 	assert(*numRelations > 0);
@@ -62,7 +55,13 @@ uint8_t * dijkstra_createRelations(
 	uint8_t * relmem = calloc(memSize, 1);
 	if (relmem == NULL)
 	{
-		return NULL;
+		return false;
+	}
+	const point_t ** points = malloc(sizeof(const point_t *) * (*numRelations));
+	if (points == NULL)
+	{
+		free(relmem);
+		return false;
 	}
 
 	// Populate matrix
@@ -71,28 +70,31 @@ uint8_t * dijkstra_createRelations(
 		const line_t * tee = teed[i];
 		if (tee != NULL)
 		{
-			size_t i1 = tee->src->idx, i2 = tee->dst->idx;
+			const size_t i1 = tee->src->idx, i2 = tee->dst->idx;
 			dijkstra_bSet(relmem, dijkstra_calcIdx(i1, i2, *numRelations), true);
 			dijkstra_bSet(relmem, dijkstra_calcIdx(i2, i1, *numRelations), true);
+			
+			points[i1] = tee->src;
+			points[i2] = tee->dst;
 		}
 	}
 
-	return relmem;
+	*prelations = relmem;
+	*ppoints = points;
+	return true;
 }
 
 
 bool dijkstra_search_poc(
 	prevdist_t * restrict * restrict pprevdist,
-	const point_t *** restrict ppoints,
-	const line_t * const restrict * restrict roads,
-	size_t numRoads,
+	const point_t ** restrict points,
 	const uint8_t * restrict relations,
 	size_t numRelations,
 	const point_t * restrict start
 )
 {
-	assert(roads != NULL);
-	assert(numRoads > 0);
+	assert(pprevdist != NULL);
+	assert(points != NULL);
 	assert(relations != NULL);
 	assert(numRelations > 0);
 	assert(start != NULL);
@@ -132,25 +134,6 @@ bool dijkstra_search_poc(
 		}
 	}
 
-	
-	const point_t ** points = malloc(sizeof(const point_t *) * numRelations);
-	if (points == NULL)
-	{
-		pq_destroy(&pq);
-		free(prevdist);
-		return false;
-	}
-
-	// Add junctions
-	for (size_t i = 0; i < numRoads; ++i)
-	{
-		if (roads[i] != NULL)
-		{
-			points[roads[i]->src->idx] = roads[i]->src;
-			points[roads[i]->dst->idx] = roads[i]->dst;
-		}
-	}
-
 	while (!pq_empty(&pq))
 	{
 		size_t uIdx = pq_extractMin(&pq);
@@ -176,7 +159,6 @@ bool dijkstra_search_poc(
 		}
 	}
 
-	*ppoints = points;
 	pq_destroy(&pq);
 	*pprevdist = prevdist;
 

@@ -9,9 +9,10 @@ bool dijkstra_bGet(const uint8_t * restrict bArray, size_t idx);
 size_t dijkstra_bArrBytes(size_t numItems);
 size_t dijkstra_calcIdx(size_t row, size_t col, size_t numCols);
 
-uint8_t * dijkstra_createRelations(
+bool dijkstra_createRelations(
+	uint8_t ** restrict prelations,
 	size_t * restrict numRelations,
-	const hashMapCK_t * restrict map,
+	const point_t *** restrict ppoints,
 	const line_t * const restrict * restrict teed,
 	size_t numTeed
 );
@@ -25,9 +26,7 @@ typedef struct prevdist
 
 bool dijkstra_search_poc(
 	prevdist_t * restrict * restrict pprevdist,
-	const point_t *** restrict ppoints,
-	const line_t * const restrict * restrict roads,
-	size_t numRoads,
+	const point_t ** restrict points,
 	const uint8_t * restrict relations,
 	size_t numRelations,
 	const point_t * restrict start
