@@ -97,6 +97,7 @@ int main(int argc, char ** argv)
 	free(points);
 
 
+
 	float * matrix = NULL;
 	result = dijkstra_makeMatrix(
 		dm.pointsp,
@@ -113,6 +114,7 @@ int main(int argc, char ** argv)
 	const size_t totalPoints = dm.numMidPoints + 2;
 
 
+	printf("Peatuste vaheliste kauguste maatriks:\n");
 	printf("%8c ", ' ');
 	for (size_t i = 0; i < totalPoints; ++i)
 	{
