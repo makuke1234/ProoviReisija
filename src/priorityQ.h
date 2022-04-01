@@ -103,8 +103,8 @@ bool pq_pushWithPriority(fibHeap_t * restrict q, size_t idx, float distance);
  */
 size_t pq_extractMin(fibHeap_t * restrict q);
 /**
- * @brief Decreases the priority of a node with identifier 'idx'. New priority must be
- * smaller! Adds new node if node doesn't exist already.
+ * @brief Decreases the priority of an existing node with identifier 'idx'.
+ * New priority must be smaller or equal to previous!
  * Complexity: O(1).
  * 
  * @param q Pointer to fibHeap_t structure
