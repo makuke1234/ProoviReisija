@@ -45,7 +45,7 @@ int main(int argc, char ** argv)
 	size_t numRelations;
 	uint8_t * relations = NULL;
 	const point_t ** points = NULL;
-	bool result = dijkstra_createRelations(
+	bool result = pf_createRelations(
 		&relations,
 		&numRelations,
 		&points,
@@ -84,7 +84,7 @@ int main(int argc, char ** argv)
 				"%*c%c",
 				maxplen - 1,
 				' ',
-				dijkstra_bGet(relations, dijkstra_calcIdx(i, j, numRelations)) ? '1' : '0'
+				pf_bGet(relations, pf_calcIdx(i, j, numRelations)) ? '1' : '0'
 			);
 			if ((j + 1) < numRelations)
 			{
@@ -99,7 +99,7 @@ int main(int argc, char ** argv)
 
 
 	float * matrix = NULL;
-	result = dijkstra_makeMatrix(
+	result = pf_makeDistMatrix(
 		dm.pointsp,
 		&matrix,
 		dm.numMidPoints + 2,

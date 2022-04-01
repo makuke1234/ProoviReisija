@@ -4,12 +4,12 @@
 #include "dataModel.h"
 #include "priorityQ.h"
 
-void dijkstra_bSet(uint8_t * restrict bArray, size_t idx, bool value);
-bool dijkstra_bGet(const uint8_t * restrict bArray, size_t idx);
-size_t dijkstra_bArrBytes(size_t numItems);
-size_t dijkstra_calcIdx(size_t row, size_t col, size_t numCols);
+void pf_bSet(uint8_t * restrict bArray, size_t idx, bool value);
+bool pf_bGet(const uint8_t * restrict bArray, size_t idx);
+size_t pf_bArrBytes(size_t numItems);
+size_t pf_calcIdx(size_t row, size_t col, size_t numCols);
 
-bool dijkstra_createRelations(
+bool pf_createRelations(
 	uint8_t ** restrict prelations,
 	size_t * restrict numRelations,
 	const point_t *** restrict ppoints,
@@ -17,22 +17,22 @@ bool dijkstra_createRelations(
 	size_t numTeed
 );
 
-typedef struct prevdist
+typedef struct prevDist
 {
 	float dist;
 	const point_t * prev;
 
-} prevdist_t;
+} prevDist_t;
 
-bool dijkstra_search(
-	prevdist_t * restrict * restrict pprevdist,
+bool pf_dijkstraSearch(
+	prevDist_t * restrict * restrict pprevdist,
 	const point_t ** restrict points,
 	const uint8_t * restrict relations,
 	size_t numRelations,
 	const point_t * restrict start
 );
 
-bool dijkstra_makeMatrix(
+bool pf_makeDistMatrix(
 	const point_t * const restrict * restrict startpoints,
 	float * restrict * restrict pmatrix,
 	size_t numPoints,

@@ -5,26 +5,26 @@
 #include <math.h>
 #include <string.h>
 
-void dijkstra_bSet(uint8_t * restrict bArray, size_t idx, bool value)
+void pf_bSet(uint8_t * restrict bArray, size_t idx, bool value)
 {
 	const uint8_t sop = idx % 8, shift1 = 0x01 << sop, shift2 = value << sop;
 	const size_t idx8 = idx / 8;
 	bArray[idx8] = (uint8_t)((bArray[idx8] & ~shift1) | shift2);
 }
-bool dijkstra_bGet(const uint8_t * restrict bArray, size_t idx)
+bool pf_bGet(const uint8_t * restrict bArray, size_t idx)
 {
 	return (bArray[idx / 8] & (0x01 << (idx % 8))) != 0;
 }
-size_t dijkstra_bArrBytes(size_t numItems)
+size_t pf_bArrBytes(size_t numItems)
 {
 	return (numItems + 7) / 8;
 }
-size_t dijkstra_calcIdx(size_t row, size_t col, size_t numCols)
+size_t pf_calcIdx(size_t row, size_t col, size_t numCols)
 {
 	return row * numCols + col;
 }
 
-bool dijkstra_createRelations(
+bool pf_createRelations(
 	uint8_t ** restrict prelations,
 	size_t * restrict numRelations,
 	const point_t *** restrict ppoints,
@@ -50,7 +50,7 @@ bool dijkstra_createRelations(
 	}
 	assert(*numRelations > 0);
 
-	size_t memSize = dijkstra_bArrBytes((*numRelations) * (*numRelations));
+	size_t memSize = pf_bArrBytes((*numRelations) * (*numRelations));
 
 	uint8_t * relmem = calloc(memSize, 1);
 	if (relmem == NULL)
@@ -71,8 +71,8 @@ bool dijkstra_createRelations(
 		if (tee != NULL)
 		{
 			const size_t i1 = tee->src->idx, i2 = tee->dst->idx;
-			dijkstra_bSet(relmem, dijkstra_calcIdx(i1, i2, *numRelations), true);
-			dijkstra_bSet(relmem, dijkstra_calcIdx(i2, i1, *numRelations), true);
+			pf_bSet(relmem, pf_calcIdx(i1, i2, *numRelations), true);
+			pf_bSet(relmem, pf_calcIdx(i2, i1, *numRelations), true);
 			
 			points[i1] = tee->src;
 			points[i2] = tee->dst;
@@ -85,8 +85,8 @@ bool dijkstra_createRelations(
 }
 
 
-bool dijkstra_search(
-	prevdist_t * restrict * restrict pprevdist,
+bool pf_dijkstraSearch(
+	prevDist_t * restrict * restrict pprevdist,
 	const point_t ** restrict points,
 	const uint8_t * restrict relations,
 	size_t numRelations,
@@ -99,7 +99,7 @@ bool dijkstra_search(
 	assert(numRelations > 0);
 	assert(start != NULL);
 
-	prevdist_t * prevdist = (*pprevdist != NULL) ? *pprevdist : malloc(sizeof(prevdist_t) * numRelations);
+	prevDist_t * prevdist = (*pprevdist != NULL) ? *pprevdist : malloc(sizeof(prevDist_t) * numRelations);
 	if (prevdist == NULL)
 	{
 		return false;
@@ -113,14 +113,14 @@ bool dijkstra_search(
 	{
 		if (i != start->idx)
 		{
-			prevdist[i] = (prevdist_t){
+			prevdist[i] = (prevDist_t){
 				.dist = INFINITY,
 				.prev = NULL
 			};
 		}
 		else
 		{
-			prevdist[i] = (prevdist_t){
+			prevdist[i] = (prevDist_t){
 				.dist = 0.0f,
 				.prev = NULL
 			};
@@ -141,7 +141,7 @@ bool dijkstra_search(
 		for (size_t i = 0; i < numRelations; ++i)
 		{
 			// Check if point is neighbour
-			if ((i != uIdx) && dijkstra_bGet(relations, dijkstra_calcIdx(uIdx, i, numRelations)))
+			if ((i != uIdx) && pf_bGet(relations, pf_calcIdx(uIdx, i, numRelations)))
 			{
 				//Calc uvDist
 				float dx = points[uIdx]->x - points[i]->x;
@@ -150,7 +150,7 @@ bool dijkstra_search(
 				float alt = prevdist[uIdx].dist + uvDist;
 				if (alt < prevdist[i].dist)
 				{
-					prevdist[i] = (prevdist_t){
+					prevdist[i] = (prevDist_t){
 						.dist = alt,
 						.prev = points[uIdx]
 					};
@@ -166,7 +166,7 @@ bool dijkstra_search(
 	return true;
 }
 
-bool dijkstra_makeMatrix(
+bool pf_makeDistMatrix(
 	const point_t * const restrict * restrict startpoints,
 	float * restrict * restrict pmatrix,
 	size_t numPoints,
@@ -204,7 +204,7 @@ bool dijkstra_makeMatrix(
 	size_t numRelations;
 	uint8_t * relations = NULL;
 	const point_t ** points = NULL;
-	bool result = dijkstra_createRelations(
+	bool result = pf_createRelations(
 		&relations,
 		&numRelations,
 		&points,
@@ -218,10 +218,10 @@ bool dijkstra_makeMatrix(
 		return false;
 	}
 
-	prevdist_t * distances = NULL;
+	prevDist_t * distances = NULL;
 	for (size_t i = 0; i < (numPoints - 1); ++i)
 	{
-		result = dijkstra_search(
+		result = pf_dijkstraSearch(
 			&distances,
 			points,
 			relations,
