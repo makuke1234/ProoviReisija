@@ -314,12 +314,7 @@ size_t pq_extractMin(fibHeap_t * restrict q)
 void pq_decPriority(fibHeap_t * restrict q, size_t idx, float distance)
 {
 	assert(q != NULL);
-
-	if ((idx >= q->n_lut) || (q->lut[idx] == NULL))
-	{
-		pq_pushWithPriority(q, idx, distance);
-		return;
-	}
+	assert(idx < q->n_lut);
 
 	fibNode_t * n = q->lut[idx];
 	assert(distance <= n->key);
