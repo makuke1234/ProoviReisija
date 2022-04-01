@@ -1,4 +1,4 @@
-#include "dijkstra.h"
+#include "pathFinding.h"
 #include "mathHelper.h"
 
 #include <stdlib.h>
@@ -99,7 +99,7 @@ bool dijkstra_search(
 	assert(numRelations > 0);
 	assert(start != NULL);
 
-	prevdist_t * prevdist = malloc(sizeof(prevdist_t) * numRelations);
+	prevdist_t * prevdist = (*pprevdist != NULL) ? *pprevdist : malloc(sizeof(prevdist_t) * numRelations);
 	if (prevdist == NULL)
 	{
 		return false;
@@ -163,5 +163,101 @@ bool dijkstra_search(
 	pq_destroy(&pq);
 	*pprevdist = prevdist;
 
+	return true;
+}
+
+bool dijkstra_makeMatrix(
+	const point_t * const restrict * restrict startpoints,
+	float * restrict * restrict pmatrix,
+	size_t numPoints,
+	const line_t * const restrict * restrict teed,
+	size_t numTeed
+)
+{
+	assert(startpoints != NULL);
+	assert(pmatrix != NULL);
+
+	hashMapCK_t pmap;
+	if (!hashMapCK_init(&pmap, numPoints))
+	{
+		return false;
+	}
+
+	// Teeb algus-punktide räsitabeli
+	for (size_t i = 0; i < numPoints; ++i)
+	{
+		if (!hashMapCK_insert(&pmap, startpoints[i]->id.str, (void *)&startpoints[i]))
+		{
+			hashMapCK_destroy(&pmap);
+			return false;
+		}
+	}
+
+	float * matrix = calloc(numPoints * numPoints, sizeof(float));
+	if (matrix == NULL)
+	{
+		hashMapCK_destroy(&pmap);
+		return false;
+	}
+
+	// Teeb relatsioonide maatriksi kõigepealt
+	size_t numRelations;
+	uint8_t * relations = NULL;
+	const point_t ** points = NULL;
+	bool result = dijkstra_createRelations(
+		&relations,
+		&numRelations,
+		&points,
+		teed,
+		numTeed
+	);
+	if (!result)
+	{
+		hashMapCK_destroy(&pmap);
+		free(matrix);
+		return false;
+	}
+
+	prevdist_t * distances = NULL;
+	for (size_t i = 0; i < (numPoints - 1); ++i)
+	{
+		result = dijkstra_search(
+			&distances,
+			points,
+			relations,
+			numRelations,
+			startpoints[i]
+		);
+		if (!result)
+		{
+			hashMapCK_destroy(&pmap);
+			free(matrix);
+			free(points);
+			free(relations);
+			return false;
+		}
+
+		// Täidab maatriksit
+		for (size_t j = 0; j < numRelations; ++j)
+		{
+			hashNodeCK_t * node = hashMapCK_get(&pmap, points[j]->id.str);
+			const point_t ** ppoint = (node != NULL) ? node->value : NULL;
+			if ((ppoint != NULL) && (points[j] == *ppoint))
+			{
+				// Punkt on algus/lõpp-punkt
+				const size_t idx = (size_t)(ppoint - startpoints);
+				const float dist = distances[j].dist;
+				matrix[i   * numPoints + idx] = dist;
+				matrix[idx * numPoints + i  ] = dist;
+			}
+		}
+	}
+
+	hashMapCK_destroy(&pmap);
+	free(points);
+	free(distances);
+	free(relations);
+
+	*pmatrix = matrix;
 	return true;
 }

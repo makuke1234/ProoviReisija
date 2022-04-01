@@ -1,7 +1,7 @@
 #include "iniFile.h"
 #include "dataModel.h"
 #include "logger.h"
-#include "dijkstra.h"
+#include "pathFinding.h"
 #include "mathHelper.h"
 
 #include <stdio.h>
@@ -93,31 +93,44 @@ int main(int argc, char ** argv)
 		}
 		putchar('\n');
 	}
+	free(relations);
+	free(points);
 
-	prevdist_t * distances = NULL;
-	result = dijkstra_search(
-		&distances,
-		points,
-		relations,
-		numRelations,
-		dm.begp
+
+	float * matrix = NULL;
+	result = dijkstra_makeMatrix(
+		dm.pointsp,
+		&matrix,
+		dm.numMidPoints + 2,
+		(const line_t * const *)dm.teed,
+		dm.numTeed
 	);
 	if (!result)
 	{
 		fprintf(stderr, "Viga Dijkstra algoritmi t55s!\n");
 		return 1;
 	}
+	const size_t totalPoints = dm.numMidPoints + 2;
 
 
-	printf("Kaugused punktide vahel: \n");
-	for (size_t i = 0; i < numRelations; ++i)
+	printf("%8c ", ' ');
+	for (size_t i = 0; i < totalPoints; ++i)
 	{
-		prevdist_t * dist = &distances[i];
-		printf("Punkti %s kaudu -> %s: %.3f\n", dist->prev != NULL ? dist->prev->id.str : "pole", points[i]->id.str, (double)dist->dist);
+		printf("%8s ", dm.points[i].id.str);
 	}
-	free(points);
-	free(distances);
-	free(relations);
+	putchar('\n');
+	for (size_t i = 0; i < totalPoints; ++i)
+	{
+		float * row = &matrix[i * totalPoints];
+		printf("%8s ", dm.points[i].id.str);
+		for (size_t j = 0; j < totalPoints; ++j)
+		{
+			printf("%8.3f ", (double)row[j]);
+		}
+		putchar('\n');
+	}
+
+	free(matrix);
 
 
 	dm_destroy(&dm);

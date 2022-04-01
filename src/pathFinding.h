@@ -1,5 +1,5 @@
-#ifndef DIJKSTRA_H
-#define DIJKSTRA_H
+#ifndef PATH_FINDING_H
+#define PATH_FINDING_H
 
 #include "dataModel.h"
 #include "priorityQ.h"
@@ -30,6 +30,14 @@ bool dijkstra_search(
 	const uint8_t * restrict relations,
 	size_t numRelations,
 	const point_t * restrict start
+);
+
+bool dijkstra_makeMatrix(
+	const point_t * const restrict * restrict startpoints,
+	float * restrict * restrict pmatrix,
+	size_t numPoints,
+	const line_t * const restrict * restrict teed,
+	size_t numTeed
 );
 
 #endif
