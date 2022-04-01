@@ -1,5 +1,6 @@
 #include "pathFinding.h"
 #include "mathHelper.h"
+#include "logger.h"
 
 #include <stdlib.h>
 #include <math.h>
@@ -138,23 +139,27 @@ bool pf_dijkstraSearch(
 	{
 		size_t uIdx = pq_extractMin(&pq);
 		assert(uIdx != SIZE_MAX);
-		for (size_t i = 0; i < numRelations; ++i)
+
+		writeLogger("Extracted minimum: %s; %.3f", points[uIdx]->id.str, (double)prevdist[uIdx].dist);
+
+		for (size_t vIdx = 0; vIdx < pq.n_lut; ++vIdx)
 		{
 			// Check if point is neighbour
-			if ((i != uIdx) && pf_bGet(relations, pf_calcIdx(uIdx, i, numRelations)))
+			if ((pq.lut[vIdx] != NULL) && pf_bGet(relations, pf_calcIdx(uIdx, vIdx, numRelations)))
 			{
 				//Calc uvDist
-				float dx = points[uIdx]->x - points[i]->x;
-				float dy = points[uIdx]->y - points[i]->y;
-				float uvDist = sqrtf((dx * dx) + (dy * dy));
-				float alt = prevdist[uIdx].dist + uvDist;
-				if (alt < prevdist[i].dist)
+				const float dx = points[uIdx]->x - points[vIdx]->x;
+				const float dy = points[uIdx]->y - points[vIdx]->y;
+				const float alt = prevdist[uIdx].dist + sqrtf((dx * dx) + (dy * dy));
+				if (alt < prevdist[vIdx].dist)
 				{
-					prevdist[i] = (prevDist_t){
+					writeLogger("New minimum for %s is %.3f, old: %.3f", points[vIdx]->id.str, (double)alt, (double)prevdist[vIdx].dist);
+
+					prevdist[vIdx] = (prevDist_t){
 						.dist = alt,
 						.prev = points[uIdx]
 					};
-					pq_decPriority(&pq, i, alt);
+					pq_decPriority(&pq, vIdx, alt);
 				}
 			}
 		}
@@ -219,7 +224,7 @@ bool pf_makeDistMatrix(
 	}
 
 	prevDist_t * distances = NULL;
-	for (size_t i = 0; i < (numPoints - 1); ++i)
+	for (size_t i = 0; i < numPoints; ++i)
 	{
 		result = pf_dijkstraSearch(
 			&distances,
@@ -236,6 +241,17 @@ bool pf_makeDistMatrix(
 			free(relations);
 			return false;
 		}
+		
+		#if LOGGING_ENABLE == 1
+
+		// Log the dijkstra's path
+		writeLogger("Starting point: %s", startpoints[i]->id.str);
+		for (size_t j = 0; j < numRelations; ++j)
+		{
+			writeLogger("%s -> %s: %.3f", distances[j].prev == NULL ? startpoints[i]->id.str : distances[j].prev->id.str, points[j]->id.str, (double)distances[j].dist);
+		}
+
+		#endif
 
 		// Täidab maatriksit
 		for (size_t j = 0; j < numRelations; ++j)
