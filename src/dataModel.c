@@ -428,30 +428,6 @@ bool dm_addStops(dataModel_t * restrict dm)
 
 	size_t totPoints = 2 + dm->numMidPoints;
 
-	// Teeb praegustest teedest koopia
-	for (size_t i = 0; i < dm->numTeed; ++i)
-	{
-		if (dm->teed[i] == NULL)
-		{
-			return false;
-		}
-	}
-
-	size_t tNumTeed = dm->numTeed;
-	line_t * tTeed = malloc(sizeof(line_t) * tNumTeed);
-	if (tTeed == NULL)
-	{
-		return false;
-	}
-	for (size_t i = 0; i < dm->numTeed; ++i)
-	{
-		if (!line_init(&tTeed[i], dm->teed[i]->id.str, dm->teed[i]->src, dm->teed[i]->dst))
-		{
-			free(tTeed);
-			return false;
-		}
-	}
-
 	for (size_t i = 0; i < totPoints; ++i)
 	{
 		point_t * p = &dm->points[i];
@@ -461,10 +437,10 @@ bool dm_addStops(dataModel_t * restrict dm)
 		line_t * tee = NULL;
 		bool pointSet = false;
 
-		for (size_t j = 0; j < tNumTeed; ++j)
+		for (size_t j = 0; j < dm->numTeed; ++j)
 		{
 			point_t tempPoint;
-			line_intersect(&tempPoint, p, &tTeed[j]);
+			line_intersect(&tempPoint, p, dm->teed[j]);
 
 			float dx = tempPoint.x - p->x;
 			float dy = tempPoint.y - p->y;
@@ -482,7 +458,6 @@ bool dm_addStops(dataModel_t * restrict dm)
 
 		if (!pointSet || !iniString_copy(&bestPoint.id, &p->id))
 		{
-			free(tTeed);
 			return false;
 		}
 
@@ -493,7 +468,6 @@ bool dm_addStops(dataModel_t * restrict dm)
 		if (pointmem == NULL)
 		{
 			point_destroy(&bestPoint);
-			free(tTeed);
 			return false;
 		}
 		*pointmem = bestPoint;
@@ -502,14 +476,12 @@ bool dm_addStops(dataModel_t * restrict dm)
 		if (!hashMapCK_insert(&dm->ristmikud, pointmem->id.str, pointmem))
 		{
 			point_free(pointmem);
-			free(tTeed);
 			return false;
 		}
 
 		line_t * linemem = line_make(pointmem->id.str, pointmem, tee->dst);
 		if (linemem == NULL)
 		{
-			free(tTeed);
 			return false;
 		}
 
@@ -517,13 +489,10 @@ bool dm_addStops(dataModel_t * restrict dm)
 		if (!dm_addLine(dm, linemem))
 		{
 			line_free(linemem);
-			free(tTeed);
 			return false;
 		}
 		line_setDest(tee, pointmem);
 	}
-
-	free(tTeed);
 
 	return true;
 }
