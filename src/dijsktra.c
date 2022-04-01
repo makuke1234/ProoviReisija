@@ -85,7 +85,7 @@ bool dijkstra_createRelations(
 }
 
 
-bool dijkstra_search_poc(
+bool dijkstra_search(
 	prevdist_t * restrict * restrict pprevdist,
 	const point_t ** restrict points,
 	const uint8_t * restrict relations,

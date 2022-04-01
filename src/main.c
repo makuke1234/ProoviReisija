@@ -95,7 +95,7 @@ int main(int argc, char ** argv)
 	}
 
 	prevdist_t * distances = NULL;
-	result = dijkstra_search_poc(
+	result = dijkstra_search(
 		&distances,
 		points,
 		relations,
