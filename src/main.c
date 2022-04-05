@@ -132,7 +132,32 @@ int main(int argc, char ** argv)
 		putchar('\n');
 	}
 
+	printf("Permutatsioonide l2biproovimine...\n");
+
+	size_t * bestIndexes = NULL;
+	result = pf_findOptimalMatrixOrder(
+		matrix,
+		totalPoints,
+		0,
+		1,
+		&bestIndexes
+	);
 	free(matrix);
+
+	if (!result)
+	{
+		fprintf(stderr, "Viga optimaalse j2rjekorra leidmisel!\n");
+		return 1;
+	}
+
+	printf("Parim peatuste l2bimise j2rjekord:\n");
+	for (size_t i = 0; i < totalPoints; ++i)
+	{
+		printf("%s ", dm.points[bestIndexes[i]].id.str);
+	}
+	putchar('\n');
+
+	free(bestIndexes);
 
 
 	dm_destroy(&dm);

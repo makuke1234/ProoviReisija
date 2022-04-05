@@ -277,3 +277,188 @@ bool pf_makeDistMatrix(
 	*pmatrix = matrix;
 	return true;
 }
+
+typedef struct pf_qnode_impl
+{
+	size_t val;
+
+	struct pf_qnode_impl * prev, * next;
+} pf_qnode_implS;
+
+bool pf_qnode_push_impl(pf_qnode_implS ** restrict pq, size_t val)
+{
+	assert(pq != NULL);
+	pf_qnode_implS * n;
+	if (*pq == NULL)
+	{
+		*pq = malloc(sizeof(pf_qnode_implS));
+		n = *pq;
+		if (n == NULL)
+		{
+			return false;
+		}
+
+		n->prev = n;
+		n->next = n;
+	}
+	else
+	{
+		n = malloc(sizeof(pf_qnode_implS));
+		if (n == NULL)
+		{
+			return false;
+		}
+
+		n->prev = (*pq)->prev;
+		n->next = *pq;
+		(*pq)->prev->next = n;
+		(*pq)->prev = n;
+	}
+
+	n->val = val;
+
+	return true;
+}
+void pf_qnode_free_impl(pf_qnode_implS * restrict q)
+{
+	assert(q != NULL);
+
+	pf_qnode_implS * n = q;
+	do
+	{
+		pf_qnode_implS * next = n->next;
+		free(n);
+		n = next;
+	} while (n != q);
+}
+
+typedef struct
+{
+	size_t n;
+	size_t * arr;
+	pf_qnode_implS * q;
+} pf_perm_implS;
+
+typedef struct
+{
+	const float * mtx;
+	float lowest;
+
+	size_t n;
+	size_t startIdx, stopIdx;
+	size_t * arr;
+	size_t * best;
+
+	pf_perm_implS perm;
+
+} pf_fomo_implS;
+
+
+static inline float pf_fomo_dist_impl(pf_fomo_implS * restrict arg)
+{
+	float dist = 0.0f;
+
+	for (size_t i = 0, n_1 = arg->n - 1; i < n_1; ++i)
+	{
+		dist += arg->mtx[pf_calcIdx(arg->arr[i], arg->arr[i + 1], arg->n)];
+	}
+
+	return dist;
+}
+
+static inline void pf_fomo_iter_impl(pf_fomo_implS * restrict arg, size_t sz)
+{
+	if (sz == 0)
+	{
+		// Check current sequence against best
+		float dist = pf_fomo_dist_impl(arg);
+		if (dist < arg->lowest)
+		{
+			arg->lowest = dist;
+			memcpy(&arg->best[1], &arg->arr[1], sizeof(size_t) * arg->perm.n);
+		}
+		
+		return;
+	}
+
+	// Shuffle through all permutations
+	for (size_t i = 0; i < sz; ++i)
+	{
+		pf_qnode_implS * oldprev = arg->perm.q;
+		arg->perm.arr[arg->perm.n - sz] = oldprev->val;
+		arg->perm.q = oldprev->next;
+		oldprev->prev->next = arg->perm.q;
+		arg->perm.q->prev = oldprev->prev;
+
+		pf_fomo_iter_impl(arg, sz - 1);
+
+		oldprev->prev->next = oldprev;
+		arg->perm.q->prev = oldprev;
+	}
+}
+
+bool pf_findOptimalMatrixOrder(
+	const float * restrict matrix,
+	size_t numPoints,
+	size_t startIdx,
+	size_t stopIdx,
+	size_t ** restrict poutIndexes
+)
+{
+	assert(matrix != NULL);
+	assert(numPoints >= 2);
+	assert(startIdx < numPoints);
+	assert(stopIdx < numPoints);
+	assert(poutIndexes != NULL);
+	
+	pf_fomo_implS arg = {
+		.mtx      = matrix,
+		.lowest   = (float)INFINITY,
+		.n        = numPoints,
+		.startIdx = startIdx,
+		.stopIdx  = stopIdx,
+		.arr      = malloc(sizeof(size_t) * numPoints),
+		.best     = malloc(sizeof(size_t) * numPoints),
+		.perm     = {
+			.n   = numPoints - 2,
+			.arr = &arg.arr[1],
+			.q   = NULL
+		}
+	};
+	if ((arg.arr == NULL) || (arg.best == NULL))
+	{
+		if (arg.arr != NULL)
+		{
+			free(arg.arr);
+		}
+		else if (arg.best != NULL)
+		{
+			free(arg.best);
+		}
+		return false;
+	}
+	// Fill start and stop
+	arg.best[0]             = arg.arr[0]             = startIdx;
+	arg.best[numPoints - 1] = arg.arr[numPoints - 1] = stopIdx;
+
+	// Fill queue with starting indexes
+	for (size_t i = 0, j = 1; j < (numPoints - 1); ++i)
+	{
+		if ((i != stopIdx) && (i != startIdx))
+		{
+			++j;
+			if (pf_qnode_push_impl(&arg.perm.q, i) == false)
+			{
+				pf_qnode_free_impl(arg.perm.q);
+				return false;
+			}
+		}
+	}
+
+	pf_fomo_iter_impl(&arg, arg.perm.n);
+
+	free(arg.arr);
+	pf_qnode_free_impl(arg.perm.q);
+	*poutIndexes = arg.best;
+	return true;
+}

@@ -40,4 +40,12 @@ bool pf_makeDistMatrix(
 	size_t numTeed
 );
 
+bool pf_findOptimalMatrixOrder(
+	const float * restrict matrix,
+	size_t numPoints,
+	size_t startIdx,
+	size_t stopIdx,
+	size_t ** restrict poutIndexes
+);
+
 #endif
