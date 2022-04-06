@@ -28,9 +28,10 @@ Projekti ajalogi on saadaval [siin](./ajalogi.txt).
 
 - [x] Andmete lugemine failist
 - [x] Punktide lisamine vahepunktidena lähimatele teedele
-- [ ] Dijkstra algoritmi implementatsioon
-- [ ] Optimaalse teekonna leidmine
-- [ ] Lihtne kasutajaliides
+- [x] Dijkstra algoritmi implementatsioon
+- [x] Optimaalse teekonna leidmine
+- [x] Teedele anda "kaalud"/"hinnad"
+- [ ] Lihtne kasutajaliides teekonna kuvamiseks
 - [ ] Koodi dokumenteerimine
 
 
