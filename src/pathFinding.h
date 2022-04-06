@@ -51,8 +51,9 @@ size_t pf_calcIdx(size_t row, size_t col, size_t numCols);
  * @return true Success
  * @return false Failure
  */
-bool pf_createRelations(
+bool pf_createRelationsCosts(
 	uint8_t ** restrict prelations,
+	float ** restrict pcosts,
 	size_t * restrict numRelations,
 	const point_t *** restrict ppoints,
 	const line_t * const restrict * restrict teed,
@@ -87,6 +88,7 @@ bool pf_dijkstraSearch(
 	prevDist_t * restrict * restrict pprevdist,
 	const point_t ** restrict points,
 	const uint8_t * restrict relations,
+	const float * restrict costs,
 	size_t numRelations,
 	const point_t * restrict start
 );

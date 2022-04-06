@@ -27,8 +27,9 @@ size_t pf_calcIdx(size_t row, size_t col, size_t numCols)
 	return row * numCols + col;
 }
 
-bool pf_createRelations(
+bool pf_createRelationsCosts(
 	uint8_t ** restrict prelations,
+	float ** restrict pcosts,
 	size_t * restrict numRelations,
 	const point_t *** restrict ppoints,
 	const line_t * const restrict * restrict teed,
@@ -36,6 +37,7 @@ bool pf_createRelations(
 )
 {
 	assert(prelations != NULL);
+	assert(pcosts != NULL);
 	assert(numRelations != NULL);
 	assert(ppoints != NULL);
 	assert(teed != NULL);
@@ -61,13 +63,26 @@ bool pf_createRelations(
 	{
 		return false;
 	}
+	float * costs = malloc(sizeof(float) * (*numRelations) * (*numRelations));
+	if (costs == NULL)
+	{
+		free(relmem);
+		return false;
+	}
 
 	// Teeb ristmike pointerite massiivi
 	const point_t ** points = malloc(sizeof(const point_t *) * (*numRelations));
 	if (points == NULL)
 	{
 		free(relmem);
+		free(costs);
 		return false;
+	}
+
+	// Täidab "hindade" maatriksi esialgu igaks juhuks 1-dega
+	for (size_t i = 0, n = (*numRelations) * (*numRelations); i < n; ++i)
+	{
+		costs[i] = 1.0f;
 	}
 
 	// Täidab maatriksi ja ristmike pointerite massiivi
@@ -77,16 +92,22 @@ bool pf_createRelations(
 		if (tee != NULL)
 		{
 			const size_t i1 = tee->src->idx, i2 = tee->dst->idx;
-			pf_bSet(relmem, pf_calcIdx(i1, i2, *numRelations), true);
-			pf_bSet(relmem, pf_calcIdx(i2, i1, *numRelations), true);
+			const size_t ci1 = pf_calcIdx(i1, i2, *numRelations);
+			const size_t ci2 = pf_calcIdx(i2, i1, *numRelations);
+			pf_bSet(relmem, ci1, true);
+			pf_bSet(relmem, ci2, true);
+
+			costs[ci1] = tee->cost;
+			costs[ci2] = tee->cost;
 			
 			points[i1] = tee->src;
 			points[i2] = tee->dst;
 		}
 	}
-
+	
 	*prelations = relmem;
-	*ppoints = points;
+	*pcosts     = costs;
+	*ppoints    = points;
 	return true;
 }
 
@@ -95,6 +116,7 @@ bool pf_dijkstraSearch(
 	prevDist_t * restrict * restrict pprevdist,
 	const point_t ** restrict points,
 	const uint8_t * restrict relations,
+	const float * restrict costs,
 	size_t numRelations,
 	const point_t * restrict start
 )
@@ -102,6 +124,7 @@ bool pf_dijkstraSearch(
 	assert(pprevdist != NULL);
 	assert(points != NULL);
 	assert(relations != NULL);
+	assert(costs != NULL);
 	assert(numRelations >= 2);
 	assert(start != NULL);
 
@@ -149,7 +172,7 @@ bool pf_dijkstraSearch(
 	{
 		// Eemaldab lühima teepikkuse
 		size_t uIdx = pq_extractMin(&pq);
-		// Kontrollib igaks juhuks kas õnnestus DEBUG režiimis
+		// Kontrollib igaks juhuks kas õnnestus, aga ainult DEBUG režiimis
 		assert(uIdx != SIZE_MAX);
 
 		writeLogger("Extracted minimum: %s; %.3f", points[uIdx]->id.str, (double)prevdist[uIdx].dist);
@@ -162,7 +185,7 @@ bool pf_dijkstraSearch(
 			{
 				const float dx = points[uIdx]->x - points[vIdx]->x;
 				const float dy = points[uIdx]->y - points[vIdx]->y;
-				const float alt = prevdist[uIdx].dist + sqrtf((dx * dx) + (dy * dy));
+				const float alt = prevdist[uIdx].dist + sqrtf((dx * dx) + (dy * dy)) * costs[pf_calcIdx(uIdx, vIdx, numRelations)];
 				// Check if new distance is smaller than previous best
 				if (alt < prevdist[vIdx].dist)
 				{
@@ -228,9 +251,11 @@ bool pf_makeDistMatrix(
 	// Teeb relatsioonide maatriksi Dijkstra algoritmi jaoks
 	size_t numRelations;
 	uint8_t * relations = NULL;
+	float * costs = NULL;
 	const point_t ** points = NULL;
-	bool result = pf_createRelations(
+	bool result = pf_createRelationsCosts(
 		&relations,
+		&costs,
 		&numRelations,
 		&points,
 		teed,
@@ -253,6 +278,7 @@ bool pf_makeDistMatrix(
 			&distances,
 			points,
 			relations,
+			costs,
 			numRelations,
 			startpoints[i]
 		);
@@ -261,6 +287,7 @@ bool pf_makeDistMatrix(
 			hashMapCK_destroy(&pmap);
 			free(matrix);
 			free(points);
+			free(costs);
 			free(relations);
 			return false;
 		}
@@ -296,6 +323,7 @@ bool pf_makeDistMatrix(
 	hashMapCK_destroy(&pmap);
 	free(points);
 	free(distances);
+	free(costs);
 	free(relations);
 
 	*pmatrix = matrix;

@@ -44,9 +44,11 @@ int main(int argc, char ** argv)
 	// Koostab maatriksi lühimatest kaugustest punktide vahel
 	size_t numRelations;
 	uint8_t * relations = NULL;
+	float * costs = NULL;
 	const point_t ** points = NULL;
-	bool result = pf_createRelations(
+	bool result = pf_createRelationsCosts(
 		&relations,
+		&costs,
 		&numRelations,
 		&points,
 		(const line_t * const *)dm.teed,
@@ -68,11 +70,7 @@ int main(int argc, char ** argv)
 	printf("%*c ", maxplen, ' ');
 	for (size_t i = 0; i < numRelations; ++i)
 	{
-		printf("%*s", maxplen, points[i]->id.str);
-		if ((i + 1) < numRelations)
-		{
-			putchar(' ');
-		}
+		printf("%*s ", maxplen, points[i]->id.str);
 	}
 	putchar('\n');
 	for (size_t i = 0; i < numRelations; ++i)
@@ -93,7 +91,26 @@ int main(int argc, char ** argv)
 		}
 		putchar('\n');
 	}
+
+	printf("\"Hindade\" maatriks:\n");
+	printf("%*c ", 4, ' ');
+	for (size_t i = 0; i < numRelations; ++i)
+	{
+		printf("%*s ", 4, points[i]->id.str);
+	}
+	putchar('\n');
+	for (size_t i = 0; i < numRelations; ++i)
+	{
+		printf("%*s ", 4, points[i]->id.str);
+		for (size_t j = 0; j < numRelations; ++j)
+		{
+			printf("%4.0f ", (double)costs[pf_calcIdx(i, j, numRelations)]);
+		}
+		putchar('\n');
+	}
+
 	free(relations);
+	free(costs);
 	free(points);
 
 
