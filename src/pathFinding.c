@@ -8,12 +8,14 @@
 
 void pf_bSet(uint8_t * restrict bArray, size_t idx, bool value)
 {
+	assert(bArray != NULL);
 	const uint8_t sop = idx % 8, shift1 = 0x01 << sop, shift2 = value << sop;
 	const size_t idx8 = idx / 8;
 	bArray[idx8] = (uint8_t)((bArray[idx8] & ~shift1) | shift2);
 }
 bool pf_bGet(const uint8_t * restrict bArray, size_t idx)
 {
+	assert(bArray != NULL);
 	return (bArray[idx / 8] & (0x01 << (idx % 8))) != 0;
 }
 size_t pf_bArrBytes(size_t numItems)
@@ -39,6 +41,7 @@ bool pf_createRelations(
 	assert(teed != NULL);
 	assert(numTeed > 0);
 
+	// Leiab ristmike koguarvu
 	*numRelations = 0;
 	for (size_t i = 0; i < numTeed; ++i)
 	{
@@ -49,15 +52,17 @@ bool pf_createRelations(
 			*numRelations = mh_zmax(*numRelations, newRel);
 		}
 	}
-	assert(*numRelations > 0);
+	assert(*numRelations >= 2);
 
+	// Teeb 1D-massiivi, mis hoiab 2D-maatriksit relatsioonidest, täidab nullidega
 	size_t memSize = pf_bArrBytes((*numRelations) * (*numRelations));
-
 	uint8_t * relmem = calloc(memSize, 1);
 	if (relmem == NULL)
 	{
 		return false;
 	}
+
+	// Teeb ristmike pointerite massiivi
 	const point_t ** points = malloc(sizeof(const point_t *) * (*numRelations));
 	if (points == NULL)
 	{
@@ -65,7 +70,7 @@ bool pf_createRelations(
 		return false;
 	}
 
-	// Populate matrix
+	// Täidab maatriksi ja ristmike pointerite massiivi
 	for (size_t i = 0; i < numTeed; ++i)
 	{
 		const line_t * tee = teed[i];
@@ -97,19 +102,21 @@ bool pf_dijkstraSearch(
 	assert(pprevdist != NULL);
 	assert(points != NULL);
 	assert(relations != NULL);
-	assert(numRelations > 0);
+	assert(numRelations >= 2);
 	assert(start != NULL);
 
+	// Kui kasutaja ei andust prevDist massiivi, siis allokeerib selle jaoks mälu
 	prevDist_t * prevdist = (*pprevdist != NULL) ? *pprevdist : malloc(sizeof(prevDist_t) * numRelations);
 	if (prevdist == NULL)
 	{
 		return false;
 	}
 
+	// Initsialiseerib Fibonacci kuhja/hunniku
 	fibHeap_t pq;
 	pq_init(&pq);
 
-	// Initialise previous distance
+	// prevdist inistialiseeritakse, kõikidesse punktidesse on alguspunktis teepikkus esialgu lõpmata suur
 	for (size_t i = 0; i < numRelations; ++i)
 	{
 		if (i != start->idx)
@@ -127,6 +134,7 @@ bool pf_dijkstraSearch(
 			};
 		}
 
+		// Kui kuhja lisamine ebaõnnestub, siis "hävitab" kuhja ning tagastab 0
 		if (!pq_pushWithPriority(&pq, i, prevdist[i].dist))
 		{
 			pq_destroy(&pq);
@@ -135,30 +143,37 @@ bool pf_dijkstraSearch(
 		}
 	}
 
+	// Teeb senikaua kuni puu ei ole tühi
+	// Pseudokood: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm#Using_a_priority_queue
 	while (!pq_empty(&pq))
 	{
+		// Eemaldab lühima teepikkuse
 		size_t uIdx = pq_extractMin(&pq);
+		// Kontrollib igaks juhuks kas õnnestus DEBUG režiimis
 		assert(uIdx != SIZE_MAX);
 
 		writeLogger("Extracted minimum: %s; %.3f", points[uIdx]->id.str, (double)prevdist[uIdx].dist);
 
+		// Käib läbi kõik punkti naabrid
 		for (size_t vIdx = 0; vIdx < pq.n_lut; ++vIdx)
 		{
 			// Check if point is neighbour
 			if ((pq.lut[vIdx] != NULL) && pf_bGet(relations, pf_calcIdx(uIdx, vIdx, numRelations)))
 			{
-				//Calc uvDist
 				const float dx = points[uIdx]->x - points[vIdx]->x;
 				const float dy = points[uIdx]->y - points[vIdx]->y;
 				const float alt = prevdist[uIdx].dist + sqrtf((dx * dx) + (dy * dy));
+				// Check if new distance is smaller than previous best
 				if (alt < prevdist[vIdx].dist)
 				{
 					writeLogger("New minimum for %s is %.3f, old: %.3f", points[vIdx]->id.str, (double)alt, (double)prevdist[vIdx].dist);
 
+					// Re-initialize with new distance
 					prevdist[vIdx] = (prevDist_t){
 						.dist = alt,
 						.prev = points[uIdx]
 					};
+					// Decrease priority in Fibonacci heap
 					pq_decPriority(&pq, vIdx, alt);
 				}
 			}
@@ -181,7 +196,11 @@ bool pf_makeDistMatrix(
 {
 	assert(startpoints != NULL);
 	assert(pmatrix != NULL);
+	assert(numPoints >= 2);
+	assert(teed != NULL);
+	assert(numTeed > 0);
 
+	// Teeb hõlpsaks leidmiseks räsitabeli peatuspunktidest
 	hashMapCK_t pmap;
 	if (!hashMapCK_init(&pmap, numPoints))
 	{
@@ -198,6 +217,7 @@ bool pf_makeDistMatrix(
 		}
 	}
 
+	// Teeb 1D-allokeeritud 2D-maatriksi 
 	float * matrix = calloc(numPoints * numPoints, sizeof(float));
 	if (matrix == NULL)
 	{
@@ -205,7 +225,7 @@ bool pf_makeDistMatrix(
 		return false;
 	}
 
-	// Teeb relatsioonide maatriksi kõigepealt
+	// Teeb relatsioonide maatriksi Dijkstra algoritmi jaoks
 	size_t numRelations;
 	uint8_t * relations = NULL;
 	const point_t ** points = NULL;
@@ -224,8 +244,11 @@ bool pf_makeDistMatrix(
 	}
 
 	prevDist_t * distances = NULL;
-	for (size_t i = 0; i < numPoints; ++i)
+
+	// Viimast punkti ei pea läbi käima, sest kõikide eelnevate punktidega saab maatriksi täidetud
+	for (size_t i = 0, n_1 = numPoints - 1; i < n_1; ++i)
 	{
+		// Leiab lühimad teed kõikidesse punktidesse konkreetsest alguspunktist
 		result = pf_dijkstraSearch(
 			&distances,
 			points,
@@ -253,14 +276,15 @@ bool pf_makeDistMatrix(
 
 		#endif
 
-		// Täidab maatriksit
+		// Täidab maatriksit lühimate teedega, arvestab ainult soovitud peatuspunkte
 		for (size_t j = 0; j < numRelations; ++j)
 		{
+			// Kontrollib kas punkt on peatuspunkt või mitte
 			hashNodeCK_t * node = hashMapCK_get(&pmap, points[j]->id.str);
 			const point_t ** ppoint = (node != NULL) ? node->value : NULL;
 			if ((ppoint != NULL) && (points[j] == *ppoint))
 			{
-				// Punkt on algus/lõpp-punkt
+				// Arvutab punkti indeksi peatuste seas
 				const size_t idx = (size_t)(ppoint - startpoints);
 				const float dist = distances[j].dist;
 				matrix[i   * numPoints + idx] = dist;
@@ -288,9 +312,11 @@ typedef struct pf_qnode_impl
 bool pf_qnode_push_impl(pf_qnode_implS ** restrict pq, size_t val)
 {
 	assert(pq != NULL);
+
 	pf_qnode_implS * n;
 	if (*pq == NULL)
 	{
+		// Kui järjekorda ei eksisteeri, siis tekitab selle
 		*pq = malloc(sizeof(pf_qnode_implS));
 		n = *pq;
 		if (n == NULL)
@@ -303,6 +329,7 @@ bool pf_qnode_push_impl(pf_qnode_implS ** restrict pq, size_t val)
 	}
 	else
 	{
+		// Lisab uue punkti järjekorra lõppu
 		n = malloc(sizeof(pf_qnode_implS));
 		if (n == NULL)
 		{
@@ -315,6 +342,7 @@ bool pf_qnode_push_impl(pf_qnode_implS ** restrict pq, size_t val)
 		(*pq)->prev = n;
 	}
 
+	// Kirjutab soovitud väärtuse järjekorra uude elementi
 	n->val = val;
 
 	return true;
@@ -323,6 +351,7 @@ void pf_qnode_free_impl(pf_qnode_implS * restrict q)
 {
 	assert(q != NULL);
 
+	// "Kustutab" järjekorra elemente senikaua kuni ei ole uuesti algusesse jõudnud
 	pf_qnode_implS * n = q;
 	do
 	{
@@ -337,6 +366,7 @@ typedef struct
 	size_t n;
 	size_t * arr;
 	pf_qnode_implS * q;
+
 } pf_perm_implS;
 
 typedef struct
@@ -356,6 +386,7 @@ typedef struct
 
 static inline float pf_fomo_dist_impl(pf_fomo_implS * restrict arg)
 {
+	// Leiab antud punktide järjestusega teekonna pikkuse
 	float dist = 0.0f;
 
 	for (size_t i = 0, n_1 = arg->n - 1; i < n_1; ++i)
@@ -367,31 +398,39 @@ static inline float pf_fomo_dist_impl(pf_fomo_implS * restrict arg)
 }
 
 static inline void pf_fomo_iter_impl(pf_fomo_implS * restrict arg, size_t sz)
-{
+{	
+	// Kui üks "rida" on täidetud, siis kontrollib, äkki on leitud lühem punktide läbimisjärjekord
 	if (sz == 0)
 	{
-		// Check current sequence against best
 		float dist = pf_fomo_dist_impl(arg);
+		// Kui praegu leitud läbimisjärjekord on parem eelnevatest, siis uuendab hetke-parimat
 		if (dist < arg->lowest)
 		{
 			arg->lowest = dist;
 			memcpy(&arg->best[1], &arg->arr[1], sizeof(size_t) * arg->perm.n);
 		}
 		
+		// Teeb rekursiooni "katki"
 		return;
 	}
 
-	// Shuffle through all permutations
+	// "Keerutab" läbi kõikide permutatsioonide
 	for (size_t i = 0; i < sz; ++i)
 	{
+		// Jätab praeguse järjekorra "vana" alguse meelde
 		pf_qnode_implS * oldprev = arg->perm.q;
+		// Eemaldab esimese elemendi järjekorrast
 		arg->perm.arr[arg->perm.n - sz] = oldprev->val;
 		arg->perm.q = oldprev->next;
 		oldprev->prev->next = arg->perm.q;
 		arg->perm.q->prev = oldprev->prev;
 
+		// Proovib omakorda kõik permutatsioonid järgijäävate indeksitega läbi
+		// Rekursioon siin mälu-probleeme ei tekita, sest suure keerukuse tõttu jõuab arvuti
+		// max. 20-sügavust rekursiooni läbi teha
 		pf_fomo_iter_impl(arg, sz - 1);
 
+		// Lisab eelnevalt eemaldatud esimese elemendi järjekorra lõppu
 		oldprev->prev->next = oldprev;
 		arg->perm.q->prev = oldprev;
 	}
@@ -411,6 +450,7 @@ bool pf_findOptimalMatrixOrder(
 	assert(stopIdx < numPoints);
 	assert(poutIndexes != NULL);
 	
+	// Initsialiseerib andmestruktuuri permutatsioonide läbiproovimiseks
 	pf_fomo_implS arg = {
 		.mtx      = matrix,
 		.lowest   = (float)INFINITY,
@@ -425,6 +465,7 @@ bool pf_findOptimalMatrixOrder(
 			.q   = NULL
 		}
 	};
+	// Kontrollib mälu allokeerimise õnnestumist
 	if ((arg.arr == NULL) || (arg.best == NULL))
 	{
 		if (arg.arr != NULL)
@@ -437,11 +478,12 @@ bool pf_findOptimalMatrixOrder(
 		}
 		return false;
 	}
-	// Fill start and stop
+	// Algus- ja lõpp-punkt pannakse paika
 	arg.best[0]             = arg.arr[0]             = startIdx;
 	arg.best[numPoints - 1] = arg.arr[numPoints - 1] = stopIdx;
 
-	// Fill queue with starting indexes
+	// Täidetakse järjekorra andmestruktuur järjest kõikide punktide indeksitega, mis
+	// ei ole algus- ega lõpp-punkti omad, sest need jäävad alati paika
 	for (size_t i = 0, j = 1; j < (numPoints - 1); ++i)
 	{
 		if ((i != stopIdx) && (i != startIdx))
@@ -455,10 +497,14 @@ bool pf_findOptimalMatrixOrder(
 		}
 	}
 
+	// Proovib kõik permutatsioonid läbi, et leida lühim peatuste läbimise järjekord
 	pf_fomo_iter_impl(&arg, arg.perm.n);
 
+	// Ressursid vabastatakse
 	free(arg.arr);
 	pf_qnode_free_impl(arg.perm.q);
+
+	// Parim järjekord tagastatakse
 	*poutIndexes = arg.best;
 	return true;
 }
