@@ -43,6 +43,7 @@ size_t pf_calcIdx(size_t row, size_t col, size_t numCols);
  * @brief Creates relational matrix & unique junctions array from roads
  * 
  * @param prelations Pointer to receiving 1D array for the relational matrix
+ * @param pcosts Pointer to receiving 1D array for the costs matrix
  * @param numRelations Pointer to receiving the number of unique junctions
  * @param ppoints Pointer to receiving the array of unique junction pointers, data
  * in there corresponds directly to the rows/columns of the relational matrix
@@ -79,6 +80,7 @@ typedef struct prevDist
  * @param pprevdist Pointer to receiving prevDist structure array
  * @param points Array of unique junction pointers
  * @param relations Relational matrix
+ * @param costs Costs matrix corresponding to the relational matrix
  * @param numRelations Number of unique junctions
  * @param start Starting point pointer
  * @return true Success
