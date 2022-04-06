@@ -113,7 +113,8 @@ bool pf_makeDistMatrix(
 
 /**
  * @brief Finds optimal sequence of stops to take given the shortest distances
- * between any two points and the starting & stopping points.
+ * between any two points and the starting & stopping points. Uses Dijkstra search
+ * algorithm to find shortest distances between any two points.
  * 
  * @param matrix 1D-allocated shortest distances matrix
  * @param numPoints Number of (stopping) points
