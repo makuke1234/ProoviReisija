@@ -74,7 +74,7 @@ typedef struct line
 	iniString_t id;
 	const point_t * src, * dst;
 
-	float dx, dy, length;
+	float dx, dy, length, cost;
 
 } line_t;
 
@@ -90,7 +90,8 @@ void line_zero(line_t * restrict l);
  * @param l Pointer to line structure
  * @param pointmap Pointer to constant-keyed hashmap of points/junctions
  * @param idstr Identifier string
- * @param valuestr Value string, denotes 2 endpoint/junction identifiers with a pseudo-format of "%s,%s"
+ * @param valuestr Value string, denotes 2 endpoint/junction identifiers with a pseudo-format of "%s,%s".
+ * Can also include a cost of the road, then the pseudo-format is "%s,%s,%f".
  * @return true Success
  * @return false Failure
  */
@@ -121,6 +122,7 @@ line_t * line_makeStr(
  * @param idstr Identifier string
  * @param src Source point
  * @param dst Destination point
+ * @param cost The cost of that particular road
  * @return true Success
  * @return false Failure
  */
@@ -128,7 +130,8 @@ bool line_init(
 	line_t * restrict l,
 	const char * restrict idstr,
 	const point_t * restrict src,
-	const point_t * restrict dst
+	const point_t * restrict dst,
+	float cost
 );
 /**
  * @brief Initialises & heap-allocated memory for line structure with corresponding
@@ -137,12 +140,14 @@ bool line_init(
  * @param idstr Identifier string
  * @param src Source point
  * @param dst Destination point
+ * @param cost The cost of that particular road
  * @return line_t* Pointer to heap-allocated line structure, NULL on failure
  */
 line_t * line_make(
 	const char * restrict idstr,
 	const point_t * restrict src,
-	const point_t * restrict dst
+	const point_t * restrict dst,
+	float cost
 );
 
 /**

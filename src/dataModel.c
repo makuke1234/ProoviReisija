@@ -69,6 +69,11 @@ void line_zero(line_t * restrict l)
 	iniString_zero(&l->id);
 	l->src = NULL;
 	l->dst = NULL;
+
+	l->dx     = 0.0f;
+	l->dy     = 0.0f;
+	l->length = 0.0f;
+	l->cost   = 1.0f;
 }
 bool line_initStr(
 	line_t * restrict l,
@@ -86,26 +91,24 @@ bool line_initStr(
 		return false;
 	}
 	
-	char id1[MAX_ID], id2[MAX_ID];
+	char id1[MAX_ID], id2[MAX_ID], costStr[MAX_ID];
+	char * strs[] = { id1, id2, costStr };
 	bool found = false;
-	for (size_t i = 0, len = strlen(valuestr); i < len; ++i)
+	size_t prevStop = 0, j = 0, len = strlen(valuestr);
+	for (size_t i = 0; (i < len) && (j < 3); ++i)
 	{
 		if (valuestr[i] == ',')
 		{
 			found = true;
-			memcpy(id1, valuestr, sizeof(char) * i);
-			id1[i] = '\0';
-
+			memcpy(strs[j], &valuestr[prevStop], sizeof(char) * (i - prevStop));
+			strs[j][i - prevStop] = '\0';
+			++j;
 			++i;
-			for (; i < len; ++i)
+			while ((i < len) && ((valuestr[i] == ' ') || (valuestr[i] == '\t')))
 			{
-				if ((valuestr[i] != ' ') && (valuestr[i] != '\t'))
-				{
-					break;
-				}
+				++i;
 			}
-			
-			memcpy(id2, &valuestr[i], sizeof(char) * (len - i + 1));
+			prevStop = i;
 		}
 	}
 	if (!found)
@@ -113,7 +116,22 @@ bool line_initStr(
 		iniString_destroy(&l->id);
 		return false;
 	}
-	writeLogger("id1: \"%s\", id2: \"%s\"", id1, id2);
+	if (j < 3)
+	{
+		memcpy(strs[j], &valuestr[prevStop], sizeof(char) * (len - prevStop));
+		strs[j][len - prevStop] = '\0';
+	}
+	l->cost = 1.0f;
+	if (j == 2)
+	{
+		l->cost = (float)atof(costStr);
+		if (l->cost == 0.0f)
+		{
+			l->cost = 1.0f;
+		}
+	}
+
+	writeLogger("prevStop: %zu, id1: \"%s\", id2: \"%s\", cost: %f", prevStop, id1, id2, (double)l->cost);
 
 	const hashNodeCK_t * n1, * n2;
 	n1 = hashMapCK_get(pointmap, id1);
@@ -157,20 +175,23 @@ bool line_init(
 	line_t * restrict l,
 	const char * restrict idstr,
 	const point_t * restrict src,
-	const point_t * restrict dst
+	const point_t * restrict dst,
+	float cost
 )
 {
-	assert(l   != NULL);
-	assert(src != NULL);
-	assert(dst != NULL);
-	assert(src != dst);
+	assert(l    != NULL);
+	assert(src  != NULL);
+	assert(dst  != NULL);
+	assert(src  != dst);
+	assert(cost != 0.0f);
 
 	if (!iniString_init(&l->id, idstr, -1))
 	{
 		return false;
 	}
-	l->src = src;
-	l->dst = dst;
+	l->src  = src;
+	l->dst  = dst;
+	l->cost = cost;
 	line_calc(l);
 
 	return true;
@@ -178,7 +199,8 @@ bool line_init(
 line_t * line_make(
 	const char * restrict idstr,
 	const point_t * restrict src,
-	const point_t * restrict dst
+	const point_t * restrict dst,
+	float cost
 )
 {
 	assert(src != NULL);
@@ -190,7 +212,7 @@ line_t * line_make(
 	{
 		return false;
 	}
-	else if (!line_init(mem, idstr, src, dst))
+	else if (!line_init(mem, idstr, src, dst, cost))
 	{
 		free(mem);
 		return false;
@@ -442,9 +464,11 @@ bool dm_addStops(dataModel_t * restrict dm)
 			point_t tempPoint;
 			line_intersect(&tempPoint, p, dm->teed[j]);
 
-			float dx = tempPoint.x - p->x;
-			float dy = tempPoint.y - p->y;
+			const float dx = tempPoint.x - p->x;
+			const float dy = tempPoint.y - p->y;
 			float len2 = (dx * dx) + (dy * dy);
+			// Tee "hinda" võetakse ka arvesse, eelistatakse "kiiremaid" teid
+			len2 *= dm->teed[j]->cost;
 
 			if (!pointSet || (len2 < shortestLen2))
 			{
@@ -479,7 +503,7 @@ bool dm_addStops(dataModel_t * restrict dm)
 			return false;
 		}
 
-		line_t * linemem = line_make(pointmem->id.str, pointmem, tee->dst);
+		line_t * linemem = line_make(pointmem->id.str, pointmem, tee->dst, tee->cost);
 		if (linemem == NULL)
 		{
 			return false;
