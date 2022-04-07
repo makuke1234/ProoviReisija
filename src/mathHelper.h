@@ -38,6 +38,18 @@ intptr_t mh_imax(intptr_t a, intptr_t b);
 /* ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ */
 /* **** Funktsioonid kahe täisarvu maksimumi arvutamiseks **** */
 
+/** **** Funktsioonid kahe ujukoma-arvu miinimumi arvutamiseks **** */
+
+float mh_fminf(float a, float b);
+double mh_fmin(double a, double b);
+long double mh_fminl(long double a, long double b);
+
+/** **** Funktsioonid kahe ujukoma-arvu maksimumi leidmiseks **** */
+
+float mh_fmaxf(float a, float b);
+double mh_fmax(double a, double b);
+long double mh_fmaxl(long double a, long double b);
+
 
 
 /**

@@ -83,6 +83,32 @@ intptr_t mh_imax(intptr_t a, intptr_t b)
 }
 
 
+float mh_fminf(float a, float b)
+{
+	return (a < b) ? a : b;
+}
+double mh_fmin(double a, double b)
+{
+	return (a < b) ? a : b;
+}
+long double mh_fminl(long double a, long double b)
+{
+	return (a < b) ? a : b;
+}
+
+float mh_fmaxf(float a, float b)
+{
+	return (a < b) ? b : a;
+}
+double mh_fmax(double a, double b)
+{
+	return (a < b) ? b : a;
+}
+long double mh_fmaxl(long double a, long double b)
+{
+	return (a < b) ? b : a;
+}
+
 
 
 float mh_clampf(float value, float min, float max)
