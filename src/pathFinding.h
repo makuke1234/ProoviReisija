@@ -146,6 +146,24 @@ bool pf_findOptimalMatrixOrder(
 	size_t ** restrict poutIndexes
 );
 
+/**
+ * @brief Generates the detailed shortest path according to best order of stopping
+ * points, array of starting points, array of all points, relational matrix &
+ * cost matrix. The function also requires the total number of stops and the total
+ * number of points/junctions.
+ * 
+ * @param ppath Pointer to receiving path array
+ * @param ppathLen Pointer to receiving path array length
+ * @param bestIndexes Best stops sequence index array
+ * @param startpoints Starting points array
+ * @param numPoints Number of stops
+ * @param points Array of all points
+ * @param relations Relational matrix
+ * @param costs Road cost matrix
+ * @param numRelations Dimension of relational matrix, the number of all points
+ * @return true Success
+ * @return false Failure
+ */
 bool pf_generateShortestPath(
 	const point_t *** restrict ppath,
 	size_t * restrict ppathLen,
