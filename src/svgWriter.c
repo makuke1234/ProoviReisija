@@ -41,7 +41,7 @@ svgRGB_t svg_rgba32(uint32_t color)
 void svg_init()
 {
 	svgSettings = (struct svgSettings){
-		.pRadius = 2,
+		.pRadius  = 2,
 		.fontSize = 20
 	};
 }
@@ -60,8 +60,7 @@ bool svg_header(FILE * restrict fp, size_t width, size_t height, svgRGB_t backCo
 		fp,
 		"<svg version=\"1.1\" width=\"%zu\" height=\"%zu\" xmlns=\"http://www.w3.org/2000/svg\">\n"
 		"<rect width=\"100%%\" height=\"100%%\" fill=\"rgb(%hu, %hu, %hu)\" />\n\n",
-		width,
-		height,
+		width, height,
 		(uint16_t)backColor.r, (uint16_t)backColor.g, (uint16_t)backColor.b
 	) > 0;
 }
@@ -70,7 +69,10 @@ bool svg_line(FILE * restrict fp, const line_t * restrict l, svgRGB_t color)
 {
 	return fprintf(
 		fp,
-		"<"
+		"<line x1=\"%.1f\" y1=\"%.1f\" x2=\"%.1f\" y2=\"%.1f\" style=\"stroke:rgb(%hu, %hu, %hu);stroke-width:2\" />\n",
+		(double)l->src->x, (double)l->src->y,
+		(double)l->dst->x, (double)l->dst->y,
+		(uint16_t)color.r, (uint16_t)color.g, (uint16_t)color.b
 	);
 }
 bool svg_linePoint(FILE * restrict fp, const line_t * restrict l, svgRGB_t color, bool drawSrc)
@@ -79,14 +81,15 @@ bool svg_linePoint(FILE * restrict fp, const line_t * restrict l, svgRGB_t color
 }
 bool svg_point(FILE * restrict fp, const point_t * restrict p, svgRGB_t color)
 {
+	const double x = (double)p->x, y = (double)p->y;
 	return fprintf(
 		fp,
-		"<circle cx=\"%zu\" cy=\"%zu\" r=\"%zu\" fill=\"rgb(%hu, %hu, %hu)\" />\n"
-		"<text cx=\"%zu\" cy=\"%zu\" font-size=\"%zu\" text-anchor=\"\" fill=\"black\">%s</text>\n",
-		p->x, p->y,
+		"<circle cx=\"%.1f\" cy=\"%.1f\" r=\"%zu\" fill=\"rgb(%hu, %hu, %hu)\" />\n"
+		"<text cx=\"%.1f\" cy=\"%.1f\" font-size=\"%zu\" text-anchor=\"\" fill=\"black\">%s</text>\n",
+		x, y,
 		svgSettings.pRadius,
 		(uint16_t)color.r, (uint16_t)color.g, (uint16_t)color.b,
-		p->x, p->y,
+		x, y,
 		svgSettings.fontSize,
 		p->id.str
 	);
