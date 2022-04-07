@@ -304,8 +304,13 @@ int main(int argc, char ** argv)
 				.dst = &dm.end
 			};
 			svg_line(fsvg, &line, blue);
-			svg_text(fsvg, dm.beg.x, dm.beg.y, "Start");
-			svg_text(fsvg, dm.end.x, dm.end.y, "Finiš");
+
+			point_t p = dm.beg;
+			p.id.str = "Start";
+			svg_point(fsvg, &p, blue);
+			p = dm.end;
+			p.id.str = "Finiš";
+			svg_point(fsvg, &p, blue);
 
 			for (size_t i = 0; i < dm.numMidPoints; ++i)
 			{
