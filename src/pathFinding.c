@@ -544,3 +544,121 @@ bool pf_findOptimalMatrixOrder(
 	*poutIndexes = arg.best;
 	return true;
 }
+
+bool pf_generateShortestPath(
+	const point_t *** restrict ppath,
+	size_t * restrict ppathLen,
+	const size_t * restrict bestIndexes,
+	const point_t ** restrict startpoints,
+	size_t numPoints,
+	const point_t ** restrict points,
+	const uint8_t * restrict relations,
+	const float * restrict costs,
+	size_t numRelations
+)
+{
+	assert(ppath        != NULL);
+	assert(ppathLen     != NULL);
+	assert(bestIndexes  != NULL);
+	assert(startpoints  != NULL);
+	assert(numPoints    >= 2);
+	assert(points       != NULL);
+	assert(relations    != NULL);
+	assert(costs        != NULL);
+	assert(numRelations > 0);
+
+	size_t pathLen = 1, pathCap = 16;
+	const point_t ** path = malloc(pathCap * sizeof(const point_t *));
+	if (path == NULL)
+	{
+		return false;
+	}
+	path[0] = startpoints[bestIndexes[0]];
+
+	const point_t ** smallPath = malloc(sizeof(const point_t *) * numRelations);
+	size_t smallPathLen = 0;
+	if (smallPath == NULL)
+	{
+		free(path);
+		return false;
+	}
+
+
+	prevDist_t * distances = NULL;
+	for (size_t i = 0, n_1 = numPoints - 1; i < n_1; ++i)
+	{
+		const point_t * start = startpoints[bestIndexes[i]];
+		const point_t * stop  = startpoints[bestIndexes[i + 1]];
+
+		bool result = pf_dijkstraSearch(
+			&distances,
+			points,
+			relations,
+			costs,
+			numRelations,
+			start
+		);
+		if (!result)
+		{
+			free(smallPath);
+			free(path);
+			return false;
+		}
+
+		// Teeb uue raja alates lõpp-punktist kuni alguseni
+		const point_t * node = stop;
+		smallPathLen = 0;
+		for (size_t j = 0; j < numRelations; ++j)
+		{
+			if (node == start)
+			{
+				break;
+			}
+
+			smallPath[j] = node;
+			++smallPathLen;
+			node = distances[node->idx].prev;
+		}
+
+		// Vajadusel suurendab raja pikkust
+		if ((pathLen + smallPathLen) > pathCap)
+		{
+			const size_t newCap = (pathLen + smallPathLen + 1) * 2;
+			const point_t ** newmem = realloc(path, newCap * sizeof(const point_t *));
+			if (newmem == NULL)
+			{
+				free(smallPath);
+				free(path);
+				free(distances);
+				return false;
+			}
+
+			path    = newmem;
+			pathCap = newCap;
+		}
+
+		// Lisab saadud tulemuse tagurpidi praegusele rajale
+
+		for (size_t j = 0, idx = smallPathLen - 1; j < smallPathLen; ++j, --idx)
+		{
+			path[pathLen] = smallPath[idx];
+			++pathLen;
+		}
+	}
+
+	free(smallPath);
+	free(distances);
+
+	if (pathCap > pathLen)
+	{
+		const point_t ** pathmem = realloc(path, sizeof(const point_t *) * pathLen);
+		if (pathmem != NULL)
+		{
+			path = pathmem;
+		}
+	}
+	*ppath    = path;
+	*ppathLen = pathLen;
+
+	return true;
+}

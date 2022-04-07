@@ -107,7 +107,7 @@ bool pf_dijkstraSearch(
 
 /**
  * @brief Creates 1D-allocated 2D matrix of shortest distances between any
- * two desired point.
+ * two desired points.
  * 
  * @param startpoints Array of starting point pointers 
  * @param pmatrix Pointer to receiving 1D matrix of shortest distances
@@ -144,6 +144,18 @@ bool pf_findOptimalMatrixOrder(
 	size_t startIdx,
 	size_t stopIdx,
 	size_t ** restrict poutIndexes
+);
+
+bool pf_generateShortestPath(
+	const point_t *** restrict ppath,
+	size_t * restrict ppathLen,
+	const size_t * restrict bestIndexes,
+	const point_t ** restrict startpoints,
+	size_t numPoints,
+	const point_t ** restrict points,
+	const uint8_t * restrict relations,
+	const float * restrict costs,
+	size_t numRelations
 );
 
 #endif
