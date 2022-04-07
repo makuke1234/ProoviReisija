@@ -5,6 +5,7 @@ struct svgSettings
 	size_t pRadius, fontSize;
 
 	double scalex, scaley;
+	const char * font;
 };
 
 static struct svgSettings svgSettings;
@@ -43,7 +44,8 @@ void svg_init(void)
 {
 	svgSettings = (struct svgSettings){
 		.pRadius  = SVG_POINT_RADIUS,
-		.fontSize = SVG_FONT_SIZE
+		.fontSize = SVG_FONT_SIZE,
+		.font     = ""
 	};
 }
 void svg_setPointRadius(size_t radius)
@@ -53,6 +55,10 @@ void svg_setPointRadius(size_t radius)
 void svg_setFontSize(size_t sz)
 {
 	svgSettings.fontSize = sz;
+}
+void svg_setFont(const char * restrict font)
+{
+	svgSettings.font = font;
 }
 
 bool svg_header(FILE * restrict fp, int64_t x, int64_t y, size_t width, size_t height, svgRGB_t backColor)
@@ -75,10 +81,11 @@ bool svg_header(FILE * restrict fp, int64_t x, int64_t y, size_t width, size_t h
 
 	return fprintf(
 		fp,
-		"<svg version=\"1.1\" width=\"%zu\" height=\"%zu\" viewBox=\"%lld %lld %zu %zu\" xmlns=\"http://www.w3.org/2000/svg\">\n"
+		"<svg version=\"1.1\" width=\"%zu\" height=\"%zu\" viewBox=\"%lld %lld %zu %zu\" font-family=\"%s\" xmlns=\"http://www.w3.org/2000/svg\">\n"
 		"<rect x=\"%lld\" y=\"%lld\" width=\"100%%\" height=\"100%%\" fill=\"rgb(%hu, %hu, %hu)\" />\n\n",
 		SVG_WIDTH, newHeight,
 		vx, -vy, SVG_WIDTH, newHeight,
+		svgSettings.font,
 		vx, -vy,
 		(uint16_t)backColor.r, (uint16_t)backColor.g, (uint16_t)backColor.b
 	) > 0;

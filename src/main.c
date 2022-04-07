@@ -220,6 +220,7 @@ int main(int argc, char ** argv)
 			}
 
 			svg_init();
+			svg_setFont("Hermit");
 			svg_header(fsvg, (int64_t)minw, (int64_t)maxh, (size_t)(maxw - minw), (size_t)(maxh - minh), svg_rgba32(0xCCCCCCFF));
 
 			svgRGB_t color = svg_rgba32(0x888888FF);

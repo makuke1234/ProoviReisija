@@ -69,6 +69,12 @@ void svg_setPointRadius(size_t radius);
  * @param sz Font size
  */
 void svg_setFontSize(size_t sz);
+/**
+ * @brief Sets the font to draw with to the SVG
+ * 
+ * @param font Font name string
+ */
+void svg_setFont(const char * restrict font);
 
 /**
  * @brief Writes the SVG file header to file.
