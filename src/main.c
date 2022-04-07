@@ -115,7 +115,7 @@ int main(int argc, char ** argv)
 
 
 
-	float * matrix = NULL;
+	distActual_t * matrix = NULL;
 	result = pf_makeDistMatrix(
 		dm.pointsp,
 		&matrix,
@@ -131,7 +131,7 @@ int main(int argc, char ** argv)
 	const size_t totalPoints = dm.numMidPoints + 2;
 
 
-	printf("Peatuste vaheliste kauguste maatriks:\n");
+	printf("Peatuste vaheliste \"hindade\" maatriks:\n");
 	printf("%8c ", ' ');
 	for (size_t i = 0; i < totalPoints; ++i)
 	{
@@ -140,11 +140,29 @@ int main(int argc, char ** argv)
 	putchar('\n');
 	for (size_t i = 0; i < totalPoints; ++i)
 	{
-		float * row = &matrix[i * totalPoints];
+		distActual_t * row = &matrix[i * totalPoints];
 		printf("%8s ", dm.points[i].id.str);
 		for (size_t j = 0; j < totalPoints; ++j)
 		{
-			printf("%8.3f ", (double)row[j]);
+			printf("%8.3f ", (double)row[j].dist);
+		}
+		putchar('\n');
+	}
+
+	printf("Peatuste vaheliste tegelike kauguste maatriks:\n");
+	printf("%8c ", ' ');
+	for (size_t i = 0; i < totalPoints; ++i)
+	{
+		printf("%8s ", dm.points[i].id.str);
+	}
+	putchar('\n');
+	for (size_t i = 0; i < totalPoints; ++i)
+	{
+		distActual_t * row = &matrix[i * totalPoints];
+		printf("%8s ", dm.points[i].id.str);
+		for (size_t j = 0; j < totalPoints; ++j)
+		{
+			printf("%8.3f ", (double)row[j].actual);
 		}
 		putchar('\n');
 	}
@@ -159,7 +177,6 @@ int main(int argc, char ** argv)
 		1,
 		&bestIndexes
 	);
-	free(matrix);
 
 	if (!result)
 	{
@@ -170,9 +187,21 @@ int main(int argc, char ** argv)
 	printf("Parim peatuste l2bimise j2rjekord:\n");
 	for (size_t i = 0; i < totalPoints; ++i)
 	{
-		printf("%s ", dm.points[bestIndexes[i]].id.str);
+		printf("%s", dm.points[bestIndexes[i]].id.str);
+		if (i < (totalPoints - 1))
+		{
+			printf(" -> ");
+		}
 	}
 	putchar('\n');
+	float total = 0.0f;
+	for (size_t i = 0, n_1 = totalPoints - 1; i < n_1; ++i)
+	{
+		total += matrix[pf_calcIdx(bestIndexes[i], bestIndexes[i + 1], totalPoints)].actual;
+	}
+	free(matrix);
+
+	printf("Teekond kokku: %.3f km\n", (double)total / 1000.0);
 
 	free(bestIndexes);
 

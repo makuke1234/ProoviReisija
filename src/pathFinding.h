@@ -68,10 +68,20 @@ bool pf_createRelationsCosts(
  */
 typedef struct prevDist
 {
-	float dist;
+	float dist, actual;
 	const point_t * prev;
 
 } prevDist_t;
+
+/**
+ * @brief Data structure to hold distance with costs involved and real distance
+ * 
+ */
+typedef struct distActual
+{
+	float dist, actual;
+
+} distActual_t;
 
 /**
  * @brief Performs the Dijkstra optimal path search algorithm starting from given point.
@@ -109,7 +119,7 @@ bool pf_dijkstraSearch(
  */
 bool pf_makeDistMatrix(
 	const point_t * const restrict * restrict startpoints,
-	float * restrict * restrict pmatrix,
+	distActual_t * restrict * restrict pmatrix,
 	size_t numPoints,
 	const line_t * const restrict * restrict teed,
 	size_t numTeed
@@ -129,7 +139,7 @@ bool pf_makeDistMatrix(
  * @return false Failure
  */
 bool pf_findOptimalMatrixOrder(
-	const float * restrict matrix,
+	const distActual_t * restrict matrix,
 	size_t numPoints,
 	size_t startIdx,
 	size_t stopIdx,

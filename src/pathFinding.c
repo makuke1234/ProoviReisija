@@ -145,15 +145,17 @@ bool pf_dijkstraSearch(
 		if (i != start->idx)
 		{
 			prevdist[i] = (prevDist_t){
-				.dist = INFINITY,
-				.prev = NULL
+				.dist   = INFINITY,
+				.actual = INFINITY,
+				.prev   = NULL
 			};
 		}
 		else
 		{
 			prevdist[i] = (prevDist_t){
-				.dist = 0.0f,
-				.prev = NULL
+				.dist   = 0.0f,
+				.actual = 0.0f,
+				.prev   = NULL
 			};
 		}
 
@@ -185,7 +187,9 @@ bool pf_dijkstraSearch(
 			{
 				const float dx = points[uIdx]->x - points[vIdx]->x;
 				const float dy = points[uIdx]->y - points[vIdx]->y;
-				const float alt = prevdist[uIdx].dist + sqrtf((dx * dx) + (dy * dy)) * costs[pf_calcIdx(uIdx, vIdx, numRelations)];
+				const float cost = costs[pf_calcIdx(uIdx, vIdx, numRelations)];
+				const float dist = sqrtf((dx * dx) + (dy * dy));
+				const float alt = prevdist[uIdx].dist + dist * cost;
 				// Check if new distance is smaller than previous best
 				if (alt < prevdist[vIdx].dist)
 				{
@@ -193,8 +197,9 @@ bool pf_dijkstraSearch(
 
 					// Re-initialize with new distance
 					prevdist[vIdx] = (prevDist_t){
-						.dist = alt,
-						.prev = points[uIdx]
+						.dist   = alt,
+						.actual = prevdist[uIdx].actual + dist,
+						.prev   = points[uIdx]
 					};
 					// Decrease priority in Fibonacci heap
 					pq_decPriority(&pq, vIdx, alt);
@@ -211,7 +216,7 @@ bool pf_dijkstraSearch(
 
 bool pf_makeDistMatrix(
 	const point_t * const restrict * restrict startpoints,
-	float * restrict * restrict pmatrix,
+	distActual_t * restrict * restrict pmatrix,
 	size_t numPoints,
 	const line_t * const restrict * restrict teed,
 	size_t numTeed
@@ -241,7 +246,7 @@ bool pf_makeDistMatrix(
 	}
 
 	// Teeb 1D-allokeeritud 2D-maatriksi 
-	float * matrix = calloc(numPoints * numPoints, sizeof(float));
+	distActual_t * matrix = calloc(numPoints * numPoints, sizeof(distActual_t));
 	if (matrix == NULL)
 	{
 		hashMapCK_destroy(&pmap);
@@ -313,9 +318,12 @@ bool pf_makeDistMatrix(
 			{
 				// Arvutab punkti indeksi peatuste seas
 				const size_t idx = (size_t)(ppoint - startpoints);
-				const float dist = distances[j].dist;
-				matrix[i   * numPoints + idx] = dist;
-				matrix[idx * numPoints + i  ] = dist;
+				const distActual_t distActual = {
+					.dist   = distances[j].dist,
+					.actual = distances[j].actual
+				};
+				matrix[i   * numPoints + idx] = distActual;
+				matrix[idx * numPoints + i  ] = distActual;
 			}
 		}
 	}
@@ -399,7 +407,7 @@ typedef struct
 
 typedef struct
 {
-	const float * mtx;
+	const distActual_t * mtx;
 	float lowest;
 
 	size_t n;
@@ -419,7 +427,7 @@ static inline float pf_fomo_dist_impl(pf_fomo_implS * restrict arg)
 
 	for (size_t i = 0, n_1 = arg->n - 1; i < n_1; ++i)
 	{
-		dist += arg->mtx[pf_calcIdx(arg->arr[i], arg->arr[i + 1], arg->n)];
+		dist += arg->mtx[pf_calcIdx(arg->arr[i], arg->arr[i + 1], arg->n)].dist;
 	}
 
 	return dist;
@@ -465,7 +473,7 @@ static inline void pf_fomo_iter_impl(pf_fomo_implS * restrict arg, size_t sz)
 }
 
 bool pf_findOptimalMatrixOrder(
-	const float * restrict matrix,
+	const distActual_t * restrict matrix,
 	size_t numPoints,
 	size_t startIdx,
 	size_t stopIdx,
