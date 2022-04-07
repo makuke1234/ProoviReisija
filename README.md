@@ -37,6 +37,7 @@ Näidisväljund:
 ![Näidisväljund](./out.svg)
 
 - [x] Koodi dokumenteerimine
+- [ ] Aruande koostamine
 
 
 # Materjalid
