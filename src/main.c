@@ -3,9 +3,11 @@
 #include "logger.h"
 #include "pathFinding.h"
 #include "mathHelper.h"
+#include "svgWriter.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 int main(int argc, char ** argv)
 {
@@ -13,7 +15,7 @@ int main(int argc, char ** argv)
 
 	if (argc < 2)
 	{
-		fprintf(stderr, "Kasutus: %s [info fail.ini]\n", argv[0]);
+		fprintf(stderr, "Kasutus: %s [info fail.ini] ([v2ljund-pilt.svg])\n", argv[0]);
 		return 1;
 	}
 
@@ -109,17 +111,14 @@ int main(int argc, char ** argv)
 		putchar('\n');
 	}
 
-	free(relations);
-	free(costs);
-	free(points);
 
-
+	const size_t totalStops = dm.numMidPoints + 2;
 
 	distActual_t * matrix = NULL;
 	result = pf_makeDistMatrix(
 		dm.pointsp,
 		&matrix,
-		dm.numMidPoints + 2,
+		totalStops,
 		(const line_t * const *)dm.teed,
 		dm.numTeed
 	);
@@ -128,21 +127,19 @@ int main(int argc, char ** argv)
 		fprintf(stderr, "Viga Dijkstra algoritmi t55s!\n");
 		return 1;
 	}
-	const size_t totalPoints = dm.numMidPoints + 2;
-
 
 	printf("Peatuste vaheliste \"hindade\" maatriks:\n");
 	printf("%8c ", ' ');
-	for (size_t i = 0; i < totalPoints; ++i)
+	for (size_t i = 0; i < totalStops; ++i)
 	{
 		printf("%8s ", dm.points[i].id.str);
 	}
 	putchar('\n');
-	for (size_t i = 0; i < totalPoints; ++i)
+	for (size_t i = 0; i < totalStops; ++i)
 	{
-		distActual_t * row = &matrix[i * totalPoints];
+		distActual_t * row = &matrix[i * totalStops];
 		printf("%8s ", dm.points[i].id.str);
-		for (size_t j = 0; j < totalPoints; ++j)
+		for (size_t j = 0; j < totalStops; ++j)
 		{
 			printf("%8.3f ", (double)row[j].dist);
 		}
@@ -151,16 +148,16 @@ int main(int argc, char ** argv)
 
 	printf("Peatuste vaheliste tegelike kauguste maatriks:\n");
 	printf("%8c ", ' ');
-	for (size_t i = 0; i < totalPoints; ++i)
+	for (size_t i = 0; i < totalStops; ++i)
 	{
 		printf("%8s ", dm.points[i].id.str);
 	}
 	putchar('\n');
-	for (size_t i = 0; i < totalPoints; ++i)
+	for (size_t i = 0; i < totalStops; ++i)
 	{
-		distActual_t * row = &matrix[i * totalPoints];
+		distActual_t * row = &matrix[i * totalStops];
 		printf("%8s ", dm.points[i].id.str);
-		for (size_t j = 0; j < totalPoints; ++j)
+		for (size_t j = 0; j < totalStops; ++j)
 		{
 			printf("%8.3f ", (double)row[j].actual);
 		}
@@ -172,7 +169,7 @@ int main(int argc, char ** argv)
 	size_t * bestIndexes = NULL;
 	result = pf_findOptimalMatrixOrder(
 		matrix,
-		totalPoints,
+		totalStops,
 		0,
 		1,
 		&bestIndexes
@@ -185,24 +182,153 @@ int main(int argc, char ** argv)
 	}
 
 	printf("Parim peatuste l2bimise j2rjekord:\n");
-	for (size_t i = 0; i < totalPoints; ++i)
+	for (size_t i = 0; i < totalStops; ++i)
 	{
 		printf("%s", dm.points[bestIndexes[i]].id.str);
-		if (i < (totalPoints - 1))
+		if (i < (totalStops - 1))
 		{
 			printf(" -> ");
 		}
 	}
 	putchar('\n');
 	float total = 0.0f;
-	for (size_t i = 0, n_1 = totalPoints - 1; i < n_1; ++i)
+	for (size_t i = 0, n_1 = totalStops - 1; i < n_1; ++i)
 	{
-		total += matrix[pf_calcIdx(bestIndexes[i], bestIndexes[i + 1], totalPoints)].actual;
+		total += matrix[pf_calcIdx(bestIndexes[i], bestIndexes[i + 1], totalStops)].actual;
 	}
-	free(matrix);
-
 	printf("Teekond kokku: %.3f km\n", (double)total / 1000.0);
 
+	if (argc > 2)
+	{
+		// SVG failinimi on antud
+		FILE * fsvg = fopen(argv[2], "w");
+		if (fsvg == NULL)
+		{
+			fprintf(stderr, "SVG faili avamine eba6nnestus!\n");
+		}
+		else
+		{
+			printf("SVG faili kirjutamine...\n");
+			float maxw = -INFINITY, minw = INFINITY, maxh = -INFINITY, minh = INFINITY;
+			for (size_t i = 0; i < numRelations; ++i)
+			{
+				const float px = points[i]->x, py = points[i]->y;
+				maxw = mh_fmaxf(maxw, px);
+				minw = mh_fminf(minw, px);
+				maxh = mh_fmaxf(maxh, py);
+				minh = mh_fminf(minh, py);
+			}
+
+			svg_init();
+			svg_header(fsvg, (int64_t)minw, (int64_t)maxh, (size_t)(maxw - minw), (size_t)(maxh - minh), svg_rgba32(0xCCCCCCFF));
+
+			svgRGB_t color = svg_rgba32(0x888888FF);
+
+			for (size_t i = 0; i < dm.numTeed; ++i)
+			{
+				svg_line(fsvg, dm.teed[i], color);
+			}
+
+			// Joonistab lühima teekonna
+			color = svg_rgba32(0xFF1111FF);
+			size_t pathLen;
+			const point_t ** path = NULL;
+			result = pf_generateShortestPath(
+				&path,
+				&pathLen,
+				bestIndexes,
+				dm.pointsp,
+				totalStops,
+				points,
+				relations,
+				costs,
+				numRelations
+			);
+			if (!result)
+			{
+				fprintf(stderr, "Lyhima teekonna genereerimine nurjus!\n");
+				return 1;
+			}
+			
+			printf("Teekond pikalt:\n");
+
+			hashMapCK_t spmap;
+			if (!hashMap_init(&spmap, totalStops))
+			{
+				fprintf(stderr, "R2sitabeli initsialiseerimine eba6nnestus!\n");
+				return 1;
+			}
+
+			for (size_t i = 0; i < totalStops; ++i)
+			{
+				if (!hashMap_insert(&spmap, dm.pointsp[i]->id.str, NULL))
+				{
+					fprintf(stderr, "Elemendi lisamine r2sitabelisse nurjus!\n");
+					return 1;
+				}
+			}
+
+			for (size_t i = 0; i < (pathLen - 1); ++i)
+			{
+				line_t l = {
+					.src = path[i],
+					.dst = path[i + 1]
+				};
+
+				if (hashMapCK_get(&spmap, l.dst->id.str) == NULL)
+				{
+					svg_linePoint(fsvg, &l, color, false);
+				}
+				else
+				{
+					svg_line(fsvg, &l, color);
+				}
+
+				printf("%s -> ", path[i]->id.str);
+			}
+			printf("%s\n", path[pathLen - 1]->id.str);
+
+			hashMapCK_destroy(&spmap);
+
+			free(path);
+
+			svgRGB_t blue = svg_rgba32(0x00A2E8FF);
+
+			line_t line = {
+				.src = &dm.beg,
+				.dst = dm.begp
+			};
+			svg_line(fsvg, &line, blue);
+			line = (line_t){
+				.src = dm.endp,
+				.dst = &dm.end
+			};
+			svg_line(fsvg, &line, blue);
+			svg_text(fsvg, dm.beg.x, dm.beg.y, "Start");
+			svg_text(fsvg, dm.end.x, dm.end.y, "Finiš");
+
+			for (size_t i = 0; i < dm.numMidPoints; ++i)
+			{
+				line = (line_t){
+					.src = dm.midp[i],
+					.dst = &dm.mid[i]
+				};
+				svg_line(fsvg, &line, blue);
+				svg_point(fsvg, &dm.mid[i], blue);
+			}
+
+
+			svg_footer(fsvg);
+			fclose(fsvg);
+
+			printf("Valmis: %s\n", argv[2]);
+		}
+	}
+
+	free(points);
+	free(relations);
+	free(costs);
+	free(matrix);
 	free(bestIndexes);
 
 
