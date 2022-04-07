@@ -31,8 +31,12 @@ Projekti ajalogi on saadaval [siin](./ajalogi.txt).
 - [x] Dijkstra algoritmi implementatsioon
 - [x] Optimaalse teekonna leidmine
 - [x] Teedele anda "kaalud"/"hinnad"
-- [ ] Lihtne kasutajaliides teekonna kuvamiseks
-- [ ] Koodi dokumenteerimine
+- [x] Lihtne kasutajaliides teekonna kuvamiseks
+
+Näidisväljund:
+![Näidisväljund](./out.svg)
+
+- [x] Koodi dokumenteerimine
 
 
 # Materjalid
