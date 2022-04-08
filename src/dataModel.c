@@ -663,11 +663,19 @@ bool dm_writeSvg(dataModel_t * restrict dm, FILE * restrict fsvg)
 {
 	bool result = true;
 
-	
+
 	float maxw = -INFINITY, minw = INFINITY, maxh = -INFINITY, minh = INFINITY;
 	for (size_t i = 0; i < dm->numJunctions; ++i)
 	{
 		const float px = dm->juncPoints[i]->x, py = dm->juncPoints[i]->y;
+		maxw = mh_fmaxf(maxw, px);
+		minw = mh_fminf(minw, px);
+		maxh = mh_fmaxf(maxh, py);
+		minh = mh_fminf(minh, py);
+	}
+	for (size_t i = 0, n = dm->numMidPoints + 2; i < n; ++i)
+	{
+		const float px = dm->points[i].x, py = dm->points[i].y;
 		maxw = mh_fmaxf(maxw, px);
 		minw = mh_fminf(minw, px);
 		maxh = mh_fmaxf(maxh, py);
