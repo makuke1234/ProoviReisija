@@ -172,7 +172,7 @@ bool pf_dijkstraSearch(
 	// Pseudokood: https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm#Using_a_priority_queue
 	while (!pq_empty(&pq))
 	{
-		// Eemaldab lühima teepikkuse
+		// Eemaldab lühima teepikkuse indeksi
 		size_t uIdx = pq_extractMin(&pq);
 		// Kontrollib igaks juhuks kas õnnestus, aga ainult DEBUG režiimis
 		assert(uIdx != SIZE_MAX);
@@ -203,6 +203,7 @@ bool pf_dijkstraSearch(
 					};
 					// Decrease priority in Fibonacci heap
 					pq_decPriority(&pq, vIdx, alt);
+					writeLogger("Key decreased");
 				}
 			}
 		}

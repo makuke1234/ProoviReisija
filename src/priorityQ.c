@@ -6,9 +6,11 @@
 #include <stdio.h>
 
 static inline void pq_merge_impl(fibHeap_t * restrict q, fibNode_t * restrict master, fibNode_t * restrict slave);
+static inline void pq_cut_impl(fibHeap_t * restrict q, fibNode_t * x, fibNode_t * y);
+static inline void pq_cascading_cut_impl(fibHeap_t * restrict q, fibNode_t * n);
 static inline void pq_promote_impl(fibHeap_t * restrict q, fibNode_t * restrict n);
 static inline void pq_free_impl(fibNode_t * n, fibNode_t * firstParent);
-static inline void pq_print_impl(fibNode_t * n, fibNode_t * firstParent);
+static inline void pq_print_impl(fibNode_t * n, fibNode_t * firstParent, FILE * restrict fp);
 
 static inline void pq_merge_impl(fibHeap_t * restrict q, fibNode_t * restrict master, fibNode_t * restrict slave)
 {
@@ -36,38 +38,85 @@ static inline void pq_merge_impl(fibHeap_t * restrict q, fibNode_t * restrict ma
 	}
 	else
 	{
-		master->child->left->right = slave;
-		slave->right = master->child;
-		slave->left = master->child->left;
-		master->child->left = slave;
+		slave->right = master->child->right;
+		slave->left = master->child;
+		master->child->right->left = slave;
+		master->child->right = slave;
 	}
 
 	slave->parent = master;
 
 	// Increase master's degree by 1
 	++(master->degree);
+}
+static inline void pq_cut_impl(fibHeap_t * restrict q, fibNode_t * x, fibNode_t * y)
+{
+	assert(q != NULL);
+	assert(x != NULL);
+	assert(y != NULL);
 
-	// Decrease root degree by 1
-	--(q->n);
+	if (x->right == x)
+	{
+		y->child = NULL;
+	}
+	else
+	{
+		y->child = x->right;
+
+		x->left->right = x->right;
+		x->right->left = x->left;
+	}
+
+	--(y->degree);
+	pq_promote_impl(q, x);
+}
+static inline void pq_cascading_cut_impl(fibHeap_t * restrict q, fibNode_t * n)
+{
+	assert(q != NULL);
+	assert(n != NULL);
+
+	fibNode_t * parent = n->parent;
+	if (parent != NULL)
+	{
+		if (n->marked == NOT_MARKED)
+		{
+			n->marked = MARKED;
+		}
+		else
+		{
+			pq_cut_impl(q, n, parent);
+			pq_cascading_cut_impl(q, parent);
+		}
+	}
 }
 static inline void pq_promote_impl(fibHeap_t * restrict q, fibNode_t * restrict n)
 {
 	n->parent = NULL;
 	n->marked = NOT_MARKED;
 
-	n->left = q->min->left;
-	n->right = q->min;
+	if (q->min == NULL)
+	{
+		n->left = n;
+		n->right = n;
+		q->min = n;
+	}
+	else
+	{
+		n->left = q->min->left;
+		n->right = q->min;
 
-	q->min->left->right = n;
-	q->min->left = n;
+
+		q->min->left->right = n;
+		q->min->left = n;
+	
+		if (n->key < q->min->key)
+		{
+			q->min = n;
+		}
+	}
 
 	// Increase root degree
 	++(q->n);
-
-	if (n->key < q->min->key)
-	{
-		q->min = n;
-	}
 }
 static inline void pq_free_impl(fibNode_t * n, fibNode_t * firstParent)
 {
@@ -84,20 +133,20 @@ static inline void pq_free_impl(fibNode_t * n, fibNode_t * firstParent)
 	free(n);
 
 }
-static inline void pq_print_impl(fibNode_t * n, fibNode_t * firstParent)
+static inline void pq_print_impl(fibNode_t * n, fibNode_t * firstParent, FILE * restrict fp)
 {
 	if (n == NULL)
 	{
 		return;
 	}
-	printf("%f id: %zu\n", (double)n->key, n->idx);
+	fprintf(fp, "%f id: %zu\n", (double)n->key, n->idx);
 	
 	if (n->left != firstParent)
 	{
-		pq_print_impl(n->left, firstParent);
+		pq_print_impl(n->left, firstParent, fp);
 	}
-	printf("%zu Children\n", n->idx);
-	pq_print_impl(n->child, n->child);
+	fprintf(fp, "%zu Children\n", n->idx);
+	pq_print_impl(n->child, n->child, fp);
 }
 
 void pq_init(fibHeap_t * restrict q)
@@ -211,8 +260,8 @@ size_t pq_extractMin(fibHeap_t * restrict q)
 	q->n = q->n + min->degree - 1;
 	q->min = min->right;
 
+	min->left->right = q->min;
 	q->min->left = min->left;
-	q->min->left->right = q->min;
 	
 	if (min == min->right)
 	{
@@ -252,62 +301,60 @@ size_t pq_extractMin(fibHeap_t * restrict q)
 
 	// Merge all roots with equal degree, consolidate heap
 	// Special thanks to woodfrog's repository https://github.com/woodfrog/FibonacciHeap helping to implement heap consolidation
-	size_t degree = (size_t)(LOG2_GR_REC * log2((float)q->n)) + 1;
-	fibNode_t ** A = malloc(sizeof(fibNode_t *) * degree);
-	if (A == NULL)
-	{
-		return SIZE_MAX;
-	}
+	const size_t degree = MAX_DEGREE;
+	fibNode_t * A[MAX_DEGREE];
 	for (size_t i = 0; i < degree; ++i)
 	{
 		A[i] = NULL;
 	}
 
-	bool breakFlag = false;
-	fibNode_t * temp = q->min;
+	fibNode_t * x = q->min, * x2 = x;
 	while (1)
 	{
-		size_t d = temp->degree;
-		while ((d < degree) && (A[d] != NULL))
+		size_t d = x->degree;
+		if ((d < degree) && (A[d] != NULL))
 		{
-			fibNode_t * t2 = A[d];
-			if (temp == t2)
+			fibNode_t * y = A[d];
+			if (x == y)
 			{
-				breakFlag = true;
 				break;
 			}
-			if (temp->key > t2->key)
+			A[d] = NULL;
+			if (x->key > y->key)
 			{
-				fibNode_t * t = temp;
-				temp = t2;
-				t2 = t;
+				fibNode_t * t = x;
+				x = y;
+				y = t;
 			}
 
-			pq_merge_impl(q, temp, t2);
-			A[d] = NULL;
-			++d;
+			pq_merge_impl(q, x, y);
+			--(q->n);
+			x2 = x;
+			continue;
 		}
-		if (breakFlag || ((d == temp->degree) && (d >= degree)))
+		else if (d < degree)
+		{
+			A[d] = x;
+		}
+		x = x->right;
+		if (x2 == x)
 		{
 			break;
 		}
-		A[temp->degree] = temp;
-		temp = temp->right;
 	}
-	free(A);
-	q->min = temp;
+	q->min = x;
 	
 	// Find new minimum
-	fibNode_t * oldmin = temp;
+	fibNode_t * oldmin = x;
 	do
 	{
-		if (temp->key < q->min->key)
+		if (x->key < q->min->key)
 		{
-			q->min = temp;
+			q->min = x;
 		}
 
-		temp = temp->right;
-	} while (temp != oldmin);
+		x = x->right;
+	} while (x != oldmin);
 
 	return idx;
 }
@@ -326,6 +373,15 @@ void pq_decPriority(fibHeap_t * restrict q, size_t idx, float distance)
 	n->key = distance;
 	fibNode_t * parent = n->parent;
 	if ((parent != NULL) && (distance < parent->key))
+	{
+		pq_cut_impl(q, n, parent);
+		pq_cascading_cut_impl(q, parent);
+	}
+	if (distance < q->min->key)
+	{
+		q->min = n;
+	}
+	/*if ((parent != NULL) && (distance < parent->key))
 	{
 		// Promote to root list
 		if (n->parent->child == n)
@@ -383,14 +439,14 @@ void pq_decPriority(fibHeap_t * restrict q, size_t idx, float distance)
 			}
 		}
 	}
-	if ((parent == NULL) && (distance < q->min->key))
+	else if ((parent == NULL) && (distance < q->min->key))
 	{
 		q->min = n;
-	}
+	}*/
 }
-void pq_print(fibHeap_t * restrict q)
+void pq_print(fibHeap_t * restrict q, FILE * restrict fp)
 {
-	pq_print_impl(q->min, q->min);
+	pq_print_impl(q->min, q->min, fp);
 }
 
 void pq_destroy(fibHeap_t * restrict q)

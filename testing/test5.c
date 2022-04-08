@@ -53,6 +53,8 @@ int main(void)
 	test(pq_pushWithPriority(&q, 1, 100.0f), "Pushing failed!");
 	test(pq_pushWithPriority(&q, 7, 8.0f), "Pushing failed!");
 
+	pq_print(&q, stdout);
+
 	endphase();
 
 	testidx(pq_extractMin(&q), 2);
@@ -61,6 +63,9 @@ int main(void)
 	pq_decPriority(&q, 1, 49.0f);
 	pq_pushWithPriority(&q, 2, 49.5f);
 	testidx(pq_extractMin(&q), 0);
+
+	printf("Second phase:\n");
+	pq_print(&q, stdout);
 
 	testidx_or(pq_extractMin(&q), 3, 5, 6, 7);
 	testidx_or(pq_extractMin(&q), 3, 5, 6, 7);

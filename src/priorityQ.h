@@ -3,17 +3,17 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 #if SIZE_MAX == UINT64_MAX
 	#define DEGREE_BITS 63
-	#define MAX_DEGREE 28
 #else
 	#define DEGREE_BITS 31
-	#define MAX_DEGREE 14
 #endif
 
 #define MARKED 1
 #define NOT_MARKED 0
+#define MAX_DEGREE 64
 
 // Reciprocal value of logarithm in base 2 of the golden ratio
 #define LOG2_GR_REC 1.4404829720657015340797013126062
@@ -117,8 +117,9 @@ void pq_decPriority(fibHeap_t * restrict q, size_t idx, float distance);
  * Complexity: O(n).
  * 
  * @param q Pointer to fibHeap_t structure
+ * @param fp File to print to
  */
-void pq_print(fibHeap_t * restrict q);
+void pq_print(fibHeap_t * restrict q, FILE * restrict fp);
 
 /**
  * @brief Destroys the Fibonacci heap.
