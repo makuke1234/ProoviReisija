@@ -1,6 +1,7 @@
 #include "dataModel.h"
 #include "logger.h"
 #include "mathHelper.h"
+#include "pathFinding.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -594,6 +595,68 @@ void dm_updateJunctionIndexes(dataModel_t * restrict dm)
 			node = node->next;
 		}
 	}
+}
+
+bool dm_createMatrices(dataModel_t * restrict dm)
+{
+	bool result = pf_createRelationsCosts(
+		dm->roads,
+		dm->numRoads,
+		&dm->juncPoints,
+		&dm->relations,
+		&dm->costs,
+		&dm->numJunctions
+	);
+	if (!result)
+	{
+		return false;
+	}
+
+	result = pf_makeDistMatrix(
+		dm->pointsp,
+		dm->numMidPoints + 2,
+		&dm->stopsMap,
+		dm->roads,
+		dm->numRoads,
+		&dm->stopsDistMatrix
+	);
+	if (!result)
+	{
+		return false;
+	}
+
+
+	return true;
+}
+bool dm_findShortestPath(dataModel_t * restrict dm)
+{
+	bool result = pf_findOptimalMatrixOrder(
+		dm->stopsDistMatrix,
+		dm->numMidPoints + 2,
+		&dm->bestStopsIndices
+	);
+	if (!result)
+	{
+		return false;
+	}
+
+	result = pf_generateShortestPath(
+		dm->bestStopsIndices,
+		dm->pointsp,
+		dm->numMidPoints + 2,
+		dm->juncPoints,
+		dm->relations,
+		dm->costs,
+		dm->numJunctions,
+		&dm->shortestPath,
+		&dm->shortestPathLen
+	);
+	if (!result)
+	{
+		return false;
+	}
+
+	return true;
 }
 
 void dm_destroy(dataModel_t * restrict dm)
