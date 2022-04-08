@@ -320,10 +320,15 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 	{
 		point_zero(&dm->points[i]);
 	}
-	hashMapCK_zero(&dm->ristmikud);
+	hashMapCK_zero(&dm->junctionMap);
+	hashMapCK_zero(&dm->stopsMap);
 
 	// Räsitabeli koostamine punktidest
-	if (!hashMapCK_init(&dm->ristmikud, 1))
+	if (!hashMapCK_init(&dm->junctionMap, 1))
+	{
+		return dmeMEM;
+	}
+	if (!hashMapCK_init(&dm->stopsMap, TOTAL_POINTS))
 	{
 		return dmeMEM;
 	}
@@ -354,7 +359,7 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 		{
 			point_t * p = point_makeStr(val->key.str, val->value.str);
 			// Punkti p id räsitabelisse lisamine
-			if ((p == NULL) || !hashMapCK_insert(&dm->ristmikud, p->id.str, p))
+			if ((p == NULL) || !hashMapCK_insert(&dm->junctionMap, p->id.str, p))
 			{
 				if (p != NULL)
 				{
@@ -374,7 +379,7 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 		iniValue_t * val = teed->values[i];
 		if (val != NULL)
 		{
-			line_t * line = line_makeStr(&dm->ristmikud, val->key.str, val->value.str);
+			line_t * line = line_makeStr(&dm->junctionMap, val->key.str, val->value.str);
 			if ((line == NULL) || !dm_addLine(dm, line))
 			{
 				if (line != NULL)
@@ -497,7 +502,7 @@ bool dm_addStops(dataModel_t * restrict dm)
 		*pointmem = bestPoint;
 		// Lisa punkti projektsiooni viit õigesse kohta
 		dm->pointsp[i] = pointmem;
-		if (!hashMapCK_insert(&dm->ristmikud, pointmem->id.str, pointmem))
+		if (!hashMapCK_insert(&dm->junctionMap, pointmem->id.str, pointmem))
 		{
 			point_free(pointmem);
 			return false;
@@ -516,6 +521,15 @@ bool dm_addStops(dataModel_t * restrict dm)
 			return false;
 		}
 		line_setDest(tee, pointmem);
+	}
+
+	// Add stops to hashmap
+	for (size_t i = 0; i < totPoints; ++i)
+	{
+		if (!hashMapCK_insert(&dm->stopsMap, dm->pointsp[i]->id.str, dm->pointsp[i]))
+		{
+			return false;
+		}
 	}
 
 	return true;
@@ -553,9 +567,9 @@ void dm_updateJunctionIndexes(dataModel_t * restrict dm)
 	assert(dm != NULL);
 
 	size_t idx = 0;
-	for (size_t i = 0; i < dm->ristmikud.numNodes; ++i)
+	for (size_t i = 0; i < dm->junctionMap.numNodes; ++i)
 	{
-		hashNodeCK_t * node = dm->ristmikud.nodes[i];
+		hashNodeCK_t * node = dm->junctionMap.nodes[i];
 		while (node != NULL)
 		{
 			if (node->value != NULL)
@@ -581,16 +595,17 @@ void dm_destroy(dataModel_t * restrict dm)
 		point_destroy(&dm->mid[i]);
 	}
 
-	for (size_t i = 0; i < dm->ristmikud.numNodes; ++i)
+	for (size_t i = 0; i < dm->junctionMap.numNodes; ++i)
 	{
-		hashNodeCK_t * node = dm->ristmikud.nodes[i];
+		hashNodeCK_t * node = dm->junctionMap.nodes[i];
 		if (node != NULL)
 		{
 			point_free(node->value);
 			node->value = NULL;
 		}
 	}
-	hashMapCK_destroy(&dm->ristmikud);
+	hashMapCK_destroy(&dm->junctionMap);
+	hashMapCK_destroy(&dm->stopsMap);
 
 	if (dm->teed != NULL)
 	{

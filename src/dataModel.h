@@ -227,7 +227,7 @@ typedef struct dataModel
 	};
 	size_t numMidPoints;
 
-	hashMapCK_t ristmikud;
+	hashMapCK_t junctionMap, stopsMap;
 	
 	line_t ** teed;
 	size_t numTeed, maxTeed;
