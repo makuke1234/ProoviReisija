@@ -661,6 +661,9 @@ bool dm_findShortestPath(dataModel_t * restrict dm)
 }
 bool dm_writeSvg(dataModel_t * restrict dm, FILE * restrict fsvg)
 {
+	bool result = true;
+
+	
 	float maxw = -INFINITY, minw = INFINITY, maxh = -INFINITY, minh = INFINITY;
 	for (size_t i = 0; i < dm->numJunctions; ++i)
 	{
@@ -673,57 +676,57 @@ bool dm_writeSvg(dataModel_t * restrict dm, FILE * restrict fsvg)
 
 	svg_init();
 	svg_setFont("Hermit");
-	svg_header(fsvg, (int64_t)minw, (int64_t)maxh, (size_t)(maxw - minw), (size_t)(maxh - minh), svg_rgba32(0xCCCCCCFF));
+	result &= svg_header(fsvg, (int64_t)minw, (int64_t)maxh, (size_t)(maxw - minw), (size_t)(maxh - minh), svg_rgba32(0xCCCCCCFF));
 
-	svgRGB_t color = svg_rgba32(0x888888FF);
+	svgRGB_t svgGray = svg_rgba32(0x888888FF);
 
-	for (size_t i = 0; i < dm->numRoads; ++i)
+	for (size_t i = 0; i < dm->numRoads && result; ++i)
 	{
-		svg_line(fsvg, dm->roads[i], color);
+		result &= svg_line(fsvg, dm->roads[i], svgGray);
 	}
 
 	// Joonistab lühima teekonna
-	color = svg_rgba32(0xFF1111FF);
+	svgRGB_t svgRed = svg_rgba32(0xFF1111FF);
 	
-	for (size_t i = 0, n_1 = dm->shortestPathLen - 1; i < n_1; ++i)
+	for (size_t i = 0, n_1 = dm->shortestPathLen - 1; i < n_1 && result; ++i)
 	{
-		line_t l = {
+		line_t line = {
 			.src = dm->shortestPath[i],
 			.dst = dm->shortestPath[i + 1]
 		};
 
-		if (hashMapCK_get(&dm->stopsMap, l.dst->id.str) == NULL)
+		if (hashMapCK_get(&dm->stopsMap, line.dst->id.str) == NULL)
 		{
-			svg_linePoint(fsvg, &l, color, false);
+			result &= svg_linePoint(fsvg, &line, svgRed, false);
 		}
 		else
 		{
-			svg_line(fsvg, &l, color);
+			result &= svg_line(fsvg, &line, svgRed);
 		}
 
 	}
 
-	svgRGB_t blue = svg_rgba32(0x00A2E8FF);
+	svgRGB_t svgBlue = svg_rgba32(0x00A2E8FF);
 
 	line_t line = {
 		.src = &dm->beg,
 		.dst = dm->begp
 	};
-	svg_line(fsvg, &line, blue);
+	result &= svg_line(fsvg, &line, svgBlue);
 	line = (line_t){
 		.src = dm->endp,
 		.dst = &dm->end
 	};
-	svg_line(fsvg, &line, blue);
+	result &= svg_line(fsvg, &line, svgBlue);
 
 	point_t p = dm->beg;
 	p.id.str = "Start";
-	svg_point(fsvg, &p, blue);
+	result &= svg_point(fsvg, &p, svgBlue);
 	p = dm->end;
 	p.id.str = "Finiš";
-	svg_point(fsvg, &p, blue);
+	result &= svg_point(fsvg, &p, svgBlue);
 
-	for (size_t i = 0, totalStops = dm->numMidPoints + 2; i < totalStops; ++i)
+	for (size_t i = 0, totalStops = dm->numMidPoints + 2; i < totalStops && result; ++i)
 	{
 		size_t idx = dm->bestStopsIndices[i];
 		if ((idx != 0) && (idx != 1))
@@ -732,20 +735,19 @@ bool dm_writeSvg(dataModel_t * restrict dm, FILE * restrict fsvg)
 				.src = dm->pointsp[idx],
 				.dst = &dm->points[idx]
 			};
-			svg_line(fsvg, &line, blue);
-			svg_point(fsvg, &dm->points[idx], blue);
+			result &= svg_line(fsvg, &line, svgBlue);
+			result &= svg_point(fsvg, &dm->points[idx], svgBlue);
 		}
 
 		char temp[10];
-		_ultoa((unsigned long)i + 1, temp, 10);
-		strcpy(&temp[strlen(temp)], ".");
-		svg_text(fsvg, dm->points[idx].x, dm->points[idx].y, temp, svgBase_central, svgAlign_middle);
+		result &= _ultoa((unsigned long)i + 1, temp, 10) != NULL;
+		result &= strcpy(&temp[strlen(temp)], ".") != NULL;
+		result &= svg_text(fsvg, dm->points[idx].x, dm->points[idx].y, temp, svgBase_central, svgAlign_middle);
 	}
 
+	result &= svg_footer(fsvg);
 
-	svg_footer(fsvg);
-
-	return true;
+	return result;
 }
 
 void dm_destroy(dataModel_t * restrict dm)

@@ -88,7 +88,7 @@ bool svg_header(FILE * restrict fp, int64_t x, int64_t y, size_t width, size_t h
 		svgSettings.font,
 		vx, -vy,
 		(uint16_t)backColor.r, (uint16_t)backColor.g, (uint16_t)backColor.b
-	) > 0;
+	) >= 0;
 }
 
 bool svg_line(FILE * restrict fp, const line_t * restrict l, svgRGB_t color)
@@ -105,7 +105,7 @@ bool svg_line(FILE * restrict fp, const line_t * restrict l, svgRGB_t color)
 		(double)l->dst->x * svgSettings.scalex, -(double)l->dst->y * svgSettings.scaley,
 		(uint16_t)color.r, (uint16_t)color.g, (uint16_t)color.b,
 		SVG_LINE_STROKE
-	) > 0;
+	) >= 0;
 }
 bool svg_linePoint(FILE * restrict fp, const line_t * restrict l, svgRGB_t color, bool drawSrc)
 {
@@ -134,7 +134,7 @@ bool svg_point(FILE * restrict fp, const point_t * restrict p, svgRGB_t color)
 		x + svgSettings.pRadius, y - svgSettings.pRadius,
 		svgSettings.fontSize,
 		p->id.str
-	) > 0;
+	) >= 0;
 }
 bool svg_text(FILE * restrict fp, float x, float y, const char * restrict str, svgBase_t baseline, svgAlign_t align)
 {
@@ -173,11 +173,11 @@ bool svg_text(FILE * restrict fp, float x, float y, const char * restrict str, s
 		svgSettings.fontSize,
 		dombases[baseline], aligns[align],
 		str
-	) > 0;
+	) >= 0;
 }
 
 bool svg_footer(FILE * restrict fp)
 {
 	assert(fp != NULL);
-	return fputs("\n</svg>\n", fp) > 0;
+	return fputs("\n</svg>\n", fp) >= 0;
 }

@@ -148,15 +148,17 @@ int main(int argc, char ** argv)
 	}
 
 	printf("Parim peatuste l2bimise j2rjekord:\n");
-	for (size_t i = 0; i < totalStops; ++i)
+	for (size_t i = 0, n_1 = totalStops - 1; i < totalStops; ++i)
 	{
 		printf("%s", dm.points[dm.bestStopsIndices[i]].id.str);
-		if (i < (totalStops - 1))
+		if (i < n_1)
 		{
 			printf(" -> ");
 		}
 	}
 	putchar('\n');
+
+
 	float total = 0.0f;
 	for (size_t i = 0, n_1 = totalStops - 1; i < n_1; ++i)
 	{
@@ -164,13 +166,17 @@ int main(int argc, char ** argv)
 	}
 	printf("Teekond kokku: %.3f km\n", (double)total / 1000.0);
 
-	printf("Teekond pikalt:\n");
 
-	for (size_t i = 0, n_1 = dm.shortestPathLen - 1; i < n_1; ++i)
+	printf("Teekond pikalt:\n");
+	for (size_t i = 0, n_1 = dm.shortestPathLen - 1; i < dm.shortestPathLen; ++i)
 	{
-		printf("%s ", dm.shortestPath[i]->id.str);
+		printf("%s", dm.shortestPath[i]->id.str);
+		if (i < n_1)
+		{
+			printf(" -> ");
+		}
 	}
-	printf("%s\n", dm.shortestPath[dm.shortestPathLen - 1]->id.str);
+	putchar('\n');
 
 
 	if (argc > 2)
