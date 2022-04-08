@@ -6,6 +6,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdio.h>
 
 #define MAX_ID 256
 
@@ -323,6 +324,16 @@ bool dm_createMatrices(dataModel_t * restrict dm);
  * @return false Failure
  */
 bool dm_findShortestPath(dataModel_t * restrict dm);
+/**
+ * @brief Function that writes the shortest path map to the already open
+ * SVG file
+ * 
+ * @param dm Pointer to dataModel structure
+ * @param fsvg SVG FILE pointer
+ * @return true Success
+ * @return false Failure
+ */
+bool dm_writeSvg(dataModel_t * restrict dm, FILE * restrict fsvg);
 
 /**
  * @brief Destroys the data model's allocated resources
