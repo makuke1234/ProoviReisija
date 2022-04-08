@@ -33,8 +33,10 @@ Projekti ajalogi on saadaval [siin](./ajalogi.txt).
 - [x] Teedele anda "kaalud"/"hinnad"
 - [x] Lihtne kasutajaliides teekonna kuvamiseks
 
-Näidisväljund:
-![Näidisväljund](./out.svg)
+Näidisväljundid:
+![Näidis 1](./out.svg)
+![Näidis 2](./out11.svg)
+![Näidis 3](./out12.svg)
 
 - [x] Koodi dokumenteerimine
 - [ ] Koodi korrastamine
