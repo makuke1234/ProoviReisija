@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 
 int main(int argc, char ** argv)
 {
@@ -262,7 +263,7 @@ int main(int argc, char ** argv)
 
 			for (size_t i = 0; i < totalStops; ++i)
 			{
-				if (!hashMap_insert(&spmap, dm.pointsp[i]->id.str, NULL))
+				if (!hashMapCK_insert(&spmap, dm.pointsp[i]->id.str, NULL))
 				{
 					fprintf(stderr, "Elemendi lisamine r2sitabelisse nurjus!\n");
 					return 1;
@@ -313,14 +314,23 @@ int main(int argc, char ** argv)
 			p.id.str = "Finiš";
 			svg_point(fsvg, &p, blue);
 
-			for (size_t i = 0; i < dm.numMidPoints; ++i)
+			for (size_t i = 0; i < totalStops; ++i)
 			{
-				line = (line_t){
-					.src = dm.midp[i],
-					.dst = &dm.mid[i]
-				};
-				svg_line(fsvg, &line, blue);
-				svg_point(fsvg, &dm.mid[i], blue);
+				size_t idx = bestIndexes[i];
+				if ((idx != 0) && (idx != 1))
+				{
+					line = (line_t){
+						.src = dm.pointsp[idx],
+						.dst = &dm.points[idx]
+					};
+					svg_line(fsvg, &line, blue);
+					svg_point(fsvg, &dm.points[idx], blue);
+				}
+
+				char temp[10];
+				_ultoa((unsigned long)i + 1, temp, 10);
+				strcpy(&temp[strlen(temp)], ".");
+				svg_text(fsvg, dm.points[idx].x, dm.points[idx].y, temp, svgBase_central, svgAlign_middle);
 			}
 
 

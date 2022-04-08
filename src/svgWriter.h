@@ -21,7 +21,7 @@ typedef struct svgRGB
 
 #define SVG_LINE_STROKE  ((size_t)3)
 #define SVG_POINT_RADIUS ((size_t)20)
-#define SVG_FONT_SIZE    ((size_t)32)
+#define SVG_FONT_SIZE    ((size_t)24)
 
 
 /**
@@ -122,6 +122,36 @@ bool svg_linePoint(FILE * restrict fp, const line_t * restrict l, svgRGB_t color
  * @return false Failure
  */
 bool svg_point(FILE * restrict fp, const point_t * restrict p, svgRGB_t color);
+
+typedef enum svgBase
+{
+	svgBase_auto,
+	svgBase_use_script,
+	svgBase_no_change,
+	svgBase_reset_size,
+	svgBase_ideographic,
+	svgBase_alphabetic,
+	svgBase_hanging,
+	svgBase_mathematical,
+	svgBase_central,
+	svgBase_middle,
+	svgBase_text_after_edge,
+	svgBase_text_before_edge,
+	svgBase_inherit,
+
+	svgBase_size
+
+} svgBase_t;
+
+typedef enum svgAlign
+{
+	svgAlign_start,
+	svgAlign_middle,
+	svgAlign_end,
+
+	svgAlign_size
+
+} svgAlign_t;
 /**
  * @brief Draws middle-aligned text into the SVG
  * 
@@ -129,10 +159,12 @@ bool svg_point(FILE * restrict fp, const point_t * restrict p, svgRGB_t color);
  * @param x x-coordinate
  * @param y y-coordinate
  * @param str string to draw
+ * @param baseline dominant-baseline attribute
+ * @param align String alignment, text-anchor attribute
  * @return true Success
  * @return false Failure
  */
-bool svg_text(FILE * restrict fp, float x, float y, const char * restrict str);
+bool svg_text(FILE * restrict fp, float x, float y, const char * restrict str, svgBase_t baseline, svgAlign_t align);
 
 /**
  * @brief Writes the SVG file footer to file.

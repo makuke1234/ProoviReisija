@@ -127,7 +127,7 @@ bool svg_point(FILE * restrict fp, const point_t * restrict p, svgRGB_t color)
 	return fprintf(
 		fp,
 		"<circle cx=\"%.1f\" cy=\"%.1f\" r=\"%zu\" fill=\"rgb(%hu, %hu, %hu)\" />\n"
-		"<text x=\"%.1f\" y=\"%.1f\" font-size=\"%zu\" text-anchor=\"bottom-left\" fill=\"black\">%s</text>\n",
+		"<text x=\"%.1f\" y=\"%.1f\" font-size=\"%zu\" text-anchor=\"start\" fill=\"black\">%s</text>\n",
 		x, y,
 		svgSettings.pRadius,
 		(uint16_t)color.r, (uint16_t)color.g, (uint16_t)color.b,
@@ -136,18 +136,42 @@ bool svg_point(FILE * restrict fp, const point_t * restrict p, svgRGB_t color)
 		p->id.str
 	) > 0;
 }
-bool svg_text(FILE * restrict fp, float x, float y, const char * restrict str)
+bool svg_text(FILE * restrict fp, float x, float y, const char * restrict str, svgBase_t baseline, svgAlign_t align)
 {
 	assert(fp  != NULL);
 	assert(str != NULL);
+	assert(baseline >= 0 && align >= 0);
+	assert(baseline < svgBase_size && align < svgAlign_size);
+
+	static const char * dombases[svgBase_size] = {
+		"auto",
+		"use-script",
+		"no-change",
+		"reset-size",
+		"ideographic",
+		"alphabetic",
+		"hanging",
+		"mathematical",
+		"central",
+		"middle",
+		"text-after-edge",
+		"text-before-edge",
+		"inherit"
+	};
+	static const char * aligns[svgAlign_size] = {
+		"start",
+		"middle",
+		"end"
+	};
 
 	const double dx = (double)x * svgSettings.scalex, dy = -(double)y * svgSettings.scaley;
 
 	return fprintf(
 		fp,
-		"<text x=\"%.1f\" y=\"%.1f\" font-size=\"%zu\" text-anchor=\"middle\" fill=\"black\">%s</text>\n",
-		dx, dy - 10.0,
+		"<text x=\"%.1f\" y=\"%.1f\" font-size=\"%zu\" dominant-baseline=\"%s\" text-anchor=\"%s\" fill=\"black\">%s</text>\n",
+		dx, dy,
 		svgSettings.fontSize,
+		dombases[baseline], aligns[align],
 		str
 	) > 0;
 }
