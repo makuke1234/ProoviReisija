@@ -132,8 +132,6 @@ bool pf_makeDistMatrix(
  * 
  * @param matrix 1D-allocated shortest distances matrix
  * @param numPoints Number of (stopping) points
- * @param startIdx Starting points index (usually 0)
- * @param stopIdx Stopping point index (usually 1)
  * @param poutIndexes Pointer to receiving shortest index sequence array
  * @return true Success
  * @return false Failure
@@ -141,8 +139,6 @@ bool pf_makeDistMatrix(
 bool pf_findOptimalMatrixOrder(
 	const distActual_t * restrict matrix,
 	size_t numPoints,
-	size_t startIdx,
-	size_t stopIdx,
 	size_t ** restrict poutIndexes
 );
 

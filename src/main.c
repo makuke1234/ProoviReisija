@@ -171,8 +171,6 @@ int main(int argc, char ** argv)
 	result = pf_findOptimalMatrixOrder(
 		matrix,
 		totalStops,
-		0,
-		1,
 		&bestIndexes
 	);
 
@@ -254,22 +252,6 @@ int main(int argc, char ** argv)
 			
 			printf("Teekond pikalt:\n");
 
-			hashMapCK_t spmap;
-			if (!hashMap_init(&spmap, totalStops))
-			{
-				fprintf(stderr, "R2sitabeli initsialiseerimine eba6nnestus!\n");
-				return 1;
-			}
-
-			for (size_t i = 0; i < totalStops; ++i)
-			{
-				if (!hashMapCK_insert(&spmap, dm.pointsp[i]->id.str, NULL))
-				{
-					fprintf(stderr, "Elemendi lisamine r2sitabelisse nurjus!\n");
-					return 1;
-				}
-			}
-
 			for (size_t i = 0; i < (pathLen - 1); ++i)
 			{
 				line_t l = {
@@ -277,7 +259,7 @@ int main(int argc, char ** argv)
 					.dst = path[i + 1]
 				};
 
-				if (hashMapCK_get(&spmap, l.dst->id.str) == NULL)
+				if (hashMapCK_get(&dm.stopsMap, l.dst->id.str) == NULL)
 				{
 					svg_linePoint(fsvg, &l, color, false);
 				}
@@ -289,8 +271,6 @@ int main(int argc, char ** argv)
 				printf("%s -> ", path[i]->id.str);
 			}
 			printf("%s\n", path[pathLen - 1]->id.str);
-
-			hashMapCK_destroy(&spmap);
 
 			free(path);
 

@@ -198,7 +198,9 @@ void line_free(line_t * restrict l);
 
 
 #define MAX_MID_POINTS 10
-#define TOTAL_POINTS 12
+#define TOTAL_POINTS   12
+#define START_IDX      0
+#define STOP_IDX       1
 
 /**
  * @brief The data model, representing all crucial structured data of the whole

@@ -411,7 +411,6 @@ typedef struct
 	float lowest;
 
 	size_t n;
-	size_t startIdx, stopIdx;
 	size_t * arr;
 	size_t * best;
 
@@ -475,15 +474,13 @@ static inline void pf_fomo_iter_impl(pf_fomo_implS * restrict arg, size_t sz)
 bool pf_findOptimalMatrixOrder(
 	const distActual_t * restrict matrix,
 	size_t numPoints,
-	size_t startIdx,
-	size_t stopIdx,
 	size_t ** restrict poutIndexes
 )
 {
 	assert(matrix != NULL);
 	assert(numPoints >= 2);
-	assert(startIdx < numPoints);
-	assert(stopIdx < numPoints);
+	assert(START_IDX < numPoints);
+	assert(STOP_IDX < numPoints);
 	assert(poutIndexes != NULL);
 	
 	// Initsialiseerib andmestruktuuri permutatsioonide läbiproovimiseks
@@ -491,8 +488,6 @@ bool pf_findOptimalMatrixOrder(
 		.mtx      = matrix,
 		.lowest   = (float)INFINITY,
 		.n        = numPoints,
-		.startIdx = startIdx,
-		.stopIdx  = stopIdx,
 		.arr      = malloc(sizeof(size_t) * numPoints),
 		.best     = malloc(sizeof(size_t) * numPoints),
 		.perm     = {
@@ -515,14 +510,14 @@ bool pf_findOptimalMatrixOrder(
 		return false;
 	}
 	// Algus- ja lõpp-punkt pannakse paika
-	arg.best[0]             = arg.arr[0]             = startIdx;
-	arg.best[numPoints - 1] = arg.arr[numPoints - 1] = stopIdx;
+	arg.best[0]             = arg.arr[0]             = START_IDX;
+	arg.best[numPoints - 1] = arg.arr[numPoints - 1] = STOP_IDX;
 
 	// Täidetakse järjekorra andmestruktuur järjest kõikide punktide indeksitega, mis
 	// ei ole algus- ega lõpp-punkti omad, sest need jäävad alati paika
 	for (size_t i = 0, j = 1; j < (numPoints - 1); ++i)
 	{
-		if ((i != stopIdx) && (i != startIdx))
+		if ((i != STOP_IDX) && (i != START_IDX))
 		{
 			++j;
 			if (pf_qnode_push_impl(&arg.perm.q, i) == false)
