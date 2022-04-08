@@ -311,14 +311,27 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 
 	*dm = (dataModel_t){
 		.numMidPoints = 0,
-		.teed         = NULL,
-		.numTeed      = 0,
-		.maxTeed      = 0
+		.roads        = NULL,
+		.numRoads     = 0,
+		.maxRoads     = 0,
+
+		.relations    = NULL,
+		.costs        = NULL,
+		.juncPoints   = NULL,
+		.numJunctions = 0,
+
+		.stopsDistMatrix = NULL,
+		
+		.bestStopsIndices = NULL,
+		
+		.shortestPath    = NULL,
+		.shortestPathLen = 0
 	};
 
 	for (size_t i = 0; i < TOTAL_POINTS; ++i)
 	{
 		point_zero(&dm->points[i]);
+		dm->pointsp[i] = NULL;
 	}
 	hashMapCK_zero(&dm->junctionMap);
 	hashMapCK_zero(&dm->stopsMap);
@@ -464,16 +477,16 @@ bool dm_addStops(dataModel_t * restrict dm)
 		line_t * tee = NULL;
 		bool pointSet = false;
 
-		for (size_t j = 0; j < dm->numTeed; ++j)
+		for (size_t j = 0; j < dm->numRoads; ++j)
 		{
 			point_t tempPoint;
-			line_intersect(&tempPoint, p, dm->teed[j]);
+			line_intersect(&tempPoint, p, dm->roads[j]);
 
 			const float dx = tempPoint.x - p->x;
 			const float dy = tempPoint.y - p->y;
 			float len2 = (dx * dx) + (dy * dy);
 			// Tee "hinda" võetakse ka arvesse, eelistatakse "kiiremaid" teid
-			len2 *= dm->teed[j]->cost;
+			len2 *= dm->roads[j]->cost;
 
 			if (!pointSet || (len2 < shortestLen2))
 			{
@@ -481,7 +494,7 @@ bool dm_addStops(dataModel_t * restrict dm)
 
 				shortestLen2 = len2;
 				bestPoint = tempPoint;
-				tee = dm->teed[j];
+				tee = dm->roads[j];
 			}
 		}
 
@@ -539,26 +552,26 @@ bool dm_addLine(dataModel_t * restrict dm, line_t * restrict pline)
 	assert(dm    != NULL);
 	assert(pline != NULL);
 
-	if (dm->numTeed >= dm->maxTeed)
+	if (dm->numRoads >= dm->maxRoads)
 	{
-		size_t newcap = (dm->numTeed + 1) * 2;
-		line_t ** newmem = realloc(dm->teed, sizeof(line_t *) * newcap);
+		size_t newcap = (dm->numRoads + 1) * 2;
+		line_t ** newmem = realloc(dm->roads, sizeof(line_t *) * newcap);
 		if (newmem == NULL)
 		{
 			return false;
 		}
 
-		for (size_t i = dm->maxTeed; i < newcap; ++i)
+		for (size_t i = dm->maxRoads; i < newcap; ++i)
 		{
 			newmem[i] = NULL;
 		}
 
-		dm->teed    = newmem;
-		dm->maxTeed = newcap;
+		dm->roads    = newmem;
+		dm->maxRoads = newcap;
 	}
 
-	dm->teed[dm->numTeed] = pline;
-	++dm->numTeed;
+	dm->roads[dm->numRoads] = pline;
+	++dm->numRoads;
 
 	return true;
 }
@@ -607,17 +620,48 @@ void dm_destroy(dataModel_t * restrict dm)
 	hashMapCK_destroy(&dm->junctionMap);
 	hashMapCK_destroy(&dm->stopsMap);
 
-	if (dm->teed != NULL)
+	if (dm->roads != NULL)
 	{
-		for (size_t i = 0; i < dm->numTeed; ++i)
+		for (size_t i = 0; i < dm->numRoads; ++i)
 		{
-			if (dm->teed[i] != NULL)
+			if (dm->roads[i] != NULL)
 			{
-				line_free(dm->teed[i]);
+				line_free(dm->roads[i]);
 			}
 		}
-		free(dm->teed);
-		dm->teed = NULL;
+		free(dm->roads);
+		dm->roads = NULL;
+	}
+
+	if (dm->relations != NULL)
+	{
+		free(dm->relations);
+		dm->relations = NULL;
+	}
+	if (dm->costs != NULL)
+	{
+		free(dm->costs);
+		dm->costs = NULL;
+	}
+	if (dm->juncPoints != NULL)
+	{
+		free(dm->juncPoints);
+		dm->juncPoints = NULL;
+	}
+	if (dm->stopsDistMatrix != NULL)
+	{
+		free(dm->stopsDistMatrix);
+		dm->stopsDistMatrix = NULL;
+	}
+	if (dm->bestStopsIndices != NULL)
+	{
+		free(dm->bestStopsIndices);
+		dm->bestStopsIndices = NULL;
+	}
+	if (dm->shortestPath != NULL)
+	{
+		free(dm->shortestPath);
+		dm->shortestPath = NULL;
 	}
 }
 

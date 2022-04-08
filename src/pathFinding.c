@@ -523,7 +523,7 @@ bool pf_findOptimalMatrixOrder(
 
 bool pf_generateShortestPath(
 	const size_t * restrict bestIndexes,
-	const point_t ** restrict startpoints,
+	const point_t * const * restrict startpoints,
 	size_t numStops,
 	const point_t * const * restrict points,
 	const uint8_t * restrict relations,

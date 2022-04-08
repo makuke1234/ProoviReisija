@@ -18,11 +18,11 @@ int main(void)
 	test(dm.numMidPoints == 1, "%zu middle points exist!", dm.numMidPoints);
 
 	// Väljastab vahepunktid
-	for (size_t i = 0; i < dm.numTeed; ++i)
+	for (size_t i = 0; i < dm.numRoads; ++i)
 	{
-		if (dm.teed[i] != NULL)
+		if (dm.roads[i] != NULL)
 		{
-			line_t * tee = dm.teed[i];
+			line_t * tee = dm.roads[i];
 			printf(
 				"Tee %s: %s: (%f, %f) -> %s: (%f, %f)\n",
 				tee->id.str,

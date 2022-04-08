@@ -197,6 +197,16 @@ void line_destroy(line_t * restrict l);
 void line_free(line_t * restrict l);
 
 
+/**
+ * @brief Data structure to hold distance with costs involved and real distance
+ * 
+ */
+typedef struct distActual
+{
+	float dist, actual;
+
+} distActual_t;
+
 #define MAX_MID_POINTS 10
 #define TOTAL_POINTS   12
 #define START_IDX      0
@@ -231,8 +241,20 @@ typedef struct dataModel
 
 	hashMapCK_t junctionMap, stopsMap;
 	
-	line_t ** teed;
-	size_t numTeed, maxTeed;
+	line_t ** roads;
+	size_t numRoads, maxRoads;
+
+	uint8_t * relations;
+	float * costs;
+	const point_t ** juncPoints;
+	size_t numJunctions;
+
+	distActual_t * stopsDistMatrix;
+
+	size_t * bestStopsIndices;
+
+	const point_t ** shortestPath;
+	size_t shortestPathLen;
 
 } dataModel_t;
 
@@ -283,6 +305,24 @@ bool dm_addLine(dataModel_t * restrict dm, line_t * restrict pline);
  * @param dm Pointer to dataModel structure
  */
 void dm_updateJunctionIndexes(dataModel_t * restrict dm);
+
+/**
+ * @brief Creates relations matrix, costs matrix and points array
+ * 
+ * @param dm Pointer to dataModel structure
+ * @return true Success
+ * @return false Failure
+ */
+bool dm_createMatrices(dataModel_t * restrict dm);
+/**
+ * @brief Finds a sequence of stops that results in the shortest path,
+ * also finds the shortest path
+ * 
+ * @param dm 
+ * @return true 
+ * @return false 
+ */
+bool dm_findShortestPath(dataModel_t * restrict dm);
 
 /**
  * @brief Destroys the data model's allocated resources

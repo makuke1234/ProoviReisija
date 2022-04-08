@@ -30,11 +30,11 @@ int main(int argc, char ** argv)
 	}
 
 	// Väljastab vahepunktid
-	for (size_t i = 0; i < dm.numTeed; ++i)
+	for (size_t i = 0; i < dm.numRoads; ++i)
 	{
-		if (dm.teed[i] != NULL)
+		if (dm.roads[i] != NULL)
 		{
-			line_t * tee = dm.teed[i];
+			line_t * tee = dm.roads[i];
 			printf(
 				"Tee %s: %s, %zu: (%f, %f) -> %s, %zu: (%f, %f)\n",
 				tee->id.str,
@@ -50,8 +50,8 @@ int main(int argc, char ** argv)
 	float * costs = NULL;
 	const point_t ** points = NULL;
 	bool result = pf_createRelationsCosts(
-		dm.teed,
-		dm.numTeed,
+		dm.roads,
+		dm.numRoads,
 		&points,
 		&relations,
 		&costs,
@@ -120,8 +120,8 @@ int main(int argc, char ** argv)
 		dm.pointsp,
 		totalStops,
 		&dm.stopsMap,
-		dm.teed,
-		dm.numTeed,
+		dm.roads,
+		dm.numRoads,
 		&matrix
 	);
 	if (!result)
@@ -225,9 +225,9 @@ int main(int argc, char ** argv)
 
 			svgRGB_t color = svg_rgba32(0x888888FF);
 
-			for (size_t i = 0; i < dm.numTeed; ++i)
+			for (size_t i = 0; i < dm.numRoads; ++i)
 			{
-				svg_line(fsvg, dm.teed[i], color);
+				svg_line(fsvg, dm.roads[i], color);
 			}
 
 			// Joonistab lühima teekonna
