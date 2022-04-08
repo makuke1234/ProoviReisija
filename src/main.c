@@ -45,17 +45,17 @@ int main(int argc, char ** argv)
 	}
 
 	// Koostab maatriksi lühimatest kaugustest punktide vahel
-	size_t numRelations;
+	size_t numJunctions;
 	uint8_t * relations = NULL;
 	float * costs = NULL;
 	const point_t ** points = NULL;
 	bool result = pf_createRelationsCosts(
+		dm.teed,
+		dm.numTeed,
+		&points,
 		&relations,
 		&costs,
-		&numRelations,
-		&points,
-		(const line_t * const *)dm.teed,
-		dm.numTeed
+		&numJunctions
 	);
 	if (!result)
 	{
@@ -64,30 +64,30 @@ int main(int argc, char ** argv)
 	}
 
 	size_t maxplen = 0;
-	for (size_t i = 0; i < numRelations; ++i)
+	for (size_t i = 0; i < numJunctions; ++i)
 	{
 		maxplen = mh_zmax(maxplen, points[i]->id.len);
 	}
 
 	printf("Relatsioonide maatriks:\n");
 	printf("%*c ", maxplen, ' ');
-	for (size_t i = 0; i < numRelations; ++i)
+	for (size_t i = 0; i < numJunctions; ++i)
 	{
 		printf("%*s ", maxplen, points[i]->id.str);
 	}
 	putchar('\n');
-	for (size_t i = 0; i < numRelations; ++i)
+	for (size_t i = 0; i < numJunctions; ++i)
 	{
 		printf("%*s ", maxplen, points[i]->id.str);
-		for (size_t j = 0; j < numRelations; ++j)
+		for (size_t j = 0; j < numJunctions; ++j)
 		{
 			printf(
 				"%*c%c",
 				maxplen - 1,
 				' ',
-				pf_bGet(relations, pf_calcIdx(i, j, numRelations)) ? '1' : '0'
+				pf_bGet(relations, pf_calcIdx(i, j, numJunctions)) ? '1' : '0'
 			);
-			if ((j + 1) < numRelations)
+			if ((j + 1) < numJunctions)
 			{
 				putchar(' ');
 			}
@@ -97,17 +97,17 @@ int main(int argc, char ** argv)
 
 	printf("\"Hindade\" maatriks:\n");
 	printf("%*c ", 4, ' ');
-	for (size_t i = 0; i < numRelations; ++i)
+	for (size_t i = 0; i < numJunctions; ++i)
 	{
 		printf("%*s ", 4, points[i]->id.str);
 	}
 	putchar('\n');
-	for (size_t i = 0; i < numRelations; ++i)
+	for (size_t i = 0; i < numJunctions; ++i)
 	{
 		printf("%*s ", 4, points[i]->id.str);
-		for (size_t j = 0; j < numRelations; ++j)
+		for (size_t j = 0; j < numJunctions; ++j)
 		{
-			printf("%4.0f ", (double)costs[pf_calcIdx(i, j, numRelations)]);
+			printf("%4.0f ", (double)costs[pf_calcIdx(i, j, numJunctions)]);
 		}
 		putchar('\n');
 	}
@@ -118,10 +118,11 @@ int main(int argc, char ** argv)
 	distActual_t * matrix = NULL;
 	result = pf_makeDistMatrix(
 		dm.pointsp,
-		&matrix,
 		totalStops,
-		(const line_t * const *)dm.teed,
-		dm.numTeed
+		&dm.stopsMap,
+		dm.teed,
+		dm.numTeed,
+		&matrix
 	);
 	if (!result)
 	{
@@ -209,7 +210,7 @@ int main(int argc, char ** argv)
 		{
 			printf("SVG faili kirjutamine...\n");
 			float maxw = -INFINITY, minw = INFINITY, maxh = -INFINITY, minh = INFINITY;
-			for (size_t i = 0; i < numRelations; ++i)
+			for (size_t i = 0; i < numJunctions; ++i)
 			{
 				const float px = points[i]->x, py = points[i]->y;
 				maxw = mh_fmaxf(maxw, px);
@@ -234,15 +235,15 @@ int main(int argc, char ** argv)
 			size_t pathLen;
 			const point_t ** path = NULL;
 			result = pf_generateShortestPath(
-				&path,
-				&pathLen,
 				bestIndexes,
 				dm.pointsp,
 				totalStops,
 				points,
 				relations,
 				costs,
-				numRelations
+				numJunctions,
+				&path,
+				&pathLen
 			);
 			if (!result)
 			{

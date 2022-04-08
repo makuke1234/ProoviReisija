@@ -28,42 +28,42 @@ size_t pf_calcIdx(size_t row, size_t col, size_t numCols)
 }
 
 bool pf_createRelationsCosts(
+	line_t * const * restrict teed,
+	size_t numTeed,
+	const point_t *** restrict ppoints,
 	uint8_t ** restrict prelations,
 	float ** restrict pcosts,
-	size_t * restrict numRelations,
-	const point_t *** restrict ppoints,
-	const line_t * const restrict * restrict teed,
-	size_t numTeed
+	size_t * restrict pNumJunctions
 )
 {
-	assert(prelations != NULL);
-	assert(pcosts != NULL);
-	assert(numRelations != NULL);
-	assert(ppoints != NULL);
 	assert(teed != NULL);
 	assert(numTeed > 0);
+	assert(ppoints != NULL);
+	assert(prelations != NULL);
+	assert(pcosts != NULL);
+	assert(pNumJunctions != NULL);
 
 	// Leiab ristmike koguarvu
-	*numRelations = 0;
+	*pNumJunctions = 0;
 	for (size_t i = 0; i < numTeed; ++i)
 	{
 		const line_t * tee = teed[i];
 		if (tee != NULL)
 		{
 			size_t newRel = mh_zmax(tee->src->idx, tee->dst->idx) + 1;
-			*numRelations = mh_zmax(*numRelations, newRel);
+			*pNumJunctions = mh_zmax(*pNumJunctions, newRel);
 		}
 	}
-	assert(*numRelations >= 2);
+	assert(*pNumJunctions >= 2);
 
 	// Teeb 1D-massiivi, mis hoiab 2D-maatriksit relatsioonidest, täidab nullidega
-	size_t memSize = pf_bArrBytes((*numRelations) * (*numRelations));
+	size_t memSize = pf_bArrBytes((*pNumJunctions) * (*pNumJunctions));
 	uint8_t * relmem = calloc(memSize, 1);
 	if (relmem == NULL)
 	{
 		return false;
 	}
-	float * costs = malloc(sizeof(float) * (*numRelations) * (*numRelations));
+	float * costs = malloc(sizeof(float) * (*pNumJunctions) * (*pNumJunctions));
 	if (costs == NULL)
 	{
 		free(relmem);
@@ -71,7 +71,7 @@ bool pf_createRelationsCosts(
 	}
 
 	// Teeb ristmike pointerite massiivi
-	const point_t ** points = malloc(sizeof(const point_t *) * (*numRelations));
+	const point_t ** points = malloc(sizeof(const point_t *) * (*pNumJunctions));
 	if (points == NULL)
 	{
 		free(relmem);
@@ -80,7 +80,7 @@ bool pf_createRelationsCosts(
 	}
 
 	// Täidab "hindade" maatriksi esialgu igaks juhuks 1-dega
-	for (size_t i = 0, n = (*numRelations) * (*numRelations); i < n; ++i)
+	for (size_t i = 0, n = (*pNumJunctions) * (*pNumJunctions); i < n; ++i)
 	{
 		costs[i] = 1.0f;
 	}
@@ -92,8 +92,8 @@ bool pf_createRelationsCosts(
 		if (tee != NULL)
 		{
 			const size_t i1 = tee->src->idx, i2 = tee->dst->idx;
-			const size_t ci1 = pf_calcIdx(i1, i2, *numRelations);
-			const size_t ci2 = pf_calcIdx(i2, i1, *numRelations);
+			const size_t ci1 = pf_calcIdx(i1, i2, *pNumJunctions);
+			const size_t ci2 = pf_calcIdx(i2, i1, *pNumJunctions);
 			pf_bSet(relmem, ci1, true);
 			pf_bSet(relmem, ci2, true);
 
@@ -113,23 +113,23 @@ bool pf_createRelationsCosts(
 
 
 bool pf_dijkstraSearch(
-	prevDist_t * restrict * restrict pprevdist,
-	const point_t ** restrict points,
+	const point_t * const * restrict points,
 	const uint8_t * restrict relations,
 	const float * restrict costs,
-	size_t numRelations,
-	const point_t * restrict start
+	size_t numJunctions,
+	const point_t * restrict start,
+	prevDist_t ** restrict pprevdist
 )
 {
-	assert(pprevdist != NULL);
 	assert(points != NULL);
 	assert(relations != NULL);
 	assert(costs != NULL);
-	assert(numRelations >= 2);
+	assert(numJunctions >= 2);
 	assert(start != NULL);
+	assert(pprevdist != NULL);
 
 	// Kui kasutaja ei andust prevDist massiivi, siis allokeerib selle jaoks mälu
-	prevDist_t * prevdist = (*pprevdist != NULL) ? *pprevdist : malloc(sizeof(prevDist_t) * numRelations);
+	prevDist_t * prevdist = (*pprevdist != NULL) ? *pprevdist : malloc(sizeof(prevDist_t) * numJunctions);
 	if (prevdist == NULL)
 	{
 		return false;
@@ -140,7 +140,7 @@ bool pf_dijkstraSearch(
 	pq_init(&pq);
 
 	// prevdist inistialiseeritakse, kõikidesse punktidesse on alguspunktis teepikkus esialgu lõpmata suur
-	for (size_t i = 0; i < numRelations; ++i)
+	for (size_t i = 0; i < numJunctions; ++i)
 	{
 		if (i != start->idx)
 		{
@@ -183,11 +183,11 @@ bool pf_dijkstraSearch(
 		for (size_t vIdx = 0; vIdx < pq.n_lut; ++vIdx)
 		{
 			// Check if point is neighbour
-			if ((pq.lut[vIdx] != NULL) && pf_bGet(relations, pf_calcIdx(uIdx, vIdx, numRelations)))
+			if ((pq.lut[vIdx] != NULL) && pf_bGet(relations, pf_calcIdx(uIdx, vIdx, numJunctions)))
 			{
 				const float dx = points[uIdx]->x - points[vIdx]->x;
 				const float dy = points[uIdx]->y - points[vIdx]->y;
-				const float cost = costs[pf_calcIdx(uIdx, vIdx, numRelations)];
+				const float cost = costs[pf_calcIdx(uIdx, vIdx, numJunctions)];
 				const float dist = sqrtf((dx * dx) + (dy * dy));
 				const float alt = prevdist[uIdx].dist + dist * cost;
 				// Check if new distance is smaller than previous best
@@ -215,60 +215,43 @@ bool pf_dijkstraSearch(
 }
 
 bool pf_makeDistMatrix(
-	const point_t * const restrict * restrict startpoints,
-	distActual_t * restrict * restrict pmatrix,
-	size_t numPoints,
-	const line_t * const restrict * restrict teed,
-	size_t numTeed
+	const point_t * const * restrict startpoints,
+	size_t numStops,
+	const hashMapCK_t * restrict stopsMap,
+	line_t * const * restrict teed,
+	size_t numTeed,
+	distActual_t ** restrict pmatrix
 )
 {
 	assert(startpoints != NULL);
-	assert(pmatrix != NULL);
-	assert(numPoints >= 2);
+	assert(numStops >= 2);
+	assert(stopsMap != NULL);
 	assert(teed != NULL);
 	assert(numTeed > 0);
-
-	// Teeb hõlpsaks leidmiseks räsitabeli peatuspunktidest
-	hashMapCK_t pmap;
-	if (!hashMapCK_init(&pmap, numPoints))
-	{
-		return false;
-	}
-
-	// Teeb algus-punktide räsitabeli
-	for (size_t i = 0; i < numPoints; ++i)
-	{
-		if (!hashMapCK_insert(&pmap, startpoints[i]->id.str, (void *)&startpoints[i]))
-		{
-			hashMapCK_destroy(&pmap);
-			return false;
-		}
-	}
+	assert(pmatrix != NULL);
 
 	// Teeb 1D-allokeeritud 2D-maatriksi 
-	distActual_t * matrix = calloc(numPoints * numPoints, sizeof(distActual_t));
+	distActual_t * matrix = calloc(numStops * numStops, sizeof(distActual_t));
 	if (matrix == NULL)
 	{
-		hashMapCK_destroy(&pmap);
 		return false;
 	}
 
 	// Teeb relatsioonide maatriksi Dijkstra algoritmi jaoks
-	size_t numRelations;
+	size_t numJunctions;
 	uint8_t * relations = NULL;
 	float * costs = NULL;
 	const point_t ** points = NULL;
 	bool result = pf_createRelationsCosts(
+		teed,
+		numTeed,
+		&points,
 		&relations,
 		&costs,
-		&numRelations,
-		&points,
-		teed,
-		numTeed
+		&numJunctions
 	);
 	if (!result)
 	{
-		hashMapCK_destroy(&pmap);
 		free(matrix);
 		return false;
 	}
@@ -276,20 +259,19 @@ bool pf_makeDistMatrix(
 	prevDist_t * distances = NULL;
 
 	// Viimast punkti ei pea läbi käima, sest kõikide eelnevate punktidega saab maatriksi täidetud
-	for (size_t i = 0, n_1 = numPoints - 1; i < n_1; ++i)
+	for (size_t i = 0, n_1 = numStops - 1; i < n_1; ++i)
 	{
 		// Leiab lühimad teed kõikidesse punktidesse konkreetsest alguspunktist
 		result = pf_dijkstraSearch(
-			&distances,
 			points,
 			relations,
 			costs,
-			numRelations,
-			startpoints[i]
+			numJunctions,
+			startpoints[i],
+			&distances
 		);
 		if (!result)
 		{
-			hashMapCK_destroy(&pmap);
 			free(matrix);
 			free(points);
 			free(costs);
@@ -301,7 +283,7 @@ bool pf_makeDistMatrix(
 
 		// Log the dijkstra's path
 		writeLogger("Starting point: %s", startpoints[i]->id.str);
-		for (size_t j = 0; j < numRelations; ++j)
+		for (size_t j = 0; j < numJunctions; ++j)
 		{
 			writeLogger("%s -> %s: %.3f", distances[j].prev == NULL ? startpoints[i]->id.str : distances[j].prev->id.str, points[j]->id.str, (double)distances[j].dist);
 		}
@@ -309,10 +291,10 @@ bool pf_makeDistMatrix(
 		#endif
 
 		// Täidab maatriksit lühimate teedega, arvestab ainult soovitud peatuspunkte
-		for (size_t j = 0; j < numRelations; ++j)
+		for (size_t j = 0; j < numJunctions; ++j)
 		{
 			// Kontrollib kas punkt on peatuspunkt või mitte
-			hashNodeCK_t * node = hashMapCK_get(&pmap, points[j]->id.str);
+			hashNodeCK_t * node = hashMapCK_get(stopsMap, points[j]->id.str);
 			const point_t ** ppoint = (node != NULL) ? node->value : NULL;
 			if ((ppoint != NULL) && (points[j] == *ppoint))
 			{
@@ -322,13 +304,12 @@ bool pf_makeDistMatrix(
 					.dist   = distances[j].dist,
 					.actual = distances[j].actual
 				};
-				matrix[i   * numPoints + idx] = distActual;
-				matrix[idx * numPoints + i  ] = distActual;
+				matrix[i   * numStops + idx] = distActual;
+				matrix[idx * numStops + i  ] = distActual;
 			}
 		}
 	}
 
-	hashMapCK_destroy(&pmap);
 	free(points);
 	free(distances);
 	free(costs);
@@ -473,25 +454,25 @@ static inline void pf_fomo_iter_impl(pf_fomo_implS * restrict arg, size_t sz)
 
 bool pf_findOptimalMatrixOrder(
 	const distActual_t * restrict matrix,
-	size_t numPoints,
+	size_t numStops,
 	size_t ** restrict poutIndexes
 )
 {
 	assert(matrix != NULL);
-	assert(numPoints >= 2);
-	assert(START_IDX < numPoints);
-	assert(STOP_IDX < numPoints);
+	assert(numStops >= 2);
+	assert(START_IDX < numStops);
+	assert(STOP_IDX < numStops);
 	assert(poutIndexes != NULL);
 	
 	// Initsialiseerib andmestruktuuri permutatsioonide läbiproovimiseks
 	pf_fomo_implS arg = {
 		.mtx      = matrix,
 		.lowest   = (float)INFINITY,
-		.n        = numPoints,
-		.arr      = malloc(sizeof(size_t) * numPoints),
-		.best     = malloc(sizeof(size_t) * numPoints),
+		.n        = numStops,
+		.arr      = malloc(sizeof(size_t) * numStops),
+		.best     = malloc(sizeof(size_t) * numStops),
 		.perm     = {
-			.n   = numPoints - 2,
+			.n   = numStops - 2,
 			.arr = &arg.arr[1],
 			.q   = NULL
 		}
@@ -511,11 +492,11 @@ bool pf_findOptimalMatrixOrder(
 	}
 	// Algus- ja lõpp-punkt pannakse paika
 	arg.best[0]             = arg.arr[0]             = START_IDX;
-	arg.best[numPoints - 1] = arg.arr[numPoints - 1] = STOP_IDX;
+	arg.best[numStops - 1] = arg.arr[numStops - 1] = STOP_IDX;
 
 	// Täidetakse järjekorra andmestruktuur järjest kõikide punktide indeksitega, mis
 	// ei ole algus- ega lõpp-punkti omad, sest need jäävad alati paika
-	for (size_t i = 0, j = 1; j < (numPoints - 1); ++i)
+	for (size_t i = 0, j = 1; j < (numStops - 1); ++i)
 	{
 		if ((i != STOP_IDX) && (i != START_IDX))
 		{
@@ -541,26 +522,26 @@ bool pf_findOptimalMatrixOrder(
 }
 
 bool pf_generateShortestPath(
-	const point_t *** restrict ppath,
-	size_t * restrict ppathLen,
 	const size_t * restrict bestIndexes,
 	const point_t ** restrict startpoints,
-	size_t numPoints,
-	const point_t ** restrict points,
+	size_t numStops,
+	const point_t * const * restrict points,
 	const uint8_t * restrict relations,
 	const float * restrict costs,
-	size_t numRelations
+	size_t numRelations,
+	const point_t *** restrict ppath,
+	size_t * restrict ppathLen
 )
 {
-	assert(ppath        != NULL);
-	assert(ppathLen     != NULL);
 	assert(bestIndexes  != NULL);
 	assert(startpoints  != NULL);
-	assert(numPoints    >= 2);
+	assert(numStops    >= 2);
 	assert(points       != NULL);
 	assert(relations    != NULL);
 	assert(costs        != NULL);
 	assert(numRelations > 0);
+	assert(ppath        != NULL);
+	assert(ppathLen     != NULL);
 
 	size_t pathLen = 1, pathCap = 16;
 	const point_t ** path = malloc(pathCap * sizeof(const point_t *));
@@ -580,18 +561,18 @@ bool pf_generateShortestPath(
 
 
 	prevDist_t * distances = NULL;
-	for (size_t i = 0, n_1 = numPoints - 1; i < n_1; ++i)
+	for (size_t i = 0, n_1 = numStops - 1; i < n_1; ++i)
 	{
 		const point_t * start = startpoints[bestIndexes[i]];
 		const point_t * stop  = startpoints[bestIndexes[i + 1]];
 
 		bool result = pf_dijkstraSearch(
-			&distances,
 			points,
 			relations,
 			costs,
 			numRelations,
-			start
+			start,
+			&distances
 		);
 		if (!result)
 		{

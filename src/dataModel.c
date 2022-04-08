@@ -526,7 +526,7 @@ bool dm_addStops(dataModel_t * restrict dm)
 	// Add stops to hashmap
 	for (size_t i = 0; i < totPoints; ++i)
 	{
-		if (!hashMapCK_insert(&dm->stopsMap, dm->pointsp[i]->id.str, dm->pointsp[i]))
+		if (!hashMapCK_insert(&dm->stopsMap, dm->pointsp[i]->id.str, &dm->pointsp[i]))
 		{
 			return false;
 		}
