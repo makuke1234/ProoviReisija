@@ -318,9 +318,9 @@ bool dm_createMatrices(dataModel_t * restrict dm);
  * @brief Finds a sequence of stops that results in the shortest path,
  * also finds the shortest path
  * 
- * @param dm 
- * @return true 
- * @return false 
+ * @param dm Pointer to dataModel structure
+ * @return true Success
+ * @return false Failure
  */
 bool dm_findShortestPath(dataModel_t * restrict dm);
 
