@@ -381,68 +381,6 @@ void pq_decPriority(fibHeap_t * restrict q, size_t idx, float distance)
 	{
 		q->min = n;
 	}
-	/*if ((parent != NULL) && (distance < parent->key))
-	{
-		// Promote to root list
-		if (n->parent->child == n)
-		{
-			if (n->left == n)
-			{
-				n->parent->child = NULL;
-			}
-			else
-			{
-				n->parent->child = n->left;
-			}
-		}
-		--(n->parent->degree);
-		n->left->right = n->right;
-		n->right->left = n->left;
-		n->left = n;
-		n->right = n;
-		pq_promote_impl(q, n);
-
-		while (parent != NULL)
-		{
-			if ((parent->parent != NULL) && (parent->marked == NOT_MARKED))
-			{
-				parent->marked = MARKED;
-				break;
-			}
-			else
-			{
-				// Promote to root list
-				if (parent->parent != NULL)
-				{
-					if (parent->parent->child == parent)
-					{
-						if (parent->left == parent)
-						{
-							parent->parent->child = NULL;
-						}
-						else
-						{
-							parent->parent->child = parent->left;
-						}
-					}
-					--(parent->parent->degree);
-				}
-				parent->left->right = parent->right;
-				parent->right->left = parent->left;
-				parent->left = parent;
-				parent->right = parent;
-				
-				fibNode_t * gp = parent->parent;
-				pq_promote_impl(q, parent);
-
-				parent = gp;
-			}
-		}
-	}
-	else if ((parent == NULL) && (distance < q->min->key))
-	{
-		q->min = n;
-	}*/
 }
 void pq_print(fibHeap_t * restrict q, FILE * restrict fp)
 {
