@@ -8,9 +8,13 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <time.h>
 
 int main(int argc, char ** argv)
 {
+	// Mõõdab algusaja
+	clock_t startTime = clock();
+
 	initLogger();
 
 	if (argc < 2)
@@ -202,6 +206,11 @@ int main(int argc, char ** argv)
 
 
 	dm_destroy(&dm);
+
+	clock_t stopTime = clock();
+	clock_t elapsed = stopTime - startTime;
+
+	printf("Ajakulu: %.2f sekundit.\n", (double)elapsed / (double)CLOCKS_PER_SEC);
 
 	return 0;
 }
