@@ -37,6 +37,7 @@ Näidisväljundid:
 ![Näidis 1](./out.svg)
 ![Näidis 2](./out11.svg)
 ![Näidis 3](./out12.svg)
+![Näidis 4](./out3.svg)
 
 - [x] Koodi dokumenteerimine
 - [ ] Koodi korrastamine
