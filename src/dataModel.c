@@ -317,6 +317,9 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 		.numRoads     = 0,
 		.maxRoads     = 0,
 
+		.origRoads    = NULL,
+		.numOrigRoads = 0,
+
 		.relations    = NULL,
 		.costs        = NULL,
 		.juncPoints   = NULL,
@@ -405,6 +408,26 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 				dm_destroy(dm);
 				return dmeMEM;
 			}
+		}
+	}
+	dm->numOrigRoads = dm->numRoads;
+	dm->origRoads = malloc(sizeof(line_t *) * dm->numOrigRoads);
+	if (dm->origRoads == NULL)
+	{
+		ini_destroy(&inifile);
+		dm_destroy(dm);
+		return dmeMEM;
+	}
+	for (size_t i = 0; i < dm->numOrigRoads; ++i)
+	{
+		const line_t * road = dm->roads[i];
+		dm->origRoads[i] = line_make(road->id.str, road->src, road->dst, road->cost);
+		if (dm->origRoads[i] == NULL)
+		{
+			dm->numOrigRoads = i;
+			ini_destroy(&inifile);
+			dm_destroy(dm);
+			return dmeMEM;
 		}
 	}
 
@@ -684,14 +707,17 @@ bool dm_writeSvg(dataModel_t * restrict dm, FILE * restrict fsvg)
 
 	svg_init();
 	svg_setFont("Hermit");
-	result &= svg_header(fsvg, (int64_t)minw, (int64_t)maxh, (size_t)(maxw - minw), (size_t)(maxh - minh), svg_rgba32(0xCCCCCCFF));
+	result &= svg_header(fsvg, (int64_t)minw, (int64_t)maxh, (size_t)(maxw - minw), (size_t)(maxh - minh), svg_rgba32(0xF0F0F0FF));
 
-	svgRGB_t svgGray = svg_rgba32(0x888888FF);
+	svgRGB_t svgGray = svg_rgba32(0xC0C0C0FF);
 
-	for (size_t i = 0; i < dm->numRoads && result; ++i)
+	svg_setPointRadius((SVG_LINE_STROKE * 3) / 4);
+	for (size_t i = 0; i < dm->numOrigRoads && result; ++i)
 	{
-		result &= svg_line(fsvg, dm->roads[i], svgGray);
+		const line_t * road = dm->origRoads[i];
+		result &= svg_linePoint(fsvg, road, svgGray, i == 0, false);
 	}
+	svg_setPointRadius(SVG_POINT_RADIUS);
 
 	// Joonistab lühima teekonna
 	svgRGB_t svgRed = svg_rgba32(0xFF1111FF);
@@ -705,18 +731,36 @@ bool dm_writeSvg(dataModel_t * restrict dm, FILE * restrict fsvg)
 
 		if (hashMapCK_get(&dm->stopsMap, line.dst->id.str) == NULL)
 		{
-			result &= svg_linePoint(fsvg, &line, svgRed, false);
+			result &= svg_linePoint(fsvg, &line, svgRed, false, false);
 		}
 		else
 		{
 			result &= svg_line(fsvg, &line, svgRed);
 		}
-
 	}
+
+	// Kirjutab teenimed
+	svg_setTextFill("rgb(127, 127, 127)");
+	svg_setFontSize(14);
+	for (size_t i = 0; i < dm->numOrigRoads && result; ++i)
+	{
+		const line_t * road = dm->origRoads[i];
+		result &= svg_textRot(
+			fsvg,
+			(road->src->x + road->dst->x) * 0.5f,
+			(road->src->y + road->dst->y) * 0.5f,
+			road->id.str,
+			svgBase_central,
+			svgAlign_middle,
+			-atanf(road->dy / road->dx) * 180.f / 3.141592654f
+		);
+	}
+	svg_setTextFill(SVG_FILL);
+	svg_setFontSize(SVG_FONT_SIZE);
 
 	svgRGB_t svgBlue = svg_rgba32(0x00A2E8FF);
 
-	line_t line = {
+	/*line_t line = {
 		.src = &dm->beg,
 		.dst = dm->begp
 	};
@@ -727,25 +771,39 @@ bool dm_writeSvg(dataModel_t * restrict dm, FILE * restrict fsvg)
 	};
 	result &= svg_line(fsvg, &line, svgBlue);
 
-	point_t p = dm->beg;
+	point_t p = *dm->begp;
 	p.id.str = "Start";
-	result &= svg_point(fsvg, &p, svgBlue);
+	svg_setPointRadius((SVG_LINE_STROKE * 2) / 3);
+	result &= svg_point(fsvg, &p, svgBlue, false);
+	svg_setPointRadius(SVG_POINT_RADIUS);
+
+	p = dm->beg;
+	p.id.str = "Start";
+	result &= svg_point(fsvg, &p, svgBlue, true);
+
+	p = *dm->endp;
+	p.id.str = "Finiš";
+	svg_setPointRadius((SVG_LINE_STROKE * 2) / 3);
+	result &= svg_point(fsvg, &p, svgBlue, false);
+	svg_setPointRadius(SVG_POINT_RADIUS);
+
 	p = dm->end;
 	p.id.str = "Finiš";
-	result &= svg_point(fsvg, &p, svgBlue);
+	result &= svg_point(fsvg, &p, svgBlue, true);*/
 
 	for (size_t i = 0, totalStops = dm->numMidPoints + 2; i < totalStops && result; ++i)
 	{
 		size_t idx = dm->bestStopsIndices[i];
-		if ((idx != 0) && (idx != 1))
-		{
-			line = (line_t){
-				.src = dm->pointsp[idx],
-				.dst = &dm->points[idx]
-			};
-			result &= svg_line(fsvg, &line, svgBlue);
-			result &= svg_point(fsvg, &dm->points[idx], svgBlue);
-		}
+		line_t line = (line_t){
+			.src = dm->pointsp[idx],
+			.dst = &dm->points[idx]
+		};
+		result &= svg_line(fsvg, &line, svgBlue);
+		
+		svg_setPointRadius((SVG_LINE_STROKE * 3) / 4);
+		result &= svg_point(fsvg, line.src, svgBlue, false);
+		svg_setPointRadius(SVG_POINT_RADIUS);
+		result &= svg_point(fsvg, line.dst, svgBlue, true);
 
 		char temp[10];
 		result &= _ultoa((unsigned long)i + 1, temp, 10) != NULL;
@@ -793,6 +851,18 @@ void dm_destroy(dataModel_t * restrict dm)
 		}
 		free(dm->roads);
 		dm->roads = NULL;
+	}
+	if (dm->origRoads != NULL)
+	{
+		for (size_t i = 0; i < dm->numOrigRoads; ++i)
+		{
+			if (dm->origRoads[i] != NULL)
+			{
+				line_free(dm->origRoads[i]);
+			}
+		}
+		free(dm->origRoads);
+		dm->origRoads = NULL;
 	}
 
 	if (dm->relations != NULL)

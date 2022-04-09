@@ -19,9 +19,10 @@ typedef struct svgRGB
 #define SVG_HEIGHT ((size_t)1080)
 #define SVG_MARGIN ((size_t)20)
 
-#define SVG_LINE_STROKE  ((size_t)3)
+#define SVG_LINE_STROKE  ((size_t)16)
 #define SVG_POINT_RADIUS ((size_t)20)
 #define SVG_FONT_SIZE    ((size_t)24)
+#define SVG_FILL "black"
 
 
 /**
@@ -75,6 +76,13 @@ void svg_setFontSize(size_t sz);
  * @param font Font name string
  */
 void svg_setFont(const char * restrict font);
+/**
+ * @brief Sets the text fill string
+ * 
+ * @param fill Fill string
+ */
+void svg_setTextFill(const char * restrict fill);
+
 
 /**
  * @brief Writes the SVG file header to file.
@@ -106,22 +114,26 @@ bool svg_line(FILE * restrict fp, const line_t * restrict l, svgRGB_t color);
  * @param fp output file pointer
  * @param l Pointer to line
  * @param color The RGB color of the line & the point
- * @param drawSrc Boolean variable that determines whether the source point of the line should
- * be drawn or not
+ * @param drawSrc Boolean value that determines whether the source point of
+ * the line should be drawn or not
+ * @param drawText Boolean value that determines whether the name of the point(s)
+ * should be drawn or not
  * @return true Success
  * @return false Failure
  */
-bool svg_linePoint(FILE * restrict fp, const line_t * restrict l, svgRGB_t color, bool drawSrc);
+bool svg_linePoint(FILE * restrict fp, const line_t * restrict l, svgRGB_t color, bool drawSrc, bool drawText);
 /**
  * @brief Draws a point with its colored circle and text
  * 
  * @param fp output file pointer
  * @param p Pointer to point structure
  * @param color The RGB color of the point
+ * @param drawText Boolean value that determines whether the name of the point(s)
+ * should be drawn or not
  * @return true Success
  * @return false Failure
  */
-bool svg_point(FILE * restrict fp, const point_t * restrict p, svgRGB_t color);
+bool svg_point(FILE * restrict fp, const point_t * restrict p, svgRGB_t color, bool drawText);
 
 typedef enum svgBase
 {
@@ -153,7 +165,7 @@ typedef enum svgAlign
 
 } svgAlign_t;
 /**
- * @brief Draws middle-aligned text into the SVG
+ * @brief Draws aligned text into the SVG file
  * 
  * @param fp output file pointer
  * @param x x-coordinate
@@ -165,6 +177,20 @@ typedef enum svgAlign
  * @return false Failure
  */
 bool svg_text(FILE * restrict fp, float x, float y, const char * restrict str, svgBase_t baseline, svgAlign_t align);
+/**
+ * @brief Draws rotated & aligned text into the SVG file
+ * 
+ * @param fp output file pointer
+ * @param x x-coordinate
+ * @param y y-coordinate
+ * @param str string to draw
+ * @param baseline dominant-baseline attribute
+ * @param align String alignment, text-anchor attribute
+ * @param rotation Rotational angle with clock-wise direction in degrees
+ * @return true Success
+ * @return false Failure
+ */
+bool svg_textRot(FILE * restrict fp, float x, float y, const char * restrict str, svgBase_t baseline, svgAlign_t align, float rotation);
 
 /**
  * @brief Writes the SVG file footer to file.

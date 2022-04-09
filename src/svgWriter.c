@@ -6,6 +6,8 @@ struct svgSettings
 
 	double scalex, scaley;
 	const char * font;
+
+	const char * fill;
 };
 
 static struct svgSettings svgSettings;
@@ -45,7 +47,8 @@ void svg_init(void)
 	svgSettings = (struct svgSettings){
 		.pRadius  = SVG_POINT_RADIUS,
 		.fontSize = SVG_FONT_SIZE,
-		.font     = ""
+		.font     = "",
+		.fill     = SVG_FILL
 	};
 }
 void svg_setPointRadius(size_t radius)
@@ -59,6 +62,10 @@ void svg_setFontSize(size_t sz)
 void svg_setFont(const char * restrict font)
 {
 	svgSettings.font = font;
+}
+void svg_setTextFill(const char * restrict fill)
+{
+	svgSettings.fill = fill;
 }
 
 bool svg_header(FILE * restrict fp, int64_t x, int64_t y, size_t width, size_t height, svgRGB_t backColor)
@@ -107,16 +114,16 @@ bool svg_line(FILE * restrict fp, const line_t * restrict l, svgRGB_t color)
 		SVG_LINE_STROKE
 	) >= 0;
 }
-bool svg_linePoint(FILE * restrict fp, const line_t * restrict l, svgRGB_t color, bool drawSrc)
+bool svg_linePoint(FILE * restrict fp, const line_t * restrict l, svgRGB_t color, bool drawSrc, bool drawText)
 {
 	assert(fp != NULL);
 	assert(l  != NULL);
 	assert(l->src != NULL);
 	assert(l->dst != NULL);
 
-	return svg_line(fp, l, color) && ((drawSrc && svg_point(fp, l->src, color)) || !drawSrc) && svg_point(fp, l->dst, color);
+	return svg_line(fp, l, color) && ((drawSrc && svg_point(fp, l->src, color, drawText)) || !drawSrc) && svg_point(fp, l->dst, color, drawText);
 }
-bool svg_point(FILE * restrict fp, const point_t * restrict p, svgRGB_t color)
+bool svg_point(FILE * restrict fp, const point_t * restrict p, svgRGB_t color, bool drawText)
 {
 	assert(fp != NULL);
 	assert(p  != NULL);
@@ -124,7 +131,7 @@ bool svg_point(FILE * restrict fp, const point_t * restrict p, svgRGB_t color)
 
 	const double x = (double)p->x * svgSettings.scalex, y = -(double)p->y * svgSettings.scaley;
 	
-	return fprintf(
+	return drawText ? fprintf(
 		fp,
 		"<circle cx=\"%.1f\" cy=\"%.1f\" r=\"%zu\" fill=\"rgb(%hu, %hu, %hu)\" />\n"
 		"<text x=\"%.1f\" y=\"%.1f\" font-size=\"%zu\" text-anchor=\"start\" fill=\"black\">%s</text>\n",
@@ -134,8 +141,35 @@ bool svg_point(FILE * restrict fp, const point_t * restrict p, svgRGB_t color)
 		x + svgSettings.pRadius, y - svgSettings.pRadius,
 		svgSettings.fontSize,
 		p->id.str
+	) >= 0 : fprintf(
+		fp,
+		"<circle cx=\"%.1f\" cy=\"%.1f\" r=\"%zu\" fill=\"rgb(%hu, %hu, %hu)\" />\n",
+		x, y,
+		svgSettings.pRadius,
+		(uint16_t)color.r, (uint16_t)color.g, (uint16_t)color.b
 	) >= 0;
 }
+
+static const char * dombases[svgBase_size] = {
+	"auto",
+	"use-script",
+	"no-change",
+	"reset-size",
+	"ideographic",
+	"alphabetic",
+	"hanging",
+	"mathematical",
+	"central",
+	"middle",
+	"text-after-edge",
+	"text-before-edge",
+	"inherit"
+};
+static const char * aligns[svgAlign_size] = {
+	"start",
+	"middle",
+	"end"
+};
 bool svg_text(FILE * restrict fp, float x, float y, const char * restrict str, svgBase_t baseline, svgAlign_t align)
 {
 	assert(fp  != NULL);
@@ -143,35 +177,33 @@ bool svg_text(FILE * restrict fp, float x, float y, const char * restrict str, s
 	assert(baseline >= 0 && align >= 0);
 	assert(baseline < svgBase_size && align < svgAlign_size);
 
-	static const char * dombases[svgBase_size] = {
-		"auto",
-		"use-script",
-		"no-change",
-		"reset-size",
-		"ideographic",
-		"alphabetic",
-		"hanging",
-		"mathematical",
-		"central",
-		"middle",
-		"text-after-edge",
-		"text-before-edge",
-		"inherit"
-	};
-	static const char * aligns[svgAlign_size] = {
-		"start",
-		"middle",
-		"end"
-	};
+	const double dx = (double)x * svgSettings.scalex, dy = -(double)y * svgSettings.scaley;
+
+	return fprintf(
+		fp,
+		"<text x=\"%.1f\" y=\"%.1f\" font-size=\"%zu\" dominant-baseline=\"%s\" text-anchor=\"%s\" fill=\"%s\">%s</text>\n",
+		dx, dy,
+		svgSettings.fontSize,
+		dombases[baseline], aligns[align], svgSettings.fill,
+		str
+	) >= 0;
+}
+bool svg_textRot(FILE * restrict fp, float x, float y, const char * restrict str, svgBase_t baseline, svgAlign_t align, float rotation)
+{
+	assert(fp  != NULL);
+	assert(str != NULL);
+	assert(baseline >= 0 && align >= 0);
+	assert(baseline < svgBase_size && align < svgAlign_size);
 
 	const double dx = (double)x * svgSettings.scalex, dy = -(double)y * svgSettings.scaley;
 
 	return fprintf(
 		fp,
-		"<text x=\"%.1f\" y=\"%.1f\" font-size=\"%zu\" dominant-baseline=\"%s\" text-anchor=\"%s\" fill=\"black\">%s</text>\n",
-		dx, dy,
+		"<text font-size=\"%zu\" dominant-baseline=\"%s\" text-anchor=\"%s\" fill=\"%s\" transform=\"translate(%.1f, %.1f) rotate(%.6g)\">%s</text>\n",
 		svgSettings.fontSize,
-		dombases[baseline], aligns[align],
+		dombases[baseline], aligns[align], svgSettings.fill,
+		dx, dy,
+		(double)rotation,
 		str
 	) >= 0;
 }

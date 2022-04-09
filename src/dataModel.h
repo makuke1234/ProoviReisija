@@ -245,6 +245,9 @@ typedef struct dataModel
 	line_t ** roads;
 	size_t numRoads, maxRoads;
 
+	line_t ** origRoads;
+	size_t numOrigRoads;
+
 	uint8_t * relations;
 	float * costs;
 	const point_t ** juncPoints;
