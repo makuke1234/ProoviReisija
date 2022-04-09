@@ -34,10 +34,9 @@ Projekti ajalogi on saadaval [siin](./ajalogi.txt).
 - [x] Lihtne kasutajaliides teekonna kuvamiseks
 
 Näidisväljundid:
-![Näidis 1](./out.svg)
-![Näidis 2](./out11.svg)
-![Näidis 3](./out12.svg)
-![Näidis 4](./out3.svg)
+![Näidis 1](./out1.svg)
+![Näidis 2](./out2.svg)
+![Näidis 3](./out3.svg)
 
 - [x] Koodi dokumenteerimine
 - [ ] Koodi korrastamine
