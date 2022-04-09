@@ -30,7 +30,7 @@ int main(int argc, char ** argv)
 	}
 
 	// Väljastab vahepunktid
-	for (size_t i = 0; i < dm.numRoads; ++i)
+	/*for (size_t i = 0; i < dm.numRoads; ++i)
 	{
 		if (dm.roads[i] != NULL)
 		{
@@ -42,7 +42,7 @@ int main(int argc, char ** argv)
 				tee->dst->id.str, tee->dst->idx, (double)tee->dst->x, (double)tee->dst->y
 			);
 		}
-	}
+	}*/
 
 	if (!dm_createMatrices(&dm))
 	{
@@ -50,9 +50,8 @@ int main(int argc, char ** argv)
 		return 1;
 	}
 
-	// Koostab maatriksi lühimatest kaugustest punktide vahel
 
-	size_t maxplen = 0;
+	/*size_t maxplen = 0;
 	for (size_t i = 0; i < dm.numJunctions; ++i)
 	{
 		maxplen = mh_zmax(maxplen, dm.juncPoints[i]->id.len);
@@ -137,7 +136,7 @@ int main(int argc, char ** argv)
 			printf("%8.3f ", (double)row[j].actual);
 		}
 		putchar('\n');
-	}
+	}*/
 
 	printf("Optimaalse teekonna leidmine...\n");
 
