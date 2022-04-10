@@ -151,33 +151,45 @@ int main(int argc, char ** argv)
 	}
 
 	printf("Parim peatuste l2bimise j2rjekord:\n");
-	for (size_t i = 0, n_1 = totalStops - 1; i < totalStops; ++i)
+
+	double total = 0.0;
+	size_t maxslen = 0;
+	for (size_t i = 0; i < totalStops; ++i)
 	{
-		printf("%s", dm.points[dm.bestStopsIndices[i]].id.str);
-		if (i < n_1)
-		{
-			printf(" -> ");
-		}
+		maxslen = mh_zmax(maxslen, dm.points[i].id.len);
 	}
-	putchar('\n');
-
-
-	float total = 0.0f;
 	for (size_t i = 0, n_1 = totalStops - 1; i < n_1; ++i)
 	{
-		total += dm.stopsDistMatrix[pf_calcIdx(dm.bestStopsIndices[i], dm.bestStopsIndices[i + 1], totalStops)].actual;
+		const double dist = (double)dm.stopsDistMatrix[pf_calcIdx(dm.bestStopsIndices[i], dm.bestStopsIndices[i + 1], totalStops)].actual;
+		total += dist;
+		printf(
+			"%*s -> %*s: +%.3f km, hetkel kokku: %.3f km\n",
+			maxslen, dm.points[dm.bestStopsIndices[i]].id.str,
+			maxslen, dm.points[dm.bestStopsIndices[i + 1]].id.str,
+			dist / 1000.0, total / 1000.0
+		);
 	}
-	printf("Teekond kokku: %.3f km\n", (double)total / 1000.0);
+	printf("Teekond kokku: %.3f km\n", total / 1000.0);
 
 
 	printf("Teekond pikalt:\n");
-	for (size_t i = 0, n_1 = dm.shortestPathLen - 1; i < dm.shortestPathLen; ++i)
+	for (size_t i = 0; i < dm.shortestPathLen; ++i)
 	{
-		printf("%s", dm.shortestPath[i]->id.str);
-		if (i < n_1)
-		{
-			printf(" -> ");
-		}
+		maxslen = mh_zmax(maxslen, dm.shortestPath[i]->id.len);
+	}
+	total = 0.0;
+	for (size_t i = 0, n_1 = dm.shortestPathLen - 1; i < n_1; ++i)
+	{
+		const point_t * p1 = dm.shortestPath[i], * p2 = dm.shortestPath[i + 1];
+		const double dx = (double)(p1->x - p2->x), dy = (double)(p1->y - p2->y);
+		const double dist = sqrt((dx * dx) + (dy * dy));
+		total += dist;
+		printf(
+			"%*s -> %*s: +%.3f km, hetkel kokku: %.3f km\n",
+			maxslen, p1->id.str,
+			maxslen, p2->id.str,
+			dist / 1000.0, total / 1000.0
+		);
 	}
 	putchar('\n');
 
