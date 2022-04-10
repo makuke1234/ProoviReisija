@@ -742,19 +742,23 @@ bool dm_writeSvg(dataModel_t * restrict dm, FILE * restrict fsvg)
 	// Kirjutab teenimed
 	svg_setTextFill("rgb(127, 127, 127)");
 	svg_setFontSize(14);
+	#define MAX_STR 256
 	for (size_t i = 0; i < dm->numOrigRoads && result; ++i)
 	{
 		const line_t * road = dm->origRoads[i];
+		char str[MAX_STR];
+		sprintf_s(str, MAX_STR, "%s: %.2f km", road->id.str, (double)road->length / 1000.0);
 		result &= svg_textRot(
 			fsvg,
 			(road->src->x + road->dst->x) * 0.5f,
 			(road->src->y + road->dst->y) * 0.5f,
-			road->id.str,
+			str,
 			svgBase_central,
 			svgAlign_middle,
-			-atanf(road->dy / road->dx) * 180.f / 3.141592654f
+			-atanf(road->dy / road->dx) * (180.f / 3.141592654f)
 		);
 	}
+	#undef MAX_STR
 	svg_setTextFill(SVG_FILL);
 	svg_setFontSize(SVG_FONT_SIZE);
 

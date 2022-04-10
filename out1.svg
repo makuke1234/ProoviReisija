@@ -24,11 +24,11 @@
 <line x1="1315.7" y1="-400.1" x2="1486.5" y2="-371.6" style="stroke:rgb(255, 17, 17);stroke-width:16" />
 <circle cx="1486.5" cy="-371.6" r="20" fill="rgb(255, 17, 17)" />
 <line x1="1486.5" y1="-371.6" x2="1312.7" y2="-180.5" style="stroke:rgb(255, 17, 17);stroke-width:16" />
-<text font-size="14" dominant-baseline="central" text-anchor="middle" fill="rgb(127, 127, 127)" transform="translate(402.6, -284.9) rotate(-31.7236)">0</text>
-<text font-size="14" dominant-baseline="central" text-anchor="middle" fill="rgb(127, 127, 127)" transform="translate(991.0, -297.3) rotate(38.6598)">1</text>
-<text font-size="14" dominant-baseline="central" text-anchor="middle" fill="rgb(127, 127, 127)" transform="translate(650.3, -86.7) rotate(-1.20605)">2</text>
-<text font-size="14" dominant-baseline="central" text-anchor="middle" fill="rgb(127, 127, 127)" transform="translate(1362.6, -235.4) rotate(-47.7263)">3</text>
-<text font-size="14" dominant-baseline="central" text-anchor="middle" fill="rgb(127, 127, 127)" transform="translate(1114.8, -433.5) rotate(9.46232)">4</text>
+<text font-size="14" dominant-baseline="central" text-anchor="middle" fill="rgb(127, 127, 127)" transform="translate(402.6, -284.9) rotate(-31.7236)">0: 0.06 km</text>
+<text font-size="14" dominant-baseline="central" text-anchor="middle" fill="rgb(127, 127, 127)" transform="translate(991.0, -297.3) rotate(38.6598)">1: 0.05 km</text>
+<text font-size="14" dominant-baseline="central" text-anchor="middle" fill="rgb(127, 127, 127)" transform="translate(650.3, -86.7) rotate(-1.20605)">2: 0.10 km</text>
+<text font-size="14" dominant-baseline="central" text-anchor="middle" fill="rgb(127, 127, 127)" transform="translate(1362.6, -235.4) rotate(-47.7263)">3: 0.03 km</text>
+<text font-size="14" dominant-baseline="central" text-anchor="middle" fill="rgb(127, 127, 127)" transform="translate(1114.8, -433.5) rotate(9.46232)">4: 0.06 km</text>
 <line x1="653.6" y1="-440.1" x2="619.4" y2="-495.5" style="stroke:rgb(0, 162, 232);stroke-width:16" />
 <circle cx="653.6" cy="-440.1" r="12" fill="rgb(0, 162, 232)" />
 <circle cx="619.4" cy="-495.5" r="20" fill="rgb(0, 162, 232)" />
