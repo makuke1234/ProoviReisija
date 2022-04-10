@@ -33,114 +33,12 @@ int main(int argc, char ** argv)
 		return 1;
 	}
 
-	// Väljastab vahepunktid
-	/*for (size_t i = 0; i < dm.numRoads; ++i)
-	{
-		if (dm.roads[i] != NULL)
-		{
-			line_t * tee = dm.roads[i];
-			printf(
-				"Tee %s: %s, %zu: (%f, %f) -> %s, %zu: (%f, %f)\n",
-				tee->id.str,
-				tee->src->id.str, tee->src->idx, (double)tee->src->x, (double)tee->src->y,
-				tee->dst->id.str, tee->dst->idx, (double)tee->dst->x, (double)tee->dst->y
-			);
-		}
-	}*/
-
 	if (!dm_createMatrices(&dm))
 	{
 		fprintf(stderr, "Maatriksite genereerimine nurjus!\n");
 		return 1;
 	}
 
-
-	/*size_t maxplen = 0;
-	for (size_t i = 0; i < dm.numJunctions; ++i)
-	{
-		maxplen = mh_zmax(maxplen, dm.juncPoints[i]->id.len);
-	}
-
-	printf("Relatsioonide maatriks:\n");
-	printf("%*c ", maxplen, ' ');
-	for (size_t i = 0; i < dm.numJunctions; ++i)
-	{
-		printf("%*s ", maxplen, dm.juncPoints[i]->id.str);
-	}
-	putchar('\n');
-	for (size_t i = 0; i < dm.numJunctions; ++i)
-	{
-		printf("%*s ", maxplen, dm.juncPoints[i]->id.str);
-		for (size_t j = 0; j < dm.numJunctions; ++j)
-		{
-			printf(
-				"%*c%c",
-				maxplen - 1,
-				' ',
-				pf_bGet(dm.relations, pf_calcIdx(i, j, dm.numJunctions)) ? '1' : '0'
-			);
-			if ((j + 1) < dm.numJunctions)
-			{
-				putchar(' ');
-			}
-		}
-		putchar('\n');
-	}
-
-	printf("\"Hindade\" maatriks:\n");
-	printf("%*c ", 4, ' ');
-	for (size_t i = 0; i < dm.numJunctions; ++i)
-	{
-		printf("%*s ", 4, dm.juncPoints[i]->id.str);
-	}
-	putchar('\n');
-	for (size_t i = 0; i < dm.numJunctions; ++i)
-	{
-		printf("%*s ", 4, dm.juncPoints[i]->id.str);
-		for (size_t j = 0; j < dm.numJunctions; ++j)
-		{
-			printf("%4.0f ", (double)dm.costs[pf_calcIdx(i, j, dm.numJunctions)]);
-		}
-		putchar('\n');
-	}
-
-
-
-	printf("Peatuste vaheliste \"hindade\" maatriks:\n");
-	printf("%8c ", ' ');
-	for (size_t i = 0; i < totalStops; ++i)
-	{
-		printf("%8s ", dm.points[i].id.str);
-	}
-	putchar('\n');
-	for (size_t i = 0; i < totalStops; ++i)
-	{
-		distActual_t * row = &dm.stopsDistMatrix[i * totalStops];
-		printf("%8s ", dm.points[i].id.str);
-		for (size_t j = 0; j < totalStops; ++j)
-		{
-			printf("%8.3f ", (double)row[j].dist);
-		}
-		putchar('\n');
-	}
-
-	printf("Peatuste vaheliste tegelike kauguste maatriks:\n");
-	printf("%8c ", ' ');
-	for (size_t i = 0; i < totalStops; ++i)
-	{
-		printf("%8s ", dm.points[i].id.str);
-	}
-	putchar('\n');
-	for (size_t i = 0; i < totalStops; ++i)
-	{
-		distActual_t * row = &dm.stopsDistMatrix[i * totalStops];
-		printf("%8s ", dm.points[i].id.str);
-		for (size_t j = 0; j < totalStops; ++j)
-		{
-			printf("%8.3f ", (double)row[j].actual);
-		}
-		putchar('\n');
-	}*/
 
 	printf("Optimaalse teekonna leidmine...\n");
 
@@ -153,10 +51,10 @@ int main(int argc, char ** argv)
 	printf("Parim peatuste l2bimise j2rjekord:\n");
 
 	double total = 0.0;
-	size_t maxslen = 0;
+	size_t maxStrlen = 0;
 	for (size_t i = 0; i < totalStops; ++i)
 	{
-		maxslen = mh_zmax(maxslen, dm.points[i].id.len);
+		maxStrlen = mh_zmax(maxStrlen, dm.points[i].id.len);
 	}
 	for (size_t i = 0, n_1 = totalStops - 1; i < n_1; ++i)
 	{
@@ -164,8 +62,8 @@ int main(int argc, char ** argv)
 		total += dist;
 		printf(
 			"%*s -> %*s: +%.3f km, hetkel kokku: %.3f km\n",
-			maxslen, dm.points[dm.bestStopsIndices[i]].id.str,
-			maxslen, dm.points[dm.bestStopsIndices[i + 1]].id.str,
+			maxStrlen, dm.points[dm.bestStopsIndices[i]].id.str,
+			maxStrlen, dm.points[dm.bestStopsIndices[i + 1]].id.str,
 			dist / 1000.0, total / 1000.0
 		);
 	}
@@ -175,7 +73,7 @@ int main(int argc, char ** argv)
 	printf("Teekond pikalt:\n");
 	for (size_t i = 0; i < dm.shortestPathLen; ++i)
 	{
-		maxslen = mh_zmax(maxslen, dm.shortestPath[i]->id.len);
+		maxStrlen = mh_zmax(maxStrlen, dm.shortestPath[i]->id.len);
 	}
 	total = 0.0;
 	for (size_t i = 0, n_1 = dm.shortestPathLen - 1; i < n_1; ++i)
@@ -186,8 +84,8 @@ int main(int argc, char ** argv)
 		total += dist;
 		printf(
 			"%*s -> %*s: +%.3f km, hetkel kokku: %.3f km\n",
-			maxslen, p1->id.str,
-			maxslen, p2->id.str,
+			maxStrlen, p1->id.str,
+			maxStrlen, p2->id.str,
 			dist / 1000.0, total / 1000.0
 		);
 	}

@@ -764,37 +764,6 @@ bool dm_writeSvg(dataModel_t * restrict dm, FILE * restrict fsvg)
 
 	svgRGB_t svgBlue = svg_rgba32(0x00A2E8FF);
 
-	/*line_t line = {
-		.src = &dm->beg,
-		.dst = dm->begp
-	};
-	result &= svg_line(fsvg, &line, svgBlue);
-	line = (line_t){
-		.src = dm->endp,
-		.dst = &dm->end
-	};
-	result &= svg_line(fsvg, &line, svgBlue);
-
-	point_t p = *dm->begp;
-	p.id.str = "Start";
-	svg_setPointRadius((SVG_LINE_STROKE * 2) / 3);
-	result &= svg_point(fsvg, &p, svgBlue, false);
-	svg_setPointRadius(SVG_POINT_RADIUS);
-
-	p = dm->beg;
-	p.id.str = "Start";
-	result &= svg_point(fsvg, &p, svgBlue, true);
-
-	p = *dm->endp;
-	p.id.str = "Finiš";
-	svg_setPointRadius((SVG_LINE_STROKE * 2) / 3);
-	result &= svg_point(fsvg, &p, svgBlue, false);
-	svg_setPointRadius(SVG_POINT_RADIUS);
-
-	p = dm->end;
-	p.id.str = "Finiš";
-	result &= svg_point(fsvg, &p, svgBlue, true);*/
-
 	for (size_t i = 0, totalStops = dm->numMidPoints + 2; i < totalStops && result; ++i)
 	{
 		size_t idx = dm->bestStopsIndices[i];
