@@ -68,8 +68,8 @@ int main(int argc, char ** argv)
 		total += dist;
 		printf(
 			"%*s -> %*s: +%.3f km, hetkel kokku: %.3f km\n",
-			maxStrlen, dm.points[dm.bestStopsIndices[i]].id.str,
-			maxStrlen, dm.points[dm.bestStopsIndices[i + 1]].id.str,
+			(int)maxStrlen, dm.points[dm.bestStopsIndices[i]].id.str,
+			(int)maxStrlen, dm.points[dm.bestStopsIndices[i + 1]].id.str,
 			dist / 1000.0, total / 1000.0
 		);
 	}
@@ -94,8 +94,8 @@ int main(int argc, char ** argv)
 		total += dist;
 		printf(
 			"%*s -> %*s: +%.3f km, hetkel kokku: %.3f km\n",
-			maxStrlen, p1->id.str,
-			maxStrlen, p2->id.str,
+			(int)maxStrlen, p1->id.str,
+			(int)maxStrlen, p2->id.str,
 			dist / 1000.0, total / 1000.0
 		);
 	}

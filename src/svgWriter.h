@@ -15,13 +15,13 @@ typedef struct svgRGB
 
 } svgRGB_t;
 
-#define SVG_WIDTH  ((size_t)1920)
-#define SVG_HEIGHT ((size_t)1080)
-#define SVG_MARGIN ((size_t)20)
+#define SVG_WIDTH  1920
+#define SVG_HEIGHT 1080
+#define SVG_MARGIN 20
 
-#define SVG_LINE_STROKE  ((size_t)16)
-#define SVG_POINT_RADIUS ((size_t)20)
-#define SVG_FONT_SIZE    ((size_t)24)
+#define SVG_LINE_STROKE  16
+#define SVG_POINT_RADIUS 20
+#define SVG_FONT_SIZE    24
 #define SVG_FILL "black"
 
 

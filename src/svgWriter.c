@@ -90,8 +90,8 @@ bool svg_header(FILE * restrict fp, int64_t x, int64_t y, size_t width, size_t h
 		fp,
 		"<svg version=\"1.1\" width=\"%zu\" height=\"%zu\" viewBox=\"%lld %lld %zu %zu\" font-family=\"%s\" xmlns=\"http://www.w3.org/2000/svg\">\n"
 		"<rect x=\"%lld\" y=\"%lld\" width=\"100%%\" height=\"100%%\" fill=\"rgb(%hu, %hu, %hu)\" />\n\n",
-		SVG_WIDTH, newHeight,
-		vx, -vy, SVG_WIDTH, newHeight,
+		(size_t)SVG_WIDTH, newHeight,
+		vx, -vy, (size_t)SVG_WIDTH, newHeight,
 		svgSettings.font,
 		vx, -vy,
 		(uint16_t)backColor.r, (uint16_t)backColor.g, (uint16_t)backColor.b
@@ -111,7 +111,7 @@ bool svg_line(FILE * restrict fp, const line_t * restrict l, svgRGB_t color)
 		(double)l->src->x * svgSettings.scalex, -(double)l->src->y * svgSettings.scaley,
 		(double)l->dst->x * svgSettings.scalex, -(double)l->dst->y * svgSettings.scaley,
 		(uint16_t)color.r, (uint16_t)color.g, (uint16_t)color.b,
-		SVG_LINE_STROKE
+		(size_t)SVG_LINE_STROKE
 	) >= 0;
 }
 bool svg_linePoint(FILE * restrict fp, const line_t * restrict l, svgRGB_t color, bool drawSrc, bool drawText)
@@ -138,7 +138,7 @@ bool svg_point(FILE * restrict fp, const point_t * restrict p, svgRGB_t color, b
 		x, y,
 		svgSettings.pRadius,
 		(uint16_t)color.r, (uint16_t)color.g, (uint16_t)color.b,
-		x + svgSettings.pRadius, y - svgSettings.pRadius,
+		x + (double)svgSettings.pRadius, y - (double)svgSettings.pRadius,
 		svgSettings.fontSize,
 		p->id.str
 	) >= 0 : fprintf(
