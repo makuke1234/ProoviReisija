@@ -39,20 +39,20 @@ Näidisväljundid:
 ![Näidis 3](./out3.svg)
 
 - [x] Koodi dokumenteerimine
-- [ ] Koodi korrastamine
+- [x] Koodi korrastamine
 - [ ] Aruande koostamine
 
 
 # Materjalid
 
-- [INI file wiki](https://en.wikipedia.org/wiki/INI_file) -> INI faili formaat
-- [Unicode block wiki](https://en.wikipedia.org/wiki/Unicode_block)
-- [Specials (Unicode block) wiki](https://en.wikipedia.org/wiki/Specials_(Unicode_block)) -> Sealt pärineb koodis kokkuleppeline "keelatud" Unicode märgend *hex* väärtusega 0xFFFF
-- [C reference](https://en.cppreference.com/w/c) -> Alati abiks C standardteegi mõistmisel
-- [UTF-8 wiki](https://en.wikipedia.org/wiki/UTF-8#Encoding) -> Abiks Unicode *code pointide* UTF-8'ks konverteerimisel
-- [Dijkstra's algorithm wiki](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm) -> Abiks lühima tee leidmisel kahe punkti vahel
+- [*INI file* wiki](https://en.wikipedia.org/wiki/INI_file) -> INI faili formaat
+- [*Unicode block* wiki](https://en.wikipedia.org/wiki/Unicode_block)
+- [*Specials (Unicode block)* wiki](https://en.wikipedia.org/wiki/Specials_(Unicode_block)) -> Sealt pärineb koodis kokkuleppeline "keelatud" Unicode märgend *hex* väärtusega 0xFFFF
+- [*C reference*](https://en.cppreference.com/w/c) -> Alati abiks C standardteegi mõistmisel
+- [*UTF-8* wiki](https://en.wikipedia.org/wiki/UTF-8#Encoding) -> Abiks Unicode *code pointide* UTF-8'ks konverteerimisel
+- [*Dijkstra's algorithm* wiki](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm) -> Abiks lühima tee leidmisel kahe punkti vahel
 - [*Dijkstra's algorithm - Computerphile* video](https://www.youtube.com/watch?v=GazC3A4OQTE) -> Abiks Dijkstra algoritmi mõistmisel
-- [Fibonacci heap wiki](https://en.wikipedia.org/wiki/Fibonacci_heap) -> Abiks eelisjärjekorra andmestruktuuri implementeerimisel
-- [Fibonacci heap](https://www.programiz.com/dsa/fibonacci-heap) -> Abiks Fibonacci kuhja andmestruktuuri implementeerimisel
-- [FibonacciHeap repositoorium](https://github.com/woodfrog/FibonacciHeap) -> Abiks Fibonacci kuhja algoritmilise osa implementeerimisel
+- [*Fibonacci heap* wiki](https://en.wikipedia.org/wiki/Fibonacci_heap) -> Abiks eelisjärjekorra andmestruktuuri implementeerimisel
+- [*Fibonacci heap*](https://www.programiz.com/dsa/fibonacci-heap) -> Abiks Fibonacci kuhja andmestruktuuri implementeerimisel
+- [*FibonacciHeap* repositoorium](https://github.com/woodfrog/FibonacciHeap) -> Abiks Fibonacci kuhja algoritmilise osa implementeerimisel
 

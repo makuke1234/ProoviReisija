@@ -13,6 +13,7 @@ static FILE * loggingFile = NULL;
 
 void initLogger(void)
 {
+	// Avab logifaili
 	loggingFile = fopen("logger.txt", "a+");
 	if (loggingFile == NULL)
 	{
@@ -33,7 +34,7 @@ void writeLogger_inner(const char * restrict function, const char * restrict for
 		return;
 	}
 
-	// Write timestamp
+	// Kirjutab praeguse kellaaja faili
 	time_t rawtime;
 	time(&rawtime);
 	struct tm * ti = localtime(&rawtime);
@@ -44,7 +45,7 @@ void writeLogger_inner(const char * restrict function, const char * restrict for
 		ti->tm_hour, ti->tm_min,     ti->tm_sec,
 		function
 	);
-	// Write message
+	// Kirjutab kasutajapoolse sõnumi
 	va_list ap;
 	va_start(ap, format);
 
@@ -53,6 +54,7 @@ void writeLogger_inner(const char * restrict function, const char * restrict for
 	va_end(ap);
 
 	fprintf(loggingFile, ">\n");
+	// Puhver tühjendatakse igaks juhuks logifaili, juhul kui programm peaks "kokku jooksma"
 	fflush(loggingFile);
 }
 
@@ -65,6 +67,7 @@ void loggerStart(void)
 {
 	assert(curStackLen < LOGGER_STACK_SIZE);
 
+	// Stackile lisatakse praegune aeg
 	loggerStack[curStackLen] = clock();
 	++curStackLen;
 }
@@ -72,7 +75,9 @@ void loggerEnd_inner(const char * funcName)
 {
 	assert(curStackLen > 0);
 
+	// Stackilt eemaldatakse viimatine aeg (loodetavasti loggetStart funktsiooni poolt sinna lisatud)
 	--curStackLen;
+	// Ajakulu kirjutatakse logifaili
 	writeLogger_inner(funcName, "Elapsed %.3f s", (double)(clock() - loggerStack[curStackLen]) / (double)CLOCKS_PER_SEC);
 }
 

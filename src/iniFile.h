@@ -244,7 +244,7 @@ iniString_t * iniString_makeEscapeLower(const char * restrict str, intptr_t leng
  * @return true Success copying
  * @return false Failure
  */
-bool iniString_copy(iniString_t * restrict pstr, const iniString_t * restrict src);
+bool iniString_initCopy(iniString_t * restrict pstr, const iniString_t * restrict src);
 /**
  * @brief Copies string from another iniString structure, heap-allocates memory
  * for destination structure
@@ -252,7 +252,7 @@ bool iniString_copy(iniString_t * restrict pstr, const iniString_t * restrict sr
  * @param src Pointer to source iniString structure
  * @return iniString_t* Resulting heap-allocated copy of src, NULL on failure
  */
-iniString_t * iniString_copymake(const iniString_t * restrict src);
+iniString_t * iniString_makeCopy(const iniString_t * restrict src);
 
 /**
  * @brief Destroys iniString object, frees memory allocated by string

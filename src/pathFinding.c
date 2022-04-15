@@ -128,7 +128,7 @@ bool pf_dijkstraSearch(
 	assert(start != NULL);
 	assert(pprevdist != NULL);
 
-	// Kui kasutaja ei andust prevDist massiivi, siis allokeerib selle jaoks mälu
+	// Kui kasutaja ei andnud prevDist massiivi, siis allokeerib selle jaoks mälu
 	prevDist_t * prevdist = (*pprevdist != NULL) ? *pprevdist : malloc(sizeof(prevDist_t) * numJunctions);
 	if (prevdist == NULL)
 	{
@@ -182,7 +182,7 @@ bool pf_dijkstraSearch(
 		// Käib läbi kõik punkti naabrid
 		for (size_t vIdx = 0; vIdx < pq.n_lut; ++vIdx)
 		{
-			// Check if point is neighbour
+			// Kontrollib kas punkt on naaber
 			if ((pq.lut[vIdx] != NULL) && pf_bGet(relations, pf_calcIdx(uIdx, vIdx, numJunctions)))
 			{
 				const float dx = points[uIdx]->x - points[vIdx]->x;
@@ -190,18 +190,18 @@ bool pf_dijkstraSearch(
 				const float cost = costs[pf_calcIdx(uIdx, vIdx, numJunctions)];
 				const float dist = sqrtf((dx * dx) + (dy * dy));
 				const float alt = prevdist[uIdx].dist + dist * cost;
-				// Check if new distance is smaller than previous best
+				// Kontrollib kas uus leitud kaugus on lühem praegusest parimast
 				if (alt < prevdist[vIdx].dist)
 				{
 					writeLogger("New minimum for %s is %.3f, old: %.3f", points[vIdx]->id.str, (double)alt, (double)prevdist[vIdx].dist);
 
-					// Re-initialize with new distance
+					// Initsialiseeritakse uuesti uue kaugusega
 					prevdist[vIdx] = (prevDist_t){
 						.dist   = alt,
 						.actual = prevdist[uIdx].actual + dist,
 						.prev   = points[uIdx]
 					};
-					// Decrease priority in Fibonacci heap
+					// Vähendab tähtsust Fibonacci kuhjas
 					pq_decPriority(&pq, vIdx, alt);
 					writeLogger("Key decreased");
 				}
@@ -320,6 +320,10 @@ bool pf_makeDistMatrix(
 	return true;
 }
 
+/**
+ * @brief Data structure for doubly-linked list
+ * 
+ */
 typedef struct pf_qnode_impl
 {
 	size_t val;
@@ -327,6 +331,14 @@ typedef struct pf_qnode_impl
 	struct pf_qnode_impl * prev, * next;
 } pf_qnode_implS;
 
+/**
+ * @brief Inserts/pushes a value to the end of the queue/doubly-linked list
+ * 
+ * @param pq Aadress of pointer to pf_qnode_impl structure
+ * @param val Value itself
+ * @return true Success
+ * @return false Failure
+ */
 bool pf_qnode_push_impl(pf_qnode_implS ** restrict pq, size_t val)
 {
 	assert(pq != NULL);
@@ -365,6 +377,11 @@ bool pf_qnode_push_impl(pf_qnode_implS ** restrict pq, size_t val)
 
 	return true;
 }
+/**
+ * @brief Frees the queue/doubly-linked list's resources
+ * 
+ * @param q Pointer to pf_qnode_implS structure
+ */
 void pf_qnode_free_impl(pf_qnode_implS * restrict q)
 {
 	assert(q != NULL);
@@ -379,6 +396,10 @@ void pf_qnode_free_impl(pf_qnode_implS * restrict q)
 	} while (n != q);
 }
 
+/**
+ * @brief Data structure for storing permutation information
+ * 
+ */
 typedef struct
 {
 	size_t n;
@@ -387,6 +408,10 @@ typedef struct
 
 } pf_perm_implS;
 
+/**
+ * @brief Data structure for storing information about current best path sequence
+ * 
+ */
 typedef struct
 {
 	const distActual_t * mtx;
@@ -400,7 +425,12 @@ typedef struct
 
 } pf_fomo_implS;
 
-
+/**
+ * @brief Total distance of current calculated path
+ * 
+ * @param arg Pointer to pf_fomo_impl structure
+ * @return float Total distance calculated
+ */
 static inline float pf_fomo_dist_impl(pf_fomo_implS * restrict arg)
 {
 	// Leiab antud punktide järjestusega teekonna pikkuse
@@ -414,6 +444,12 @@ static inline float pf_fomo_dist_impl(pf_fomo_implS * restrict arg)
 	return dist;
 }
 
+/**
+ * @brief A recursive function that iterates over all permutations possible
+ * 
+ * @param arg Pointer to pf_fomo_impl structure
+ * @param sz Size of remaining possible "slots" to experiment with
+ */
 static inline void pf_fomo_iter_impl(pf_fomo_implS * restrict arg, size_t sz)
 {	
 	// Kui üks "rida" on täidetud, siis kontrollib, äkki on leitud lühem punktide läbimisjärjekord
@@ -444,7 +480,7 @@ static inline void pf_fomo_iter_impl(pf_fomo_implS * restrict arg, size_t sz)
 
 		// Proovib omakorda kõik permutatsioonid järgijäävate indeksitega läbi
 		// Rekursioon siin mälu-probleeme ei tekita, sest suure keerukuse tõttu jõuab arvuti
-		// max. 20-sügavust rekursiooni läbi teha
+		// max. 20-sügavust rekursiooni läbi teha (kuid selleks kuluks ka aastaid, parimal juhul päevi :))
 		pf_fomo_iter_impl(arg, sz - 1);
 
 		// Lisab eelnevalt eemaldatud esimese elemendi järjekorra lõppu

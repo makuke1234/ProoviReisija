@@ -26,6 +26,7 @@ bool point_initStr(point_t * restrict p, const char * restrict idstr, const char
 
 	char * next = NULL;
 	p->x = strtof(valuestr, &next);
+	// Toetab nii tühikutega kui ka komedega eraldatud ristkoordinaate
 	if (*next == ',')
 	{
 		++next;
@@ -93,9 +94,12 @@ bool line_initStr(
 		return false;
 	}
 	
+	// Toetab nii tavalisi ristmik->ristmik identifikaatoritega määratud teid, kui ka lisanduva "hinnaga" teid
+
 	char id1[MAX_ID], id2[MAX_ID], costStr[MAX_ID];
 	char * strs[] = { id1, id2, costStr };
 	bool found = false;
+	// prevStop tähistab eelmise sisseloetud väärtuse lõppu pärast koma ning vahetult enne järgmist "mitte-whitespace" märgnedit
 	size_t prevStop = 0, j = 0, len = strlen(valuestr);
 	for (size_t i = 0; (i < len) && (j < 3); ++i)
 	{
@@ -229,6 +233,7 @@ void line_calc(line_t * restrict l)
 	assert(l->src != NULL);
 	assert(l->dst != NULL);
 
+	// Kalkuleerib uue koordinaatide muudu ning tee pikkuse
 	l->dx = l->dst->x - l->src->x;
 	l->dy = l->dst->y - l->src->y;
 	l->length = sqrtf((l->dx * l->dx) + (l->dy * l->dy));
@@ -243,16 +248,19 @@ void line_intersect(
 	assert(startp != NULL);
 	assert(line   != NULL);
 
+	// x-koordinaadi muut on 0, seega tee sirge tõus on lõpmatus -> ristsirge tõus on 0
 	if (line->dx == 0)
 	{
 		ci->x = line->src->x;
 		ci->y = mh_clampUnif(startp->y, line->src->y, line->dst->y);
 	}
+	// y-koordinaadi muut on 0, seega tee sirge tõus on 0 -> ristsirge tõus on lõpmatus
 	else if (line->dy == 0)
 	{
 		ci->x = mh_clampUnif(startp->x, line->src->x, line->dst->x);
 		ci->y = line->src->y;
 	}
+	// nii tee sirge kui ka ristsirge tõus on arvutatav, leitakse ristsirge ning ristumispunkt
 	else
 	{
 		float k1 = line->dy / line->dx;
@@ -523,7 +531,7 @@ bool dm_addStops(dataModel_t * restrict dm)
 			}
 		}
 
-		if (!pointSet || !iniString_copy(&bestPoint.id, &p->id))
+		if (!pointSet || !iniString_initCopy(&bestPoint.id, &p->id))
 		{
 			return false;
 		}

@@ -13,9 +13,12 @@ bool g_ini_strAppendCh(char ** restrict pstr, size_t * restrict psize, size_t * 
 	assert(psize != NULL);
 	assert(pcap  != NULL);
 	
+	// Kontrollib, äkki praegune sõnemassiiv vajab suurendamist
 	if ((*psize) >= (*pcap))
 	{
-		size_t newcap = ((*psize) + 1) * 2; 
+		// Uus suurus on praegusest suurusest vähemalt 2 korda suurem, väldib ka olukorda, et muidu 0 puhul ei suurendataks
+		size_t newcap = ((*psize) + 1) * 2;
+		// Proovib mälu juurde allokeerida, kontrollib õnnestumist
 		char * newmem = realloc(*pstr, sizeof(char) * newcap);
 		if (newmem == NULL)
 		{
@@ -25,6 +28,7 @@ bool g_ini_strAppendCh(char ** restrict pstr, size_t * restrict psize, size_t * 
 		*pcap = newcap;
 	}
 
+	// Lisab soovitud märgendi sõne lõppu
 	(*pstr)[*psize] = ch;
 	++(*psize);
 
@@ -36,15 +40,20 @@ bool g_ini_strAppendCP(char ** restrict pstr, size_t * restrict psize, size_t * 
 	assert(psize != NULL);
 	assert(pcap  != NULL);
 
+	// Unicode Code Pointi lisamisel arvestan, et eelnev Unicode'iga tegelev funktsioon
+	// võis ebaõnnestuda, sel juhul tagastab selline funktsioon "keelatud" väärtuse, milleks
+	// on UTF-süsteemis mingi "non-character" märgend, näiteks 0xFFFF
 	if (codePoint == FORBIDDEN_CODEPOINT)
 	{
 		return false;
 	}
 
+	// Tegu on 1-baidisega UTF-8 süsteemis
 	if (codePoint <= 0x7F)
 	{
 		return g_ini_strAppendCh(pstr, psize, pcap, (char)codePoint);
 	}
+	// Tegu on 2-baidisega UTF-8 süsteemis
 	else if (codePoint <= 0x07FF)
 	{
 		if (!g_ini_strAppendCh(pstr, psize, pcap, (char)(0xC0 | ((codePoint >> 6) & 0x1F))))
@@ -53,6 +62,8 @@ bool g_ini_strAppendCP(char ** restrict pstr, size_t * restrict psize, size_t * 
 		}
 		return g_ini_strAppendCh(pstr, psize, pcap, (char)(0x80 | (codePoint & 0x3F)));
 	}
+	// Tegu on 3-baidisega UTF-8 süsteemis, kuna minu code point on 16-bitine,
+	// siis on alati garanteeritud, et code point on väiksem kui 0xFFFF
 	else /*if (codePoint <= 0xFFFF)*/
 	{
 		if (!g_ini_strAppendCh(pstr, psize, pcap, (char)(0xE0 | ((codePoint >> 12) & 0x0F))))
@@ -69,6 +80,9 @@ bool g_ini_strAppendCP(char ** restrict pstr, size_t * restrict psize, size_t * 
 
 uint8_t g_ini_strHexToNum(char ch)
 {
+	// Kui märgend on vahemikus '0' kuni '9' kaasaarvatud, siis tuleb lahutada '0' väärtus
+	// Kui märgend on vahemikus 'A' kuni 'F' kaasaarvatud, siis tuleb lahutada 'A' väärtus ning lisada 10
+	// Vastasel juhul on tegu "keelatud" sisendiga, mis ei ole hex, tagastatakse viga näitav väärtus 0xFF
 	return ((ch >= '0') && (ch <= '9')) ? (uint8_t)(ch - '0') : ((ch >= 'A') && (ch <= 'F')) ? (uint8_t)(ch - 'A' + 10) : 0xFF;
 }
 uint16_t g_ini_strCPFromStr(const char * restrict str)
@@ -78,13 +92,19 @@ uint16_t g_ini_strCPFromStr(const char * restrict str)
 	uint16_t cp = 0x0000;
 	for (size_t i = 0; i < 4; ++i)
 	{
+		// Siiamaani saadud arvu nihutatakse 4 biti võrra vasakule,
+		// uusi märgendeid loetakse ning kirjutatakse vasakult-paremale
 		cp <<= 4;
+		// Rakendatakse bitmask, et olla kindel, et alumised 4 bitti on "puhtad"
 		cp &= 0xFFF0;
 		uint16_t res = (uint16_t)g_ini_strHexToNum(str[i]);
+		// Kui märgendit ei õnnestunud hexi konverteerida, siis järelikult pole tegu hex-iga,
+		// tagastatakse veakood
 		if (res > 0x0F)
 		{
 			return FORBIDDEN_CODEPOINT;
 		}
+		// Saadud hex märgend lisatakse arvu
 		cp |= res;
 	}
 
@@ -96,6 +116,7 @@ char * g_ini_escapeStr_s(const char * restrict string, intptr_t length, size_t *
 	assert(string != NULL);
 	assert(psize  != NULL);
 
+	// leitakse reaalne sõne pikkus
 	size_t realLen = (length == -1) ? strlen(string) : strnlen_s(string, (size_t)length);
 	
 	size_t estrSize = 0, estrCap = realLen + 1;
@@ -107,15 +128,20 @@ char * g_ini_escapeStr_s(const char * restrict string, intptr_t length, size_t *
 
 	for (const char * end = string + realLen; string != end;)
 	{
+		// Kui leitakse tagurpidi kaldkriips, siis minnake järgmise märgendi juurde
 		if (*string == '\\')
 		{
 			++string;
+			// Kui ei jõutud lõppu
 			if (string != end)
 			{
+				// Muutuja, mis tähistab lisatavat märgendit
 				char appendable = 0;
+				// Muutuja, mis tähistab seda, kas märgend tuleb lisada või mitte
 				bool append = false;
 				switch (*string)
 				{
+				// Tavaliselt lisatavad märgendid
 				case '\\':
 				case '\'':
 				case '"':
@@ -134,7 +160,8 @@ char * g_ini_escapeStr_s(const char * restrict string, intptr_t length, size_t *
 					append = true;
 					break;
 				case 'x':
-					// Add unicode hex code-point
+					// Unicode'i hex code point
+					// Liigub järgmise märgendi juurde, nüüd peaks olema 4 märgendit, mis tähistavad hex-koodi
 					++string;
 					if ((string != end) && ((end - string) >= 4))
 					{
@@ -146,18 +173,23 @@ char * g_ini_escapeStr_s(const char * restrict string, intptr_t length, size_t *
 						string += 4;
 						break;
 					}
+					// Ei olnud nelja märgendit :(, programm vabastab mälu ning tagastab viga näitava NULLi
 					/* fall through */
 				default:
 					free(estr);
 					return NULL;
 				}
 
+				// Tuleb lisada märgend, s.o ei ole veel lisatud
+
 				if (append)
 				{
+					// Ei ole vee välja mõeldud, mida lisada :)
 					if (appendable == 0)
 					{
 						switch (*string)
 						{
+						// "erilised" märgendid
 						case '0':
 							appendable = '\0';
 							break;
@@ -183,17 +215,21 @@ char * g_ini_escapeStr_s(const char * restrict string, intptr_t length, size_t *
 						free(estr);
 						return NULL;
 					}
+					// Liigub järgmise märgendi juurde
 					++string;
 				}
 			}
+			// Lõppu jõudmise korral järgmine for-loopi tsükkel katkestav töö
 		}
 		else
 		{
+			// Tavaline märgend, kontrollitakse lisamise õnnestumist
 			if (!g_ini_strAppendCh(&estr, &estrSize, &estrCap, *string))
 			{
 				free(estr);
 				return NULL;
 			}
+			// Minnakse järgmise märgendi juurde
 			++string;
 		}
 	}
@@ -204,7 +240,8 @@ char * g_ini_escapeStr_s(const char * restrict string, intptr_t length, size_t *
 		free(estr);
 		return NULL;
 	}
-
+	
+	// Kui ära kasutatud ruum on väiksem allokeeritud mälumahust, siis optimeerib mälukasutust
 	if (estrSize < estrCap)
 	{
 		char * newstr = realloc(estr, sizeof(char) * estrSize);
@@ -230,6 +267,7 @@ char * g_ini_unescapeStr_s(const char * restrict string, intptr_t length, size_t
 	size_t realLen = (length == -1) ? strlen(string) : strnlen_s(string, (size_t)length);
 
 	size_t estrSize = 0, estrCap = realLen + 1;
+	// Allokeerib mälu tulemuse jaoks
 	char * estr = malloc(sizeof(char) * estrCap);
 	if (estr == NULL)
 	{
@@ -293,6 +331,7 @@ char * g_ini_unescapeStr_s(const char * restrict string, intptr_t length, size_t
 		return NULL;
 	}
 
+	// Optimeerib võimalusel mälukasutust
 	if (estrSize < estrCap)
 	{
 		char * newstr = realloc(estr, sizeof(char) * estrSize);
@@ -327,6 +366,7 @@ bool iniString_init(iniString_t * restrict pstr, const char * restrict str, intp
 {
 	assert(pstr != NULL);
 
+	// Ka NULL on aktsepteeritud sõnena, siis tehakse tühi sõne lihtsalt
 	if (str == NULL)
 	{
 		str = "";
@@ -370,6 +410,7 @@ bool iniString_initEscape(iniString_t * restrict pstr, const char * restrict str
 	{
 		return false;
 	}
+	// Null-terminaator lahutatakse maha
 	--pstr->len;
 
 	return true;
@@ -391,12 +432,13 @@ iniString_t * iniString_makeEscape(const char * restrict str, intptr_t length)
 bool iniString_initEscapeLower(iniString_t * restrict pstr, const char * restrict str, intptr_t length)
 {
 	assert(pstr != NULL);
+
 	if (!iniString_initEscape(pstr, str, length))
 	{
 		return false;
 	}
 
-	// Convert string to lower-case
+	// Sõne konverteeritakse väiketähtedeks pärast
 	for (char * it = pstr->str, * end = pstr->str + pstr->len; it != end; ++it)
 	{
 		*it = (char)tolower(*it);
@@ -419,7 +461,7 @@ iniString_t * iniString_makeEscapeLower(const char * restrict str, intptr_t leng
 	return mem;
 }
 
-bool iniString_copy(iniString_t * restrict pstr, const iniString_t * restrict src)
+bool iniString_initCopy(iniString_t * restrict pstr, const iniString_t * restrict src)
 {
 	assert(pstr != NULL);
 	assert(src  != NULL);
@@ -435,7 +477,7 @@ bool iniString_copy(iniString_t * restrict pstr, const iniString_t * restrict sr
 	
 	return true;
 }
-iniString_t * iniString_copymake(const iniString_t * restrict src)
+iniString_t * iniString_makeCopy(const iniString_t * restrict src)
 {
 	assert(src != NULL);
 
@@ -444,7 +486,7 @@ iniString_t * iniString_copymake(const iniString_t * restrict src)
 	{
 		return NULL;
 	}
-	else if (!iniString_copy(mem, src))
+	else if (!iniString_initCopy(mem, src))
 	{
 		free(mem);
 		return NULL;
@@ -456,6 +498,7 @@ iniString_t * iniString_copymake(const iniString_t * restrict src)
 void iniString_destroy(iniString_t * restrict pstr)
 {
 	assert(pstr != NULL);
+	// Mälu vabastatakse
 	if (pstr->str != NULL)
 	{
 		free(pstr->str);
@@ -466,6 +509,7 @@ void iniString_free(iniString_t * restrict pstr)
 {
 	assert(pstr != NULL);
 	iniString_destroy(pstr);
+	// Vabastatakse ka dünaamiliselt allokeeritud struktuuri mälu
 	free(pstr);
 }
 
@@ -478,10 +522,12 @@ bool iniValue_init(
 {
 	assert(pval != NULL);
 	
+	// INI-failis olevad "võtmed" ei tohiks olla suurtähetundlikud ...
 	if (!iniString_initEscapeLower(&pval->key, keystr, keylen))
 	{
 		return false;
 	}
+	// ... Väärtused aga on
 	else if (!iniString_initEscape(&pval->value, valstr, vallen))
 	{
 		iniString_destroy(&pval->key);
@@ -511,12 +557,14 @@ iniValue_t * iniValue_make(
 void iniValue_destroy(iniValue_t * restrict pval)
 {
 	assert(pval != NULL);
+
 	iniString_destroy(&pval->key);
 	iniString_destroy(&pval->value);
 }
 void iniValue_free(iniValue_t * restrict pval)
 {
 	assert(pval != NULL);
+
 	iniValue_destroy(pval);
 	free(pval);
 }
@@ -526,6 +574,7 @@ bool iniSection_init(iniSection_t * restrict psect, const char * sectname, intpt
 {
 	assert(psect != NULL);
 
+	// INI-failis olev sektsiooni-identifikaator ei tohiks olla tõstutundlik
 	if (!iniString_initEscapeLower(&psect->section, sectname, sectnameLen))
 	{
 		return false;
@@ -535,8 +584,10 @@ bool iniSection_init(iniSection_t * restrict psect, const char * sectname, intpt
 	psect->numValues = 0;
 	psect->maxValues = 0;
 
+	// Initsialiseeritakse räsitabel konkreetse sektsiooni võtmeväärtuste jaoks
 	if (!hashMapCK_init(&psect->valueMap, 1))
 	{
+		// Kui see ei õnnestunud, siis vabastatakse ka sektsiooni enda struktuur
 		iniString_destroy(&psect->section);
 		return false;
 	}
@@ -567,9 +618,9 @@ bool iniSection_addValue(
 {
 	assert(psect != NULL);
 
+	// Vajadusel allokeeritakse mälu väärtuste massiivi jaoks juurde
 	if (psect->numValues >= psect->maxValues)
 	{
-		// Reallocate memory
 		size_t newcap = (psect->numValues + 1) * 2;
 		iniValue_t ** newmem = realloc(psect->values, sizeof(iniValue_t *) * newcap);
 		if (newmem == NULL)
@@ -577,6 +628,8 @@ bool iniSection_addValue(
 			return false;
 		}
 
+		// "Värskelt" allokeeritud mälu nullitakse ära, memset ei saa kasutada, sest
+		// NULL ei ole garanteeritud olema väärtusega 0
 		for (size_t i = psect->maxValues; i < newcap; ++i)
 		{
 			newmem[i] = NULL;
@@ -586,18 +639,22 @@ bool iniSection_addValue(
 		psect->maxValues = newcap;
 	}
 
+	// Initsialiseeritakse uus väärtus
 	iniValue_t * val = iniValue_make(keystr, keylen, valstr, vallen);
 	if (val == NULL)
 	{
 		return false;
 	}
 
+	// Väärtus lisatakse räsitabelisse
 	if (!hashMapCK_insert(&psect->valueMap, val->key.str, val))
 	{
 		iniValue_free(val);
 		return false;
 	}
 
+	// Väärtus lisatakse ka väärtuste massiivi, et oleks võimalik väärtuste järjekord
+	// säilitada konstantse keerukuse juures
 	psect->values[psect->numValues] = val;
 	val->idx = psect->numValues;
 
@@ -622,6 +679,7 @@ bool iniSection_removeValue(iniSection_t * restrict psect, const char * restrict
 	assert(psect  != NULL);
 	assert(keystr != NULL);
 
+	// Esmalt proovitakse väärtus eemaldada räsitabelist
 	iniValue_t * val = hashMapCK_remove(&psect->valueMap, keystr);
 	if (val == NULL)
 	{
@@ -629,10 +687,13 @@ bool iniSection_removeValue(iniSection_t * restrict psect, const char * restrict
 	}
 
 	psect->values[val->idx] = NULL;
+	// Kui tegu oli viimase väärtusega massiivis, siis saab vähendada praegu käigus olevate
+	// pesade arvu
 	if (psect->numValues == (val->idx + 1))
 	{
 		--psect->numValues;
 	}
+	// Vabastatakse väärtuse struktuuri mälu
 	iniValue_free(val);
 	return true;
 }
@@ -641,7 +702,9 @@ void iniSection_destroy(iniSection_t * restrict psect)
 {
 	assert(psect != NULL);
 
+	// Vabastatakse sektsiooni nime mälu
 	iniString_destroy(&psect->section);
+	// Võimalusel vabastatakse väärtuste mälu
 	if (psect->values != NULL)
 	{
 		for (size_t i = 0; i < psect->numValues; ++i)
@@ -705,6 +768,7 @@ bool ini_addSection(ini_t * restrict pini, const char * restrict secstr, intptr_
 {
 	assert(pini != NULL);
 
+	// Vajadusel allokeerib mälu juurde
 	if (pini->numSections >= pini->maxSections)
 	{
 		size_t newcap = (pini->numSections + 1) * 2;
@@ -723,11 +787,14 @@ bool ini_addSection(ini_t * restrict pini, const char * restrict secstr, intptr_
 		pini->maxSections = newcap;
 	}
 
+	// Teeb uue sektsiooni
 	iniSection_t * sec = iniSection_make(secstr, seclen);
 	if (sec == NULL)
 	{
 		return false;
 	}
+
+	// Lisab uue sektsiooni nii räsitabelisse kui ka massiivi, hoiab järjekorda meeles
 
 	if (!hashMapCK_insert(&pini->sectionMap, sec->section.str, sec))
 	{
@@ -765,6 +832,7 @@ bool ini_removeSection(ini_t * restrict pini, const char * restrict secstr)
 	}
 
 	pini->sections[val->idx] = NULL;
+	// Kui tegu oli viimase sektsiooniga, siis saab vähendada käigus olevate pesade arvu
 	if (pini->numSections == (val->idx + 1))
 	{
 		--pini->numSections;
@@ -1158,6 +1226,7 @@ void ini_destroy(ini_t * restrict pini)
 {
 	if (pini->sections != NULL)
 	{
+		// Vabastab sektsioonidele kuuluva mälu ...
 		for (size_t i = 0; i < pini->numSections; ++i)
 		{
 			if (pini->sections[i] != NULL)
@@ -1165,6 +1234,7 @@ void ini_destroy(ini_t * restrict pini)
 				iniSection_free(pini->sections[i]);
 			}
 		}
+		// ... ning massiivi enda
 		free(pini->sections);
 		pini->sections = NULL;
 	}

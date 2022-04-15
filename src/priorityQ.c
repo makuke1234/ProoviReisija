@@ -5,12 +5,52 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+/**
+ * @brief Merges 2 trees, inserts slave as master's child
+ * 
+ * @param q Pointer to Fibonacci heap
+ * @param master Pointer to master node
+ * @param slave Pointer to slave node
+ */
 static inline void pq_merge_impl(fibHeap_t * restrict q, fibNode_t * restrict master, fibNode_t * restrict slave);
+/**
+ * @brief Cuts tree, promotes x to root
+ * 
+ * @param q Pointer to Fibonacci heap
+ * @param x Pointer to node to be cut
+ * @param y Node's parent node
+ */
 static inline void pq_cut_impl(fibHeap_t * restrict q, fibNode_t * x, fibNode_t * y);
+/**
+ * @brief Cascadingly cuts tree
+ * 
+ * @param q Pointer to Fibonacci heap
+ * @param n Pointer to node cut
+ */
 static inline void pq_cascading_cut_impl(fibHeap_t * restrict q, fibNode_t * n);
+/**
+ * @brief Promotes node to root node of the heap
+ * 
+ * @param q Pointer ot Fibonacci heap
+ * @param n Pointer to node to promote to root
+ */
 static inline void pq_promote_impl(fibHeap_t * restrict q, fibNode_t * restrict n);
+/**
+ * @brief Recursive function that frees the entire heap starting from node n
+ * 
+ * @param n First node
+ * @param firstParent First node in a row of nodes, is used to know when to stop :)
+ */
 static inline void pq_free_impl(fibNode_t * n, fibNode_t * firstParent);
+/**
+ * @brief Prints the entire Fibonacci heap
+ * 
+ * @param n First node to print
+ * @param firstParent First node in a row of nodes, is used to know when to stop :)
+ * @param fp Output file
+ */
 static inline void pq_print_impl(fibNode_t * n, fibNode_t * firstParent, FILE * restrict fp);
+
 
 static inline void pq_merge_impl(fibHeap_t * restrict q, fibNode_t * restrict master, fibNode_t * restrict slave)
 {
@@ -170,7 +210,7 @@ bool pq_pushWithPriority(fibHeap_t * restrict q, size_t idx, float distance)
 {
 	assert(q != NULL);
 
-	// Resize lut if necessary
+	// Suurendab look-up tabelit kui vaja
 	if (idx >= q->n_lut)
 	{
 		size_t newcap = (idx + 1) * 2;
@@ -188,6 +228,7 @@ bool pq_pushWithPriority(fibHeap_t * restrict q, size_t idx, float distance)
 		q->lut = nmem;
 		q->n_lut = newcap;
 	}
+	// Vähendab prioriteetsust kui eksisteerib kuhjas, tagastab 'true'
 	else if ((q->lut[idx] != NULL) && (distance <= q->lut[idx]->key))
 	{
 		if (distance < q->lut[idx]->key)
@@ -197,6 +238,7 @@ bool pq_pushWithPriority(fibHeap_t * restrict q, size_t idx, float distance)
 		return true;
 	}
 	
+	// Teeb uue kuhjaelemendi
 	fibNode_t * n = malloc(sizeof(fibNode_t));
 	if (n == NULL)
 	{
@@ -213,16 +255,16 @@ bool pq_pushWithPriority(fibHeap_t * restrict q, size_t idx, float distance)
 		.child = NULL
 	};
 
-	// Search if node with that idx already exists
+	// Vaatab, kas sellise prioriteetsusega element juba eksisteerib, kui jah, siis eemaldab selle kuhjast
 	if (q->lut[idx] != NULL)
 	{
 		pq_decPriority(q, idx, -INFINITY);
 		pq_extractMin(q);
 	}
-	// Add q to lut
+	// Lisab uue elemendi look-up tabelisse
 	q->lut[idx] = n;
 
-	// Add node to the Fibonacci heap
+	// Lisab elemendi Fibonacci kuhja
 	if (q->min == NULL)
 	{
 		q->min = n;
@@ -271,7 +313,7 @@ size_t pq_extractMin(fibHeap_t * restrict q)
 
 	if (child != NULL)
 	{
-		// Remove children parents
+		// Eemaldab "lapse" "vanemad"
 		fibNode_t * temp = child;
 		do
 		{
@@ -286,7 +328,7 @@ size_t pq_extractMin(fibHeap_t * restrict q)
 		}
 		else
 		{
-			// Promote children to root
+			// Annab "lastele" "ametikõrgendust", s.o lisab need peajuurde
 			q->min->left->right = child;
 			fibNode_t * oldLeft = q->min->left;
 			q->min->left = child->left;
@@ -299,8 +341,8 @@ size_t pq_extractMin(fibHeap_t * restrict q)
 		return idx;
 	}
 
-	// Merge all roots with equal degree, consolidate heap
-	// Special thanks to woodfrog's repository https://github.com/woodfrog/FibonacciHeap helping to implement heap consolidation
+	// Kõik samasuguse kraadiga (sama paljude järglastega) juured liidetakse, kuhi korrastatakse
+	// woodfrog repositooriumist https://github.com/woodfrog/FibonacciHeap oli abi kuhja korrastamise implementeerimisel
 	const size_t degree = MAX_DEGREE;
 	fibNode_t * A[MAX_DEGREE];
 	for (size_t i = 0; i < degree; ++i)
@@ -344,7 +386,7 @@ size_t pq_extractMin(fibHeap_t * restrict q)
 	}
 	q->min = x;
 	
-	// Find new minimum
+	// Leiab uue miinimumi
 	fibNode_t * oldmin = x;
 	do
 	{
@@ -363,20 +405,26 @@ void pq_decPriority(fibHeap_t * restrict q, size_t idx, float distance)
 	assert(q != NULL);
 	assert(idx < q->n_lut);
 
+	// Leiab soovitud elemendi look-up tabelist üles
 	fibNode_t * n = q->lut[idx];
+	// Uus prioriteetsus peab olema kindlasti väiksem või võrdne praegusega
 	assert(distance <= n->key);
+	// Kui on võrdne, siis ei ole vaja midagi teha
 	if (distance == n->key)
 	{
 		return;
 	}
 
+	// Seatakse uus prioriteetsus
 	n->key = distance;
 	fibNode_t * parent = n->parent;
+	// Kui uus prioriteetsus on väiksem "vanema" omast, siis tuleb praegune haru "lõigata" ning lisada peajuurde
 	if ((parent != NULL) && (distance < parent->key))
 	{
 		pq_cut_impl(q, n, parent);
 		pq_cascading_cut_impl(q, parent);
 	}
+	// Kui pärast lõikamist on prioriteetsus väiksem kui praegusel miinimumil, siis tuleb miinimumi uuendada
 	if (distance < q->min->key)
 	{
 		q->min = n;
