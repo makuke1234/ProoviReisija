@@ -398,28 +398,28 @@ ini_t * ini_make(void);
 /**
  * @brief Adds a section to ini structure with specific name
  * 
- * @param pini 
- * @param secstr 
- * @param seclen 
- * @return true 
- * @return false 
+ * @param pini Pointer to ini structure
+ * @param secstr Section name
+ * @param seclen Section name length in characters, can be -1 if secstr is null-terminated
+ * @return true Success
+ * @return false Failure
  */
 bool ini_addSection(ini_t * restrict pini, const char * restrict secstr, intptr_t seclen);
 /**
  * @brief Returns a section from ini structure by section's name
  * 
- * @param pini 
- * @param secstr 
- * @return iniSection_t* 
+ * @param pini Pointer to ini structure
+ * @param secstr Section name
+ * @return iniSection_t* Pointer to corresponding section structure, NULL on failure
  */
 iniSection_t * ini_getSection(ini_t * restrict pini, const char * restrict secstr);
 /**
  * @brief Removes a section from ini structure by section's name
  * 
- * @param pini 
- * @param secstr 
- * @return true 
- * @return false 
+ * @param pini Pointer to ini structure
+ * @param secstr Section name
+ * @return true Success
+ * @return false Failure
  */
 bool ini_removeSection(ini_t * restrict pini, const char * restrict secstr);
 
