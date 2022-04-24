@@ -129,7 +129,7 @@ uint16_t g_ini_strCPFromStr(const char * restrict str);
  * @brief "Escapes" escape characters in given string originating from INI file
  * 
  * @param string Pointer to character array, input
- * @param length Length of string in characters (not including null-terminator), -1 if null-terminated and/or unspecified
+ * @param length Length of string in characters (not including null-terminator), can be -1 if null-terminated
  * @param psize Pointer of variable receiving allocated memory size in bytes (including null-terminator)
  * @return char* Freshly allocated "escaped" null-terminated character array, NULL on failure
  */
@@ -138,7 +138,7 @@ char * g_ini_escapeStr_s(const char * restrict string, intptr_t length, size_t *
  * @brief "Unsafe" version of g_ini_escapeStr_s, "escapes" escape characters from INI string
  * 
  * @param string Pointer to character array, input
- * @param length Length of string in characters (not including null-terminator), -1 if null-terminated and/or unspecified
+ * @param length Length of string in characters (not including null-terminator), can be -1 if null-terminated
  * @return char* Freshly allocated "escaped" null-terminated character array, NULL on failure
  */
 char * g_ini_escapeStr(const char * restrict string, intptr_t length);
@@ -146,7 +146,7 @@ char * g_ini_escapeStr(const char * restrict string, intptr_t length);
  * @brief "Un-escapes" to escape characters in given string, result suitable for INI file
  * 
  * @param string Pointer to character array with escaped string, input
- * @param length Length of string in characters (not including null-terminator), -1 if null-terminated and/or unspecified
+ * @param length Length of string in characters (not including null-terminator), can be -1 if null-terminated
  * @param psize Pointer of variable receiving allocated memory size in bytes (including null-terminator)
  * @return char* Freshly allocated "unescaped" null-terminated character array, NULL on failure
  */
@@ -156,7 +156,7 @@ char * g_ini_unescapeStr_s(const char * restrict string, intptr_t length, size_t
  * in given string, result suitable for INI file
  * 
  * @param string Pointer to character array with escaped string, input
- * @param length Length of string in characters (not including null-terminator), -1 if null-terminated and/or unspecified
+ * @param length Length of string in characters (not including null-terminator), can be -1 if null-terminated
  * @return char* Freshly allocated "unescaped" null-terminated character array, NULL on failure
  */
 char * g_ini_unescapeStr(const char * restrict string, intptr_t length);
@@ -183,7 +183,7 @@ void iniString_zero(iniString_t * restrict pstr);
  * 
  * @param pstr Pointer to iniString structure
  * @param str Pointer to character array holding input string, can be NULL
- * @param length Length of string in characters (not including null-terminator), -1 if null-terminated and/or unspecified
+ * @param length Length of string in characters (not including null-terminator), can be -1 if null-terminated
  * @return true Initialisation succeeded
  * @return false Failure
  */
@@ -192,7 +192,7 @@ bool iniString_init(iniString_t * restrict pstr, const char * restrict str, intp
  * @brief Allocates memory for iniString structure, initialises it, copies "str" contents to new memory
  * 
  * @param str Pointer to character array holding input, can be NULL
- * @param length Lnegth of string incharacter (not including null-terminator), -1 if null-terminated and/or unspecified
+ * @param length Lnegth of string incharacter (not including null-terminator), can be -1 if null-terminated
  * @return iniString_t* Pointer to heap-allocated iniString structure, NULL on failure
  */
 iniString_t * iniString_make(const char * restrict str, intptr_t length);
@@ -201,7 +201,7 @@ iniString_t * iniString_make(const char * restrict str, intptr_t length);
  * 
  * @param pstr Pointer to iniString structure
  * @param str Pointer to character array holding input string, can be NULL
- * @param length Length of string in characters (not including null-terminator), -1 if null-terminated and/or unspecified
+ * @param length Length of string in characters (not including null-terminator), can be -1 if null-terminated
  * @return true Initialisation succeeded
  * @return false Failure
  */
@@ -211,7 +211,7 @@ bool iniString_initEscape(iniString_t * restrict pstr, const char * restrict str
  * copies & escapes contents of "str" to newly allocated location
  * 
  * @param str Pointer to character array holding input string, can be NULL
- * @param length Length of string in characters (not including null-terminator), -1 if null-terminated and/or unspecified
+ * @param length Length of string in characters (not including null-terminator), can be -1 if null-terminated
  * @return iniString_t* Pointer to heap-allocated iniString structure, NULL on failure
  */
 iniString_t * iniString_makeEscape(const char * restrict str, intptr_t length);
@@ -222,7 +222,7 @@ iniString_t * iniString_makeEscape(const char * restrict str, intptr_t length);
  * 
  * @param pstr Pointer to iniString structure, can be NULL
  * @param str Pointer to character array holding input string
- * @param length Length of string in characters (not including null-terminator), -1 if null-terminated and/or unspecified
+ * @param length Length of string in characters (not including null-terminator), can be -1 if null-terminated
  * @return true Success
  * @return false Failure
  */
@@ -232,7 +232,7 @@ bool iniString_initEscapeLower(iniString_t * restrict pstr, const char * restric
  * lower-case converted copied string of "str"
  * 
  * @param str Pointer to character array holding input string, can be NULL
- * @param length Length of string in characters (not including null-terminator), -1 if null-terminated and/or unspecified
+ * @param length Length of string in characters (not including null-terminator), can be -1 if null-terminated
  * @return iniString_t* Pointer to heap-allocated iniString structure, NULL on failure
  */
 iniString_t * iniString_makeEscapeLower(const char * restrict str, intptr_t length);
