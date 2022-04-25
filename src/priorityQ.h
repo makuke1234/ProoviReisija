@@ -29,16 +29,17 @@
  */
 typedef struct fibNode
 {
-	// Data
+	// Andmed
 	float key;
 	size_t idx;
 
 	size_t marked:1;
 	size_t degree:DEGREE_BITS;
 
-	// Linked list behaviour
+	// Kahekordne lingitud loend horisontaalselt
 	struct fibNode * left, * right;
 
+	// Kahekordne lingitud loend vertikaalselt
 	struct fibNode * parent;
 	struct fibNode * child;
 
