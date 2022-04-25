@@ -182,7 +182,7 @@ bool pf_dijkstraSearch(
 		// Käib läbi kõik punkti naabrid
 		for (size_t vIdx = 0; vIdx < pq.n_lut; ++vIdx)
 		{
-			// Kontrollib kas punkt on naaber
+			// Kontrollib kas punkt on naaber ning ikka veel eelisjärjekorras
 			if ((pq.lut[vIdx] != NULL) && pf_bGet(relations, pf_calcIdx(uIdx, vIdx, numJunctions)))
 			{
 				const float dx = points[uIdx]->x - points[vIdx]->x;

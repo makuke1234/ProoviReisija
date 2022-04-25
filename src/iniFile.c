@@ -851,12 +851,14 @@ iniErr_t ini_checkData(const char * restrict string, intptr_t length)
 	{
 		if ((*string == ' ') || (*string == '\t') || (*string == '\n') || (*string == '\r'))
 		{
+			// Ignoreerib whitespace märgendeid
 			++string;
 			continue;
 		}
 		else if ((*string == ';') || (*string == '#'))
 		{
-			// Skip till end of line
+			// Ignoreerib kommentaare INI-failis
+			// Liigub rea lõppu
 			++string;
 			for (; string != end; ++string)
 			{
@@ -869,9 +871,10 @@ iniErr_t ini_checkData(const char * restrict string, intptr_t length)
 		}
 		else if (*string == '[')
 		{
-			// Section
+			// Leidis sektsiooni
 			++string;
 			bool found = false;
+			// Otsib üles sektsiooni nime lõpu
 			for (; string != end; ++string)
 			{
 				if (*string == '\\')
