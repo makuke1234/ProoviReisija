@@ -121,12 +121,12 @@ bool pf_dijkstraSearch(
 	prevDist_t ** restrict pprevdist
 )
 {
-	assert(points != NULL);
-	assert(relations != NULL);
-	assert(costs != NULL);
+	assert(points       != NULL);
+	assert(relations    != NULL);
+	assert(costs        != NULL);
 	assert(numJunctions >= 2);
-	assert(start != NULL);
-	assert(pprevdist != NULL);
+	assert(start        != NULL);
+	assert(pprevdist    != NULL);
 
 	// Kui kasutaja ei andnud prevDist massiivi, siis allokeerib selle jaoks mälu
 	prevDist_t * prevdist = (*pprevdist != NULL) ? *pprevdist : malloc(sizeof(prevDist_t) * numJunctions);
