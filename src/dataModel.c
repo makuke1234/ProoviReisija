@@ -719,7 +719,7 @@ bool dm_writeSvg(dataModel_t * restrict dm, FILE * restrict fsvg)
 	}
 
 	svg_init();
-	svg_setFont("Hermit");
+	svg_setFont(DM_SVG_FONT);
 	result &= svg_header(fsvg, (int64_t)minw, (int64_t)maxh, (size_t)(maxw - minw), (size_t)(maxh - minh), svg_rgba32(0xF0F0F0FF));
 
 	svgRGB_t svgGray = svg_rgba32(0xC0C0C0FF);

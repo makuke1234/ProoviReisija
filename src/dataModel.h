@@ -9,6 +9,7 @@
 #include <stdio.h>
 
 #define MAX_ID 256
+#define DM_SVG_FONT "Calibri"
 
 /**
  * @brief Data structure that holds junction point's identifier string and it's coordinates.
