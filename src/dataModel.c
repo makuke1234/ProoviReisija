@@ -785,13 +785,17 @@ bool dm_writeSvg(dataModel_t * restrict dm, FILE * restrict fsvg)
 		
 		result &= svg_point(fsvg, line.src, svgBlue, false);
 
-		char temp[10];
+		#define MAX_TEMP 10
+
+		char temp[MAX_TEMP];
 		result &= _ultoa((unsigned long)i + 1, temp, 10) != NULL;
-		result &= strcpy(&temp[strlen(temp)], ".") != NULL;
+		result &= strncat(temp, ".", MAX_TEMP - 1) != NULL;
 		result &= svg_text(fsvg, dm->points[idx].x, dm->points[idx].y, temp, svgBase_central, svgAlign_middle);
+
+		#undef MAX_TEMP
 	}
 	svg_setPointRadius(SVG_POINT_RADIUS);
-	
+
 	for (size_t i = 0; i < totalStops && result; ++i)
 	{
 		const size_t idx = dm->bestStopsIndices[i];
