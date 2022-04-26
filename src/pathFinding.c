@@ -384,7 +384,10 @@ bool pf_qnode_push_impl(pf_qnode_implS ** restrict pq, size_t val)
  */
 void pf_qnode_free_impl(pf_qnode_implS * restrict q)
 {
-	assert(q != NULL);
+	if (q == NULL)
+	{
+		return;
+	}
 
 	// "Kustutab" järjekorra elemente senikaua kuni ei ole uuesti algusesse jõudnud
 	pf_qnode_implS * n = q;
