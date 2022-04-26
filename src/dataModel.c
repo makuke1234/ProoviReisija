@@ -371,9 +371,11 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 	teed      = ini_getSection(&inifile, "teed");
 	peatused  = ini_getSection(&inifile, "peatused");
 
-	if ((ristmikud == NULL) || (teed == NULL) || (peatused == NULL))
+	if ((ristmikud == NULL) || (teed == NULL) || (peatused == NULL) ||
+		(ristmikud->numValues < 2) || (teed->numValues < 1) || (peatused->numValues < 2) )
 	{
 		ini_destroy(&inifile);
+		dm_destroy(dm);
 		return dmeSECTIONS;
 	}
 
