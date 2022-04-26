@@ -85,7 +85,7 @@ bool pq_empty(fibHeap_t * restrict q);
  * @brief Pushes a new item to the heap with a particular identifier 'idx' &
  * priority of 'distance'. 'Updates' item's priority if it already exists.
  * Complexity: O(1) if item doesn't exist prior or new distance is smaller than or equal to previous.
- * Complexity: O(log n) if item exist prior and distance is bigger than previous.
+ * Complexity: O(log n) if item exists prior and distance is bigger than previous.
  * 
  * @param q Pointer to fibHeap_t structure
  * @param idx Identifier of pushable node
