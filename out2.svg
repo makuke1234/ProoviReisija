@@ -1,5 +1,5 @@
-<svg version="1.1" width="1920" height="1279" viewBox="-127 -1023 1920 1279" font-family="Hermit" xmlns="http://www.w3.org/2000/svg">
-<rect x="-127" y="-1023" width="100%" height="100%" fill="rgb(240, 240, 240)" />
+<svg version="1.1" width="1920" height="1280" viewBox="-128 -1024 1920 1280" font-family="Hermit" xmlns="http://www.w3.org/2000/svg">
+<rect x="-128" y="-1024" width="100%" height="100%" fill="rgb(240, 240, 240)" />
 
 <line x1="42.7" y1="-51.2" x2="249.6" y2="-550.5" style="stroke:rgb(192, 192, 192);stroke-width:16" />
 <circle cx="42.7" cy="-51.2" r="12" fill="rgb(192, 192, 192)" />
@@ -63,7 +63,7 @@
 <text font-size="14" dominant-baseline="central" text-anchor="middle" fill="rgb(127, 127, 127)" transform="translate(640.0, -98.1) rotate(7.96961)">6: 0.05 km</text>
 <text font-size="14" dominant-baseline="central" text-anchor="middle" fill="rgb(127, 127, 127)" transform="translate(594.2, -573.9) rotate(-3.88551)">8: 0.08 km</text>
 <text font-size="14" dominant-baseline="central" text-anchor="middle" fill="rgb(127, 127, 127)" transform="translate(1237.3, -183.5) rotate(-16.6992)">9: 0.09 km</text>
-<text font-size="14" dominant-baseline="central" text-anchor="middle" fill="rgb(127, 127, 127)" transform="translate(896.0, -332.8) rotate(-80.8377)">10: 0.06 km</text>
+<text font-size="14" dominant-baseline="central" text-anchor="middle" fill="rgb(127, 127, 127)" transform="translate(896.0, -332.8) rotate(-80.8376)">10: 0.06 km</text>
 <text font-size="14" dominant-baseline="central" text-anchor="middle" fill="rgb(127, 127, 127)" transform="translate(234.7, -89.6) rotate(-11.3099)">estonia-pst: 0.05 km</text>
 <line x1="385.1" y1="-259.8" x2="465.5" y2="-297.3" style="stroke:rgb(0, 162, 232);stroke-width:16" />
 <circle cx="385.1" cy="-259.8" r="12" fill="rgb(0, 162, 232)" />
