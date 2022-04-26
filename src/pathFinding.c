@@ -415,7 +415,7 @@ typedef struct
 typedef struct
 {
 	const distActual_t * mtx;
-	float lowest;
+	float lowest, dist;
 
 	size_t n;
 	size_t * arr;
@@ -425,24 +425,6 @@ typedef struct
 
 } pf_fomo_implS;
 
-/**
- * @brief Total distance of current calculated path
- * 
- * @param arg Pointer to pf_fomo_impl structure
- * @return float Total distance calculated
- */
-static inline float pf_fomo_dist_impl(pf_fomo_implS * restrict arg)
-{
-	// Leiab antud punktide järjestusega teekonna pikkuse
-	float dist = 0.0f;
-
-	for (size_t i = 0, n_1 = arg->n - 1; i < n_1; ++i)
-	{
-		dist += arg->mtx[pf_calcIdx(arg->arr[i], arg->arr[i + 1], arg->n)].dist;
-	}
-
-	return dist;
-}
 
 /**
  * @brief A recursive function that iterates over all permutations possible
@@ -451,17 +433,24 @@ static inline float pf_fomo_dist_impl(pf_fomo_implS * restrict arg)
  * @param sz Size of remaining possible "slots" to experiment with
  */
 static inline void pf_fomo_iter_impl(pf_fomo_implS * restrict arg, size_t sz)
-{	
-	// Kui üks "rida" on täidetud, siis kontrollib, äkki on leitud lühem punktide läbimisjärjekord
-	if (sz == 0)
+{
+	// Kui seni leitud jada pikkus ületab seni leitud lühimat, siis seda haru edasi ei vaadata
+	if (arg->dist > arg->lowest)
 	{
-		float dist = pf_fomo_dist_impl(arg);
+		return;
+	}
+	// Kui üks "rida" on täidetud, siis kontrollib, äkki on leitud lühem punktide läbimisjärjekord
+	else if (sz == 0)
+	{
+		const float oldDist = arg->dist;
+		arg->dist += arg->mtx[pf_calcIdx(arg->arr[arg->n - 2], arg->arr[arg->n - 1], arg->n)].dist;
 		// Kui praegu leitud läbimisjärjekord on parem eelnevatest, siis uuendab hetke-parimat
-		if (dist < arg->lowest)
+		if (arg->dist < arg->lowest)
 		{
-			arg->lowest = dist;
+			arg->lowest = arg->dist;
 			memcpy(&arg->best[1], &arg->arr[1], sizeof(size_t) * arg->perm.n);
 		}
+		arg->dist = oldDist;
 		
 		// Teeb rekursiooni "katki"
 		return;
@@ -478,10 +467,17 @@ static inline void pf_fomo_iter_impl(pf_fomo_implS * restrict arg, size_t sz)
 		oldprev->prev->next = arg->perm.q;
 		arg->perm.q->prev = oldprev->prev;
 
+
+		const float oldDist = arg->dist;
+		const size_t idx = arg->perm.n - sz;
+		arg->dist += arg->mtx[pf_calcIdx(arg->arr[idx], arg->arr[idx + 1], arg->n)].dist;
+
 		// Proovib omakorda kõik permutatsioonid järgijäävate indeksitega läbi
 		// Rekursioon siin mälu-probleeme ei tekita, sest suure keerukuse tõttu jõuab arvuti
 		// max. 20-sügavust rekursiooni läbi teha (kuid selleks kuluks ka aastaid, parimal juhul päevi :))
 		pf_fomo_iter_impl(arg, sz - 1);
+
+		arg->dist = oldDist;
 
 		// Lisab eelnevalt eemaldatud esimese elemendi järjekorra lõppu
 		oldprev->prev->next = oldprev;
@@ -505,6 +501,7 @@ bool pf_findOptimalMatrixOrder(
 	pf_fomo_implS arg = {
 		.mtx      = matrix,
 		.lowest   = (float)INFINITY,
+		.dist     = 0.0f,
 		.n        = numStops,
 		.arr      = malloc(sizeof(size_t) * numStops),
 		.best     = malloc(sizeof(size_t) * numStops),

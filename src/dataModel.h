@@ -208,8 +208,8 @@ typedef struct distActual
 
 } distActual_t;
 
-#define MAX_MID_POINTS 12
-#define TOTAL_POINTS   14
+#define MAX_MID_POINTS 14
+#define TOTAL_POINTS   (MAX_MID_POINTS + 2)
 #define START_IDX      0
 #define STOP_IDX       1
 
