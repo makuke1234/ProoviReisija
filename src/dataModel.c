@@ -356,6 +356,7 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 	}
 	if (!hashMapCK_init(&dm->stopsMap, TOTAL_POINTS))
 	{
+		dm_destroy(dm);
 		return dmeMEM;
 	}
 
@@ -363,6 +364,7 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 	if (ini_initFile(&inifile, filename) != inieOK)
 	{
 		writeLogger("File error!");
+		dm_destroy(dm);
 		return dmeMEM;
 	}
 
@@ -452,6 +454,7 @@ dmErr_t dm_initDataFile(dataModel_t * restrict dm, const char * restrict filenam
 	if (numStops > TOTAL_POINTS)
 	{
 		ini_destroy(&inifile);
+		dm_destroy(dm);
 		return dmeSTOPS_LIMIT;
 	}
 
