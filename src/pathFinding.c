@@ -528,7 +528,7 @@ bool pf_findOptimalMatrixOrder(
 		return false;
 	}
 	// Algus- ja lõpp-punkt pannakse paika
-	arg.best[0]             = arg.arr[0]             = START_IDX;
+	arg.best[0]            = arg.arr[0]            = START_IDX;
 	arg.best[numStops - 1] = arg.arr[numStops - 1] = STOP_IDX;
 
 	// Täidetakse järjekorra andmestruktuur järjest kõikide punktide indeksitega, mis
