@@ -13,7 +13,7 @@
 int main(int argc, char ** argv)
 {
 	// Mõõdab algusaja
-	clock_t startTime = clock();
+	const clock_t startTime = clock();
 
 	// Logger initsialiseeritakse, avatakse logifail, see toimub ainult debug-režiimis kompileerides
 	initLogger();
@@ -130,8 +130,8 @@ int main(int argc, char ** argv)
 
 
 	// Kuvatakse programmi tööle kulunud aega sekundites sajandiksekundi täpsusega
-	clock_t stopTime = clock();
-	clock_t elapsed = stopTime - startTime;
+	const clock_t stopTime = clock();
+	const clock_t elapsed = stopTime - startTime;
 
 	printf("Ajakulu: %.2f sekundit.\n", (double)elapsed / (double)CLOCKS_PER_SEC);
 
