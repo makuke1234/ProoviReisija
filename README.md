@@ -37,6 +37,16 @@ Näidisväljundid:
 ![Näidis 1](./maps/out1.svg)
 ![Näidis 2](./maps/out2.svg)
 ![Näidis 3](./maps/out3.svg)
+![Näidis 4](./maps/out4.svg)
+![Näidis 5](./maps/out5.svg)
+![Näidis 6](./maps/out6.svg)
+![Näidis 7](./maps/out7.svg)
+![Näidis 8](./maps/out8.svg)
+![Näidis 9](./maps/out9.svg)
+![Näidis 10](./maps/out10.svg)
+![Näidis 11](./maps/out11.svg)
+![Näidis 12](./maps/out12.svg)
+![Näidis 13](./maps/out13.svg)
 
 - [x] Koodi dokumenteerimine
 - [x] Koodi korrastamine
