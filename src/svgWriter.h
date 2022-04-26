@@ -115,13 +115,18 @@ bool svg_line(FILE * restrict fp, const line_t * restrict l, svgRGB_t color);
  * @param l Pointer to line
  * @param color The RGB color of the line & the point
  * @param drawSrc Boolean value that determines whether the source point of
- * the line should be drawn or not
+ * the line should be drawn
+ * @param drawDst Boolean value that determines whether the destination point of
+ * the line shold be drawn
  * @param drawText Boolean value that determines whether the name of the point(s)
  * should be drawn or not
  * @return true Success
  * @return false Failure
  */
-bool svg_linePoint(FILE * restrict fp, const line_t * restrict l, svgRGB_t color, bool drawSrc, bool drawText);
+bool svg_linePoint(
+	FILE * restrict fp, const line_t * restrict l, svgRGB_t color,
+	bool drawSrc, bool drawDst, bool drawText
+);
 /**
  * @brief Draws a point with its colored circle and text
  * 

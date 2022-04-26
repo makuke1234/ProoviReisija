@@ -719,27 +719,45 @@ bool dm_writeSvg(dataModel_t * restrict dm, FILE * restrict fsvg)
 
 	svgRGB_t svgGray = svg_rgba32(0xC0C0C0FF);
 
+
+	// Peab järge selle üle, millised ristmikud on juba joonestatud
+	hashMapCK_t drawnMap;
+	if (!hashMapCK_init(&drawnMap, dm->numJunctions))
+	{
+		return false;
+	}
+
 	svg_setPointRadius((SVG_LINE_STROKE * 3) / 4);
+
 	for (size_t i = 0; i < dm->numOrigRoads && result; ++i)
 	{
 		const line_t * road = dm->origRoads[i];
-		result &= svg_linePoint(fsvg, road, svgGray, i == 0, false);
+
+		result &= svg_linePoint(
+			fsvg, road, svgGray,
+			hashMapCK_insert(&drawnMap, road->src->id.str, NULL) != false,
+			hashMapCK_insert(&drawnMap, road->dst->id.str, NULL) != false,
+			false
+		);
 	}
 	svg_setPointRadius(SVG_POINT_RADIUS);
+
+	// Enam pole vaja järge pidada joonestatud ristmike üle
+	hashMapCK_destroy(&drawnMap);
 
 	// Joonistab lühima teekonna
 	svgRGB_t svgRed = svg_rgba32(0xFF1111FF);
 	
 	for (size_t i = 0, n_1 = dm->shortestPathLen - 1; i < n_1 && result; ++i)
 	{
-		line_t line = {
+		const line_t line = {
 			.src = dm->shortestPath[i],
 			.dst = dm->shortestPath[i + 1]
 		};
 
 		if (hashMapCK_get(&dm->stopsMap, line.dst->id.str) == NULL)
 		{
-			result &= svg_linePoint(fsvg, &line, svgRed, false, false);
+			result &= svg_linePoint(fsvg, &line, svgRed, false, true, false);
 		}
 		else
 		{
@@ -784,15 +802,6 @@ bool dm_writeSvg(dataModel_t * restrict dm, FILE * restrict fsvg)
 		result &= svg_line(fsvg, &line, svgBlue);
 		
 		result &= svg_point(fsvg, line.src, svgBlue, false);
-
-		#define MAX_TEMP 10
-
-		char temp[MAX_TEMP];
-		result &= _ultoa((unsigned long)i + 1, temp, 10) != NULL;
-		result &= strncat(temp, ".", MAX_TEMP - 1) != NULL;
-		result &= svg_text(fsvg, dm->points[idx].x, dm->points[idx].y, temp, svgBase_central, svgAlign_middle);
-
-		#undef MAX_TEMP
 	}
 	svg_setPointRadius(SVG_POINT_RADIUS);
 
@@ -800,6 +809,15 @@ bool dm_writeSvg(dataModel_t * restrict dm, FILE * restrict fsvg)
 	{
 		const size_t idx = dm->bestStopsIndices[i];
 		result &= svg_point(fsvg, &dm->points[idx], svgBlue, true);
+
+		#define MAX_TEMP 10
+
+		char temp[MAX_TEMP];
+		result &= ltoa((long)i + 1, temp, 10) != NULL;
+		result &= strcpy(&temp[strlen(temp)], ".") != NULL;
+		result &= svg_text(fsvg, dm->points[idx].x, dm->points[idx].y, temp, svgBase_central, svgAlign_middle);
+
+		#undef MAX_TEMP
 	}
 
 	result &= svg_footer(fsvg);

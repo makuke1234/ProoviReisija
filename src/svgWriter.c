@@ -114,14 +114,19 @@ bool svg_line(FILE * restrict fp, const line_t * restrict l, svgRGB_t color)
 		(size_t)SVG_LINE_STROKE
 	) >= 0;
 }
-bool svg_linePoint(FILE * restrict fp, const line_t * restrict l, svgRGB_t color, bool drawSrc, bool drawText)
+bool svg_linePoint(
+	FILE * restrict fp, const line_t * restrict l, svgRGB_t color,
+	bool drawSrc, bool drawDst, bool drawText
+)
 {
 	assert(fp != NULL);
 	assert(l  != NULL);
 	assert(l->src != NULL);
 	assert(l->dst != NULL);
 
-	return svg_line(fp, l, color) && ((drawSrc && svg_point(fp, l->src, color, drawText)) || !drawSrc) && svg_point(fp, l->dst, color, drawText);
+	return svg_line(fp, l, color) &&
+		(!drawSrc || svg_point(fp, l->src, color, drawText)) &&
+		(!drawDst || svg_point(fp, l->dst, color, drawText));
 }
 bool svg_point(FILE * restrict fp, const point_t * restrict p, svgRGB_t color, bool drawText)
 {
