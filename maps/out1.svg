@@ -31,23 +31,23 @@
 <text font-size="14" dominant-baseline="central" text-anchor="middle" fill="rgb(127, 127, 127)" transform="translate(1114.8, -433.5) rotate(9.46232)">4: 0.06 km</text>
 <line x1="653.6" y1="-440.1" x2="619.4" y2="-495.5" style="stroke:rgb(0, 162, 232);stroke-width:16" />
 <circle cx="653.6" cy="-440.1" r="12" fill="rgb(0, 162, 232)" />
-<circle cx="619.4" cy="-495.5" r="20" fill="rgb(0, 162, 232)" />
-<text x="639.4" y="-515.5" font-size="24" text-anchor="start" fill="black">p0</text>
 <text x="619.4" y="-495.5" font-size="24" dominant-baseline="central" text-anchor="middle" fill="black">1.</text>
 <line x1="121.8" y1="-75.6" x2="123.9" y2="24.8" style="stroke:rgb(0, 162, 232);stroke-width:16" />
 <circle cx="121.8" cy="-75.6" r="12" fill="rgb(0, 162, 232)" />
-<circle cx="123.9" cy="24.8" r="20" fill="rgb(0, 162, 232)" />
-<text x="143.9" y="4.8" font-size="24" text-anchor="start" fill="black">p1</text>
 <text x="123.9" y="24.8" font-size="24" dominant-baseline="central" text-anchor="middle" fill="black">2.</text>
 <line x1="1315.7" y1="-400.1" x2="1300.6" y2="-309.7" style="stroke:rgb(0, 162, 232);stroke-width:16" />
 <circle cx="1315.7" cy="-400.1" r="12" fill="rgb(0, 162, 232)" />
-<circle cx="1300.6" cy="-309.7" r="20" fill="rgb(0, 162, 232)" />
-<text x="1320.6" y="-329.7" font-size="24" text-anchor="start" fill="black">p2</text>
 <text x="1300.6" y="-309.7" font-size="24" dominant-baseline="central" text-anchor="middle" fill="black">3.</text>
 <line x1="1312.7" y1="-180.5" x2="1238.7" y2="-247.7" style="stroke:rgb(0, 162, 232);stroke-width:16" />
 <circle cx="1312.7" cy="-180.5" r="12" fill="rgb(0, 162, 232)" />
+<text x="1238.7" y="-247.7" font-size="24" dominant-baseline="central" text-anchor="middle" fill="black">4.</text>
+<circle cx="619.4" cy="-495.5" r="20" fill="rgb(0, 162, 232)" />
+<text x="639.4" y="-515.5" font-size="24" text-anchor="start" fill="black">p0</text>
+<circle cx="123.9" cy="24.8" r="20" fill="rgb(0, 162, 232)" />
+<text x="143.9" y="4.8" font-size="24" text-anchor="start" fill="black">p1</text>
+<circle cx="1300.6" cy="-309.7" r="20" fill="rgb(0, 162, 232)" />
+<text x="1320.6" y="-329.7" font-size="24" text-anchor="start" fill="black">p2</text>
 <circle cx="1238.7" cy="-247.7" r="20" fill="rgb(0, 162, 232)" />
 <text x="1258.7" y="-267.7" font-size="24" text-anchor="start" fill="black">p3</text>
-<text x="1238.7" y="-247.7" font-size="24" dominant-baseline="central" text-anchor="middle" fill="black">4.</text>
 
 </svg>

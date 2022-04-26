@@ -772,24 +772,30 @@ bool dm_writeSvg(dataModel_t * restrict dm, FILE * restrict fsvg)
 
 	svgRGB_t svgBlue = svg_rgba32(0x00A2E8FF);
 
-	for (size_t i = 0, totalStops = dm->numMidPoints + 2; i < totalStops && result; ++i)
+	const size_t totalStops = dm->numMidPoints + 2;
+	svg_setPointRadius((SVG_LINE_STROKE * 3) / 4);
+	for (size_t i = 0; i < totalStops && result; ++i)
 	{
-		size_t idx = dm->bestStopsIndices[i];
-		line_t line = (line_t){
+		const size_t idx = dm->bestStopsIndices[i];
+		const line_t line = {
 			.src = dm->pointsp[idx],
 			.dst = &dm->points[idx]
 		};
 		result &= svg_line(fsvg, &line, svgBlue);
 		
-		svg_setPointRadius((SVG_LINE_STROKE * 3) / 4);
 		result &= svg_point(fsvg, line.src, svgBlue, false);
-		svg_setPointRadius(SVG_POINT_RADIUS);
-		result &= svg_point(fsvg, line.dst, svgBlue, true);
 
 		char temp[10];
 		result &= _ultoa((unsigned long)i + 1, temp, 10) != NULL;
 		result &= strcpy(&temp[strlen(temp)], ".") != NULL;
 		result &= svg_text(fsvg, dm->points[idx].x, dm->points[idx].y, temp, svgBase_central, svgAlign_middle);
+	}
+	svg_setPointRadius(SVG_POINT_RADIUS);
+	
+	for (size_t i = 0; i < totalStops && result; ++i)
+	{
+		const size_t idx = dm->bestStopsIndices[i];
+		result &= svg_point(fsvg, &dm->points[idx], svgBlue, true);
 	}
 
 	result &= svg_footer(fsvg);
