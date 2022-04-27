@@ -6,3 +6,4 @@ test*.txt
 logger.txt
 .bash_history
 *.docx
+/kaardid
