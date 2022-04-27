@@ -36,6 +36,7 @@ int main(int argc, char ** argv)
 	}
 
 	// Tehakse naabrusmaatriks, teede "hindade" maatriks ning ristmike/punktide massiiv
+	// Tehakse ka optimaalsetest peatuste omavahelistest kaugustest maatriks
 	if (!dm_createMatrices(&dm))
 	{
 		fprintf(stderr, "Maatriksite genereerimine nurjus!\n");
